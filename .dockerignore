@@ -1,0 +1,7 @@
+uploads
+.idea
+
+deploy.sh
+docker.env
+.env
+.htaccess

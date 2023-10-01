@@ -1,0 +1,29 @@
+{
+  "name": "ramofx/backend",
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Roman Dvorovoy",
+      "email": "roman.dvorovoy123@gmail.com"
+    }
+  ],
+  "require": {
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "thecodingmachine/graphqlite": "v6.0.0",
+    "symfony/cache": "^5.4",
+    "symfony/dependency-injection": "^5.4",
+    "vlucas/phpdotenv": "^5.5",
+    "myclabs/php-enum": "^1.8",
+    "doctrine/orm": "^2.13",
+    "doctrine/dbal": "^3.6",
+    "firebase/php-jwt": "^6.4",
+    "tcdent/php-restclient": "0.1.8.2",
+    "minishlink/web-push": "^7.0",
+    "guzzlehttp/guzzle": "^7.5"
+  }
+}

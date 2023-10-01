@@ -1,0 +1,7 @@
+vendor
+.idea
+docker.env
+upload.sh
+.env
+.htaccess
+.rnd
