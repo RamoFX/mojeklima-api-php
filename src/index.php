@@ -2,6 +2,10 @@
 
 
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
+
+
 if (isset($_GET["module"])) {
   switch ($_GET["module"]) {
     case "graphql":
