@@ -145,9 +145,7 @@ namespace App\GraphQL {
   // pre-processing
 
   // CORS
-  $allowOrigin = $is_dev_mode
-    ? $_ENV["SECURITY_CLIENT_ORIGIN_DEVELOPMENT"]
-    : $_ENV["SECURITY_CLIENT_ORIGIN_PRODUCTION"];
+  $allowOrigin = $_ENV["SECURITY_CLIENT_ORIGIN"];
 
   if ($allowOrigin) {
     header("Access-Control-Allow-Origin: $allowOrigin");
