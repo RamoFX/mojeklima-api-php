@@ -4,6 +4,10 @@
 
 namespace App\Utilities {
 
+    use App\External\BrevoApi;
+
+
+
   class Email {
     private static function lines(string ...$lines): string {
       return join("\n", $lines);
@@ -11,20 +15,9 @@ namespace App\Utilities {
 
 
 
-    public static function send(string $to, string $subject, string $message) {
-      $headers = [
-        "Content-Type" => "text/plain; charset=UTF-8",
-        "From" => "MojeKlima <dvorro2@atlas.spsostrov.cz>",
-        "Reply-To" => "MojeKlima <dvorro2@ms.spsostrov.cz>"
-      ];
-
-      mail($to, $subject, $message, $headers);
-    }
-
-
-
-    public static function sendPassword(string $email, string $password) {
-      $language = Translation::getPreferredLanguage();
+    public static function send_password(string $email, string $password): bool {
+      $language = Translation::get_preferred_language();
+      $contact_email = "roman.dvorovoy123@gmail.com";
 
       $messages = [
 
@@ -32,7 +25,7 @@ namespace App\Utilities {
           "Vážený uživateli,",
           "Moc Vám děkujeme za využití našich služeb! Níže naleznete Vaše heslo k účtu, které z bezpečnostních důvodů doporučujeme změnit v nastavení účtu:",
           $password,
-          "V případě jakýchkoliv otázek nebo případných potíží neváhejte nás kontaktovat prostřednictvím emailu dvorro2@ms.spsostrov.cz.",
+          "V případě jakýchkoliv otázek nebo případných potíží neváhejte nás kontaktovat prostřednictvím emailu $contact_email.",
           "S přáním hezkého dne",
           "MojeKlima"
         ),
@@ -41,7 +34,7 @@ namespace App\Utilities {
           "Dear user,",
           "Thank you very much for using our services! Below you will find your account password, which for security reasons we recommend changing in the account settings:",
           $password,
-          "In case of any questions or possible problems, do not hesitate to contact us via email dvorro2@ms.spsostrov.cz.",
+          "In case of any questions or possible problems, do not hesitate to contact us via email $contact_email.",
           "Wishing you a nice day",
           "MojeKlima"
         ),
@@ -50,7 +43,7 @@ namespace App\Utilities {
           "Lieber Nutzer,",
           "Vielen Dank, dass Sie unsere Dienste nutzen! Nachfolgend finden Sie Ihr Kontopasswort, das wir aus Sicherheitsgründen in den Kontoeinstellungen zu ändern empfehlen:",
           $password,
-          "Bei Fragen oder möglichen Problemen zögern Sie nicht, uns per E-Mail dvorro2@ms.spsostrov.cz zu kontaktieren.",
+          "Bei Fragen oder möglichen Problemen zögern Sie nicht, uns per E-Mail $contact_email zu kontaktieren.",
           "Einen schönen Tag noch",
           "MojeKlima"
         ),
@@ -65,19 +58,19 @@ namespace App\Utilities {
       ];
       $translatedSubject = Translation::translate($subjects, $language);
 
-      self::send($email, $translatedSubject, $translatedMessage);
+      return BrevoApi::send_email($email, $translatedSubject, $translatedMessage);
     }
 
 
 
-    public static function sendNotification(string $email, string $locationName, string $alertMessage) {
+    public static function send_notification(string $email, string $locationName, string $alertMessage): bool {
       $message = self::lines(
         $alertMessage,
         "",
         "MojeKlima"
       );
 
-      self::send($email, "$locationName, MojeKlima", $message);
+      return BrevoApi::send_email($email, "$locationName, MojeKlima", $message);
     }
   }
 }
