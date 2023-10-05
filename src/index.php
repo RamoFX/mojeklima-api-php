@@ -2,24 +2,20 @@
 
 
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once 'bootstrap.php';
 
 
 
-if (isset($_GET["module"])) {
-  switch ($_GET["module"]) {
-    case "graphql":
-      include_once "graphql.php";
-      break;
+switch ($_GET["module"]) {
+  case "graphql":
+    include_once "GraphQL/index.php";
+    break;
 
-    case "cron":
-      include_once "cron.php";
-      break;
+  case "cron":
+    include_once "Cron/index.php";
+    break;
 
-    default:
-      echo 'URL parameter "module" accepts "graphql" or "cron" value, provided "' . $_GET["module"] . '"';
-      exit();
-  }
-} else {
-  echo 'URL parameter named "module" should be set';
+  default:
+    echo 'URL query parameter "module" accepts one of those values: "graphql", "cron". Got: "' . $_GET["module"] . '".';
+    exit();
 }
