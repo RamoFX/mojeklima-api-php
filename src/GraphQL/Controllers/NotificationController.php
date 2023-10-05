@@ -109,16 +109,16 @@ namespace App\GraphQL\Controllers {
 
 
       // prepare notification data
-      $locationName = $alert->getLocation()->getName();
-      $alertMessage = $alert->getMessage();
+      $location_name = $alert->getLocation()->getName();
+      $alert_message = $alert->getMessage();
 
 
 
       // send email
-      Email::sendNotification(
+      $email_successful = Email::send_notification(
         $account->getEmail(),
-        $locationName,
-        $alertMessage
+        $location_name,
+        $alert_message
       );
 
 
@@ -127,7 +127,7 @@ namespace App\GraphQL\Controllers {
       // initialize
       $auth = [
         "VAPID" => [
-          "subject" => "https://home.spsostrov.cz/~dvorro2/dmp/frontend/",
+          "subject" => "https://mojeklima.ramofx.dev/",
           "publicKey" => $_ENV['PUSH_NOTIFICATIONS_PUBLIC_KEY'],
           "privateKey" => $_ENV['PUSH_NOTIFICATIONS_PRIVATE_KEY']
         ]
@@ -139,41 +139,41 @@ namespace App\GraphQL\Controllers {
 
       $timeout = 120;
 
-      $networkClientOptions = [
-        RequestOptions::VERIFY => false // bypass school server's certificate issues
+      $network_client_options = [
+        RequestOptions::VERIFY => false // bypass server's certificate issues
       ];
 
-      $webPush = new WebPush($auth, $options, $timeout, $networkClientOptions);
+      $web_push = new WebPush($auth, $options, $timeout, $network_client_options);
 
       // prepare sending
-      $title = "$locationName | MojeKlima";
+      $title = "$location_name | MojeKlima";
       $data = [
         "notificationId" => $notification->getId()
       ];
 
       $body = json_encode([
         "data" => $data,
-        "body" => $alertMessage,
+        "body" => $alert_message,
         "title" => $title,
       ]);
 
       // send to each user agent associated with user
-      $pushSubscriptions = $account->getPushSubscriptions();
+      $push_subscriptions = $account->getPushSubscriptions();
 
-      foreach ($pushSubscriptions as $pushSubscription) {
+      foreach ($push_subscriptions as $push_subscription) {
         // prepare sending
         $subscription = Subscription::create([
           "contentEncoding" => "aesgcm",
-          "endpoint" => $pushSubscription->getEndpoint(),
-          "authToken" => $pushSubscription->getAuth(),
+          "endpoint" => $push_subscription->getEndpoint(),
+          "authToken" => $push_subscription->getAuth(),
           "keys" => [
-            "auth" => $pushSubscription->getAuth(),
-            "p256dh" => $pushSubscription->getP256dh()
+            "auth" => $push_subscription->getAuth(),
+            "p256dh" => $push_subscription->getP256dh()
           ]
         ]);
 
         // send
-        $webPush->sendOneNotification($subscription, $body);
+        $web_push->sendOneNotification($subscription, $body);
         // $result = $webPush->sendOneNotification($subscription, $body);
         //
         // // result
@@ -203,9 +203,9 @@ namespace App\GraphQL\Controllers {
 
       foreach ($accounts as $account) {
         // handle account id null
-        $accountId = $account->getId();
+        $account_id = $account->getId();
 
-        if ($accountId === null)
+        if ($account_id === null)
           continue;
 
         // skip system accounts
@@ -217,13 +217,13 @@ namespace App\GraphQL\Controllers {
         $locations = $account->getLocations();
 
         foreach ($locations as $location) {
-          $locationId = $location->getId();
+          $location_id = $location->getId();
 
           // handle location id null
-          if ($locationId === null)
+          if ($location_id === null)
             continue;
 
-          $weather = OpenWeatherApiController::weather($account, $locationId);
+          $weather = OpenWeatherApiController::weather($account, $location_id);
           $alerts = $location->getAlerts();
 
           foreach ($alerts as $alert) {
@@ -231,53 +231,53 @@ namespace App\GraphQL\Controllers {
             if (!$alert->getIsEnabled())
               continue;
 
-            $alertId = $alert->getId();
+            $alert_id = $alert->getId();
 
             // handle alert id null
-            if ($alertId === null)
+            if ($alert_id === null)
               continue;
 
             $criteria = $alert->getCriteria();
 
             // get weather value set in alert
-            $currentValue = null;
+            $current_value = null;
 
             switch ($criteria) {
               case 'TEMPERATURE':
-                $currentValue = $weather->getTemperature();
+                $current_value = $weather->getTemperature();
                 break;
 
               case 'HUMIDITY':
-                $currentValue = $weather->getHumidity();
+                $current_value = $weather->getHumidity();
                 break;
 
               case 'WIND_SPEED':
-                $currentValue = $weather->getWindSpeed();
+                $current_value = $weather->getWindSpeed();
                 break;
 
               case 'PRESSURE':
-                $currentValue = $weather->getPressure();
+                $current_value = $weather->getPressure();
                 break;
             }
 
             // PHP 7.4 limitation - no enums, string used as criteria type instead - need to handle all the possible values
-            if ($currentValue === null)
+            if ($current_value === null)
               continue;
 
             // comparison
             $comparator = $alert->getComparator();
             $value = $alert->getValue();
 
-            $shouldNotify = (
-              $comparator === 'LESS_THAN' && $currentValue < $value
-              || $comparator === 'LESS_THAN_OR_EQUAL_TO' && $currentValue <= $value
-              || $comparator === 'EQUAL_TO' && $currentValue == $value
-              || $comparator === 'GREATER_THAN_OR_EQUAL_TO' && $currentValue >= $value
-              || $comparator === 'GREATER_THAN' && $currentValue > $value
+            $should_notify = (
+              $comparator === 'LESS_THAN' && $current_value < $value
+              || $comparator === 'LESS_THAN_OR_EQUAL_TO' && $current_value <= $value
+              || $comparator === 'EQUAL_TO' && $current_value == $value
+              || $comparator === 'GREATER_THAN_OR_EQUAL_TO' && $current_value >= $value
+              || $comparator === 'GREATER_THAN' && $current_value > $value
             );
 
-            if ($shouldNotify)
-              self::notify($accountId, $alertId);
+            if ($should_notify)
+              self::notify($account_id, $alert_id);
           }
         }
       }

@@ -12,7 +12,7 @@ namespace App\GraphQL\Exceptions {
 
   class AccountAlreadyExist extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Účet s touto emailovou adresou již existuje",
         "en" => "An account with this email address already exists",

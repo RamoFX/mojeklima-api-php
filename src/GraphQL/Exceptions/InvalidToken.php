@@ -12,7 +12,7 @@ namespace App\GraphQL\Exceptions {
 
   class InvalidToken extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Token je neplatný",
         "en" => "Invalid token",

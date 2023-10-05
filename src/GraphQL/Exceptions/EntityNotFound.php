@@ -12,7 +12,7 @@ namespace App\GraphQL\Exceptions {
 
   class EntityNotFound extends GraphQLException {
     public function __construct(string $entityName) {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Entita \"$entityName\" nebyla nalezena",
         "en" => "Entity \"$entityName\" wasn't found",

@@ -12,7 +12,7 @@ namespace App\GraphQL\Exceptions {
 
   class AuthorizationHeaderMissing extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Autorizační hlavička je povinná, ale chybí",
         "en" => "Authorization header required but missing",

@@ -14,7 +14,6 @@ namespace App\GraphQL\Controllers {
   use App\GraphQL\Services\JWTService;
   use App\Utilities\Email;
   use App\Utilities\Random;
-  use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NoResultException;
   use Exception;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -48,7 +47,7 @@ namespace App\GraphQL\Controllers {
 
 
     /** @Mutation() */
-    public static function register(CreateAccountInput $account): string {
+    public static function register(CreateAccountInput $account): bool {
       $emails_count = EntityManagerProxy::$entity_manager->createQueryBuilder()
         ->select("count(account.id)")
         ->from(Account::class, "account")
@@ -60,22 +59,20 @@ namespace App\GraphQL\Controllers {
       if ($emails_count > 0)
         throw new AccountAlreadyExist();
 
-      $randomPassword = Random::randomString(6, "abc123");
+      $random_password = Random::randomString(6, "abc123");
 
-      $new_account = new Account(AccountRoleEnum::USER(), $account->name, $account->email, $randomPassword);
+      $new_account = new Account(AccountRoleEnum::USER(), $account->name, $account->email, $random_password);
 
       EntityManagerProxy::$entity_manager->persist($new_account);
       EntityManagerProxy::$entity_manager->flush($new_account);
 
-      Email::sendPassword($account->email, $randomPassword);
-
-      return "";
+      return Email::send_password($account->email, $random_password);
     }
 
 
 
     /** @Mutation() */
-    public static function resetPassword(string $email): string {
+    public static function resetPassword(string $email): bool {
       try {
         /* @var Account $account */
         $account = EntityManagerProxy::$entity_manager->createQueryBuilder()
@@ -86,16 +83,14 @@ namespace App\GraphQL\Controllers {
           ->getQuery()
           ->getSingleResult();
 
-        $randomPassword = Random::randomString(6, "abc123");
+        $random_password = Random::randomString(6, "abc123");
 
-        $account->setPassword($randomPassword);
+        $account->setPassword($random_password);
 
         EntityManagerProxy::$entity_manager->persist($account);
         EntityManagerProxy::$entity_manager->flush($account);
 
-        Email::sendPassword($email, $randomPassword);
-
-        return "";
+        return Email::send_password($email, $random_password);
       } catch (NoResultException $exception) {
         throw new EmailNotFound();
       }

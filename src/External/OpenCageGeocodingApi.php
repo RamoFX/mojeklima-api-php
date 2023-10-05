@@ -5,8 +5,6 @@
 namespace App\External {
 
   use App\Core\Entities\Suggestion;
-  use App\Core\Entities\Weather;
-  use App\GraphQL\DevelopmentOutputBuffer;
   use RestClient;
   use Exception;
 
@@ -14,9 +12,9 @@ namespace App\External {
 
   class OpenCageGeocodingApi {
     /** @return Suggestion[] */
-    public static function getSuggestions(string $language, string $query): array {
-      $api = self::getRestClient();
-      $apiKey = self::getApiKey();
+    public static function get_suggestions(string $language, string $query): array {
+      $api = self::get_rest_client();
+      $apiKey = self::get_api_key();
 
       // "https://api.opencagedata.com/geocode/v1/json?key=2e20a10b90b64b8ab26b10257f49ef5f&no_annotations=1&language=$language&limit=5&q=$query";
       $result = $api->get("json", [
@@ -65,7 +63,7 @@ namespace App\External {
 
 
 
-    private static function getRestClient(): RestClient {
+    private static function get_rest_client(): RestClient {
       $api = new RestClient([
         'base_url' => "https://api.opencagedata.com/geocode/v1/"
       ]);
@@ -77,7 +75,9 @@ namespace App\External {
       return $api;
     }
 
-    private static function getApiKey() {
+
+    
+    private static function get_api_key() {
       return $_ENV["OPEN_CAGE_GEOCODING_API_KEY"];
     }
   }

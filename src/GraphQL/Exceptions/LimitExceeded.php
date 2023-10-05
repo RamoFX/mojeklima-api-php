@@ -16,7 +16,7 @@ namespace App\GraphQL\Exceptions {
      * @param float|int $limit
      */
     public function __construct(string $entityName, $limit) {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Limit vyčerpán, entita: \"$entityName\", limit: $limit",
         "en" => "Limit exceeded, entity: \"$entityName\", limit: $limit",

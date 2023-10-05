@@ -23,10 +23,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Query()
      * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @InjectUser(for="$current_account")
      */
-    public static function me(Account $currentAccount): Account {
-      return $currentAccount;
+    public static function me(Account $current_account): Account {
+      return $current_account;
     }
 
 
@@ -95,17 +95,17 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @InjectUser(for="$current_account")
      */
-    public static function updateName(Account $currentAccount, string $name): Account {
+    public static function updateName(Account $current_account, string $name): Account {
       // update
-      $currentAccount->setName($name);
+      $current_account->setName($name);
 
       // save
-      EntityManagerProxy::$entity_manager->persist($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+      EntityManagerProxy::$entity_manager->persist($current_account);
+      EntityManagerProxy::$entity_manager->flush($current_account);
 
-      return $currentAccount;
+      return $current_account;
     }
 
 
@@ -113,9 +113,9 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @InjectUser(for="$current_account")
      */
-    public static function updateAvatar(Account $currentAccount): Account {
+    public static function updateAvatar(Account $current_account): Account {
 //      // check whether avatar present
 //      if (!isset($_FILES["avatar"]))
 //        throw new FileMissing();
@@ -124,31 +124,31 @@ namespace App\GraphQL\Controllers {
 //      $avatar = $_FILES["avatar"];
 //
 //      // check size
-//      $maxSize = 5_000_000; // 5 MB
+//      $max_size = 5_000_000; // 5 MB
 //
-//      if ($avatar['size'] > $maxSize)
-//        throw new FileTooBig($maxSize);
+//      if ($avatar['size'] > $max_size)
+//        throw new FileTooBig($max_size);
 //
 //      // check type
-//      $allowedTypes = [ 'apng', 'avif', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'webp' ]; // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
+//      $allowed_types = [ 'apng', 'avif', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'webp' ]; // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
 //      $type = strtolower(pathinfo($avatar['name'], PATHINFO_EXTENSION)) ?? "unknown";
 //
-//      if (!in_array($type, $allowedTypes))
-//        throw new FileTypeUnsupported($type, $allowedTypes);
+//      if (!in_array($type, $allowed_types))
+//        throw new FileTypeUnsupported($type, $allowed_types);
 //
 //      // save avatar
-//      $id = $currentAccount->getId();
-//      $finalPath = realpath(__DIR__ . "/../../../uploads/avatars/$id.$type");
-//      move_uploaded_file($avatar["tmp_name"], $finalPath);
+//      $id = $current_account->getId();
+//      $final_path = realpath(__DIR__ . "/../../../uploads/avatars/$id.$type");
+//      move_uploaded_file($avatar["tmp_name"], $final_path);
 //
 //      // save avatar_url
-//      $currentAccount->setAvatarUrl($avatar);
+//      $current_account->setAvatarUrl($avatar);
 //
 //      // save
-//      EntityManagerProxy::$entity_manager->persist($currentAccount);
-//      EntityManagerProxy::$entity_manager->flush($currentAccount);
+//      EntityManagerProxy::$entity_manager->persist($current_account);
+//      EntityManagerProxy::$entity_manager->flush($current_account);
 
-      return $currentAccount;
+      return $current_account;
     }
 
 
@@ -156,9 +156,9 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @InjectUser(for="$current_account")
      */
-    public static function updateEmail(Account $currentAccount, string $email): Account {
+    public static function updateEmail(Account $current_account, string $email): Account {
       // check whether email is already in use
       $emails_count = EntityManagerProxy::$entity_manager->createQueryBuilder()
         ->select("count(account.id)")
@@ -172,13 +172,13 @@ namespace App\GraphQL\Controllers {
         throw new EmailAlreadyInUse();
 
       // update
-      $currentAccount->setEmail($email);
+      $current_account->setEmail($email);
 
       // save
-      EntityManagerProxy::$entity_manager->persist($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+      EntityManagerProxy::$entity_manager->persist($current_account);
+      EntityManagerProxy::$entity_manager->flush($current_account);
 
-      return $currentAccount;
+      return $current_account;
     }
 
 
@@ -186,17 +186,17 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @InjectUser(for="$current_account")
      */
-    public static function updatePassword(Account $currentAccount, string $password): Account {
+    public static function updatePassword(Account $current_account, string $password): Account {
       // update
-      $currentAccount->setPassword($password);
+      $current_account->setPassword($password);
 
       // save
-      EntityManagerProxy::$entity_manager->persist($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+      EntityManagerProxy::$entity_manager->persist($current_account);
+      EntityManagerProxy::$entity_manager->flush($current_account);
 
-      return $currentAccount;
+      return $current_account;
     }
 
 
@@ -204,11 +204,11 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @InjectUser(for="$current_account")
      */
-    public static function deleteAccount(Account $currentAccount): string {
-      EntityManagerProxy::$entity_manager->remove($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+    public static function deleteAccount(Account $current_account): string {
+      EntityManagerProxy::$entity_manager->remove($current_account);
+      EntityManagerProxy::$entity_manager->flush($current_account);
 
       return "ok";
     }

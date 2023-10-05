@@ -12,7 +12,7 @@ namespace App\GraphQL\Exceptions {
 
   class EmailNotFound extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Emailová adresa nebyla nalezena",
         "en" => "Email address wasn't found",

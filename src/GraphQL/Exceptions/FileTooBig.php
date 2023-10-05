@@ -12,7 +12,7 @@ namespace App\GraphQL\Exceptions {
 
   class FileTooBig extends GraphQLException {
     public function __construct(int $limit) {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Soubor je příliž velký, maximální velikost je $limit bajtů",
         "en" => "The file is too large, the maximum size is $limit bytes",

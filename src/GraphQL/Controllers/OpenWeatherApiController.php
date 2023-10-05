@@ -22,7 +22,7 @@ namespace App\GraphQL\Controllers {
     public static function weather(Account $currentAccount, int $locationId): Weather {
       $location = LocationController::location($currentAccount, $locationId);
 
-      return OpenWeatherApi::getWeather(
+      return OpenWeatherApi::get_weather(
         $location->getLatitude(),
         $location->getLongitude()
       );

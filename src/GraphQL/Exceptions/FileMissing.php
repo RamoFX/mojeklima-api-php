@@ -12,7 +12,7 @@ namespace App\GraphQL\Exceptions {
 
   class FileMissing extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Soubor je povinný, ale chybí",
         "en" => "File is required but missing",

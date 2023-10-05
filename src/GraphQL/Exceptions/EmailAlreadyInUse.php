@@ -12,7 +12,7 @@ namespace App\GraphQL\Exceptions {
 
   class EmailAlreadyInUse extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
+      $language = Translation::get_preferred_language();
       $messages = [
         "cs" => "Emailová adresa je již použita",
         "en" => "Email address is already in use",

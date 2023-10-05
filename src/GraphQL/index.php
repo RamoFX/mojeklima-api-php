@@ -13,7 +13,6 @@ namespace App\GraphQL {
   use App\GraphQL\Controllers\OpenWeatherApiController;
   use App\GraphQL\Controllers\PushSubscriptionController;
   use App\GraphQL\Proxies\ContainerProxy;
-  use App\GraphQL\Services\HeadersService;
   use App\GraphQL\Services\SecurityService;
   use App\Utilities\Translation;
   use Doctrine\DBAL\DriverManager;
@@ -29,8 +28,6 @@ namespace App\GraphQL {
 
 
 
-  // initialization
-
   // helpers
   $is_dev_mode = $_ENV["APP_MODE"] === "development";
 
@@ -44,20 +41,20 @@ namespace App\GraphQL {
   // global exception handler
   set_exception_handler(function(Exception $exception) use ($is_dev_mode) {
     header('Content-Type: application/json');
-    $language = Translation::getPreferredLanguage();
+    $language = Translation::get_preferred_language();
     $messages = [
       "cs" => "Vnitřní chyba serveru",
       "en" => "Internal server error",
       "de" => "Interner Serverfehler",
     ];
-    $translatedMessage = Translation::translate($messages, $language);
+    $translated_message = Translation::translate($messages, $language);
 
     $output = [
       "errors" => [
         [
           "message" => $is_dev_mode
             ? $exception->getMessage()
-            : $translatedMessage
+            : $translated_message
         ]
       ]
     ];
@@ -71,7 +68,7 @@ namespace App\GraphQL {
 
 
   // orm
-  $connectionParameters = [
+  $connection_parameters = [
     "dbname" => $_ENV["DB_DATABASE"],
     "user" => $_ENV["DB_USERNAME"],
     "password" => $_ENV["DB_PASSWORD"],
@@ -81,9 +78,8 @@ namespace App\GraphQL {
   ];
 
   $configuration = ORMSetup::createAnnotationMetadataConfiguration([__DIR__ . "/../Core/Entities"], $is_dev_mode);
-  $connection = DriverManager::getConnection($connectionParameters, $configuration);
-  $entityManager = new EntityManager($connection, $configuration);
-  EntityManagerProxy::$entity_manager = $entityManager;
+  $connection = DriverManager::getConnection($connection_parameters, $configuration);
+  EntityManagerProxy::$entity_manager = new EntityManager($connection, $configuration);
 
 
 
@@ -113,11 +109,6 @@ namespace App\GraphQL {
 
 
 
-  // context
-  $context = [];
-
-
-
   // schema
   $factory = new SchemaFactory($cache, ContainerProxy::$container);
 
@@ -126,37 +117,36 @@ namespace App\GraphQL {
     ->addTypeNamespace("App\\Core\\Enums\\")
     ->addTypeNamespace("App\\GraphQL\\InputTypes\\");
 
-  $securityService = new SecurityService();
-  $factory->setAuthenticationService($securityService);
-  $factory->setAuthorizationService($securityService);
+  $security_service = new SecurityService();
+  $factory->setAuthenticationService($security_service);
+  $factory->setAuthorizationService($security_service);
 
   $schema = $factory->createSchema();
 
 
 
-  // request
-  $rawInput = file_get_contents('php://input');
-  $input = json_decode($rawInput, true);
+  // request data
+  $raw_input = file_get_contents('php://input');
+  $input = json_decode($raw_input, true);
   $query = $input['query'];
   $variables = $input['variables'] ?? null;
 
 
 
-  // pre-processing
+  // cors
+  $allow_origin = $_ENV["SECURITY_CLIENT_ORIGIN"];
 
-  // CORS
-  $allowOrigin = $_ENV["SECURITY_CLIENT_ORIGIN"];
-
-  if ($allowOrigin) {
-    header("Access-Control-Allow-Origin: $allowOrigin");
+  if ($allow_origin) {
+    header("Access-Control-Allow-Origin: $allow_origin");
     header("Vary: Origin");
   }
 
   header('Access-Control-Allow-Methods: POST, OPTIONS');
   header('Access-Control-Allow-Headers: Authorization,Content-Type,Preferred-Language');
 
-  if (strtolower($_SERVER['REQUEST_METHOD']) === 'options')
+  if (strtolower($_SERVER['REQUEST_METHOD']) === 'options') {
     exit();
+  }
 
 
 
@@ -165,34 +155,35 @@ namespace App\GraphQL {
     ? DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE
     : DebugFlag::NONE;
 
-  $result = GraphQL::executeQuery($schema, $query, null, $context, $variables);
+  $result = GraphQL::executeQuery($schema, $query, null, [], $variables);
 
   $output = $result->toArray($flags);
 
 
 
-  // format output errors
+  // output errors
   if (isset($output["errors"])) {
-    $formattedErrors = [];
+    $formatted_errors = [];
 
     foreach ($output["errors"] as $error) {
-      $formattedError = $error;
+      $formatted_error = $error;
 
       unset($formattedError["extensions"]);
       unset($formattedError["locations"]);
       unset($formattedError["path"]);
 
-      $formattedErrors[] = $formattedError;
+      $formatted_errors[] = $formattedError;
     }
 
-    $output["errors"] = $formattedErrors;
+    $output["errors"] = $formatted_errors;
   }
 
 
 
   // add optional development output from buffer
-  if ($is_dev_mode)
+  if ($is_dev_mode) {
     $output["__development"] = DevelopmentOutputBuffer::getAll();
+  }
 
 
 

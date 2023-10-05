@@ -11,9 +11,9 @@ namespace App\External {
 
 
   class OpenWeatherApi {
-    public static function getWeather(float $latitude, float $longitude): Weather {
-      $api = self::getRestClient();
-      $apiKey = self::getApiKey();
+    public static function get_weather(float $latitude, float $longitude): Weather {
+      $api = self::get_rest_client();
+      $apiKey = self::get_api_key();
 
       // "https://api.openweathermap.org/data/2.5/weather?appid=$apiKey&lat=$latitude&lon=$longitude&units=metric";
       $result = $api->get("weather", [
@@ -38,7 +38,7 @@ namespace App\External {
 
 
 
-    private static function getRestClient(): RestClient {
+    private static function get_rest_client(): RestClient {
       $api = new RestClient([
         'base_url' => "https://api.openweathermap.org/data/2.5/"
       ]);
@@ -50,7 +50,9 @@ namespace App\External {
       return $api;
     }
 
-    private static function getApiKey() {
+
+    
+    private static function get_api_key() {
       return $_ENV["OPEN_WEATHER_API_KEY"];
     }
   }

@@ -9,21 +9,21 @@ namespace App\Utilities {
 
 
   class Translation {
-    public static function getPreferredLanguage(): string {
-      $supportedLanguages = ["cs", "en", "de"];
-      $preferredLanguage = $_SERVER["HTTP_PREFERRED_LANGUAGE"];
-      $acceptLanguage = $_SERVER["HTTP_ACCEPT_LANGUAGE"];
+    public static function get_preferred_language(): string {
+      $supported_languages = ["cs", "en", "de"];
+      $preferred_language = $_SERVER["HTTP_PREFERRED_LANGUAGE"];
+      $accept_language = $_SERVER["HTTP_ACCEPT_LANGUAGE"];
 
-      if (isset($preferredLanguage) && in_array($preferredLanguage, $supportedLanguages)) {
+      if (isset($preferred_language) && in_array($preferred_language, $supported_languages)) {
         DevelopmentOutputBuffer::set('final-language-from', 'preferred-language');
-        return $preferredLanguage;
-      } else if (isset($acceptLanguage)) {
-        $acceptLanguages = explode(',', $acceptLanguage);
+        return $preferred_language;
+      } else if (isset($accept_language)) {
+        $accept_languages = explode(',', $accept_language);
 
-        foreach ($acceptLanguages as $l) {
+        foreach ($accept_languages as $l) {
           $sl = substr($l, 0, 2);
 
-          if (in_array($sl, $supportedLanguages)) {
+          if (in_array($sl, $supported_languages)) {
             DevelopmentOutputBuffer::set('final-language-from', 'accept-language');
             return $sl;
           }
@@ -36,11 +36,11 @@ namespace App\Utilities {
 
 
 
-    public static function translate(array $translatedMessages, string $language): string {
-      if (array_key_exists($language, $translatedMessages)) {
-        return $translatedMessages[$language];
+    public static function translate(array $translated_messages, string $language): string {
+      if (array_key_exists($language, $translated_messages)) {
+        return $translated_messages[$language];
       } else {
-        return "$translatedMessages[0] (no $language translation exist for this message, message provided has " . join(', ', array_keys($translatedMessages)) . " languages)";
+        return "$translated_messages[0] (no $language translation exist for this message, message provided has " . join(', ', array_keys($translated_messages)) . " languages)";
       }
     }
   }

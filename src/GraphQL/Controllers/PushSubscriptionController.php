@@ -25,30 +25,30 @@ namespace App\GraphQL\Controllers {
      */
     public static function subscribeForPushNotifications(Account $currentAccount, string $userAgent, string $endpoint, string $p256dh, string $auth): PushSubscription {
       // if push subscription exists then update it
-      $pushSubscriptions = $currentAccount->getPushSubscriptions();
+      $push_subscriptions = $currentAccount->getPushSubscriptions();
 
-      foreach ($pushSubscriptions as $pushSubscription) {
-        if ($pushSubscription->getUserAgent() === $userAgent) {
-          $pushSubscription->setEndpoint($endpoint);
-          $pushSubscription->setP256dh($p256dh);
-          $pushSubscription->setAuth($auth);
+      foreach ($push_subscriptions as $push_subscription) {
+        if ($push_subscription->getUserAgent() === $userAgent) {
+          $push_subscription->setEndpoint($endpoint);
+          $push_subscription->setP256dh($p256dh);
+          $push_subscription->setAuth($auth);
 
-          EntityManagerProxy::$entity_manager->persist($pushSubscription);
-          EntityManagerProxy::$entity_manager->flush($pushSubscription);
+          EntityManagerProxy::$entity_manager->persist($push_subscription);
+          EntityManagerProxy::$entity_manager->flush($push_subscription);
 
-          return $pushSubscription;
+          return $push_subscription;
         }
       }
 
       // create new
-      $pushSubscription = new PushSubscription($endpoint, $p256dh, $auth, $userAgent);
+      $push_subscription = new PushSubscription($endpoint, $p256dh, $auth, $userAgent);
 
-      $currentAccount->addPushSubscription($pushSubscription);
+      $currentAccount->addPushSubscription($push_subscription);
 
-      EntityManagerProxy::$entity_manager->persist($pushSubscription);
-      EntityManagerProxy::$entity_manager->flush($pushSubscription);
+      EntityManagerProxy::$entity_manager->persist($push_subscription);
+      EntityManagerProxy::$entity_manager->flush($push_subscription);
 
-      return $pushSubscription;
+      return $push_subscription;
     }
   }
 }
