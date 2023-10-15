@@ -36,10 +36,10 @@ namespace App\Core\Entities {
     /** @ORM\Column(length=511) */
     private string $description;
 
-    /** @ORM\Column(type="decimal", precision=8, scale=6) */
+    /** @ORM\Column(type="decimal", precision=8, scale=4) */
     private float $latitude;
 
-    /** @ORM\Column(type="decimal", precision=9, scale=6) */
+    /** @ORM\Column(type="decimal", precision=9, scale=4) */
     private float $longitude;
 
     /** @ORM\Column(name="created_at", type="datetime_immutable") */
