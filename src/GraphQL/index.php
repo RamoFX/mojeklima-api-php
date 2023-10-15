@@ -128,7 +128,8 @@ namespace App\GraphQL {
   // request data
   $raw_input = file_get_contents('php://input');
   $input = json_decode($raw_input, true);
-  $query = $input['query'];
+
+  $query = isset($input['query']) ? $input['query'] : null;
   $variables = $input['variables'] ?? null;
 
 
@@ -142,7 +143,7 @@ namespace App\GraphQL {
   }
 
   header('Access-Control-Allow-Methods: POST, OPTIONS');
-  header('Access-Control-Allow-Headers: Authorization,Content-Type,Preferred-Language');
+  header('Access-Control-Allow-Headers: Authorization,Content-Type,Preferred-Language,baggage,sentry-trace');
 
   if (strtolower($_SERVER['REQUEST_METHOD']) === 'options') {
     exit();
@@ -154,9 +155,7 @@ namespace App\GraphQL {
   $flags = $is_dev_mode
     ? DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE
     : DebugFlag::NONE;
-
   $result = GraphQL::executeQuery($schema, $query, null, [], $variables);
-
   $output = $result->toArray($flags);
 
 
@@ -166,13 +165,7 @@ namespace App\GraphQL {
     $formatted_errors = [];
 
     foreach ($output["errors"] as $error) {
-      $formatted_error = $error;
-
-      unset($formattedError["extensions"]);
-      unset($formattedError["locations"]);
-      unset($formattedError["path"]);
-
-      $formatted_errors[] = $formattedError;
+      $formatted_errors[] = $error["message"];
     }
 
     $output["errors"] = $formatted_errors;
