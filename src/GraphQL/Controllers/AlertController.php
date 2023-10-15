@@ -122,7 +122,7 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$current_account")
      */
-    public static function createAlert(Account $current_account, int $locationId, bool $isEnabled, string $criteria, string $comparator, float $value, int $updateFrequency, string $message): Alert {
+    public static function createAlert(Account $current_account, int $locationId, bool $isEnabled, string $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message): Alert {
       // check whether user exceeds the limit
       $alerts_count = self::allAlertsCount($current_account);
 
@@ -134,7 +134,7 @@ namespace App\GraphQL\Controllers {
       // create
       $location = self::getLocation($current_account, $locationId);
 
-      $new_alert = new Alert($isEnabled, $criteria, $comparator, $value, $updateFrequency, $message);
+      $new_alert = new Alert($isEnabled, $criteria, $rangeFrom, $rangeTo, $updateFrequency, $message);
 
       $location->addAlert($new_alert);
 
@@ -151,7 +151,7 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$current_account")
      */
-    public static function updateAlert(Account $current_account, int $id, ?bool $isEnabled, ?string $criteria, ?string $comparator, ?float $value, ?int $updateFrequency, ?string $message): Alert {
+    public static function updateAlert(Account $current_account, int $id, ?bool $isEnabled, ?string $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message): Alert {
       $alert = self::alert($current_account, $id);
 
       if ($isEnabled !== null)
@@ -160,11 +160,11 @@ namespace App\GraphQL\Controllers {
       if ($criteria !== null)
         $alert->setCriteria($criteria);
 
-      if ($comparator !== null)
-        $alert->setComparator($comparator);
+      if ($rangeFrom !== null)
+        $alert->setRangeFrom($rangeFrom);
 
-      if ($value !== null)
-        $alert->setValue($value);
+      if ($rangeTo !== null)
+        $alert->setRangeTo($rangeTo);
 
       if ($updateFrequency !== null)
         $alert->setUpdateFrequency($updateFrequency);

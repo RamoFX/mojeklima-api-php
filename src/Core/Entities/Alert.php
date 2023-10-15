@@ -38,23 +38,18 @@ namespace App\Core\Entities {
 
     /**
      * @var string|CriteriaEnum
-     * @ORM\Column(type="string", columnDefinition="enum('TEMPERATURE', 'HUMIDITY', 'WIND_SPEED', 'PRESSURE')")
+     * @ORM\Column(type="string", columnDefinition="enum('TEMPERATURE', 'HUMIDITY', 'WIND_SPEED', 'WIND_GUST', 'WIND_DIRECTION', 'PRESSURE', 'CLOUDINESS')")
      */
     private $criteria;
 
-    /**
-     * @var string|ComparatorEnum
-     * @ORM\Column(type="string", columnDefinition="enum('LESS_THAN', 'LESS_THAN_OR_EQUAL_TO', 'EQUAL_TO', 'GREATER_THAN_OR_EQUAL_TO', 'GRATER_THAN')")
-     */
-    private $comparator;
+    /** @ORM\Column(name="range_from", type="decimal", precision=6, scale=2) */
+    private float $rangeFrom;
 
-    /** @ORM\Column(type="decimal", precision=10, scale=2) */
-    private float $value;
-
+    /** @ORM\Column(name="range_to", type="decimal", precision=6, scale=2) */
+    private float $rangeTo;
 
     /** @ORM\Column(name="update_frequency", type="integer", options={"unsigned": true}) */
     private int $updateFrequency;
-
 
     /** @ORM\Column(length=511) */
     private string $message;
@@ -76,11 +71,11 @@ namespace App\Core\Entities {
     /**
      * @throws GraphQLException
      */
-    public function __construct(bool $isEnabled, string $criteria, string $comparator, float $value, int $updateFrequency, string $message) {
+    public function __construct(bool $isEnabled, string $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message) {
       $this->setIsEnabled($isEnabled);
       $this->setCriteria($criteria);
-      $this->setComparator($comparator);
-      $this->setValue($value);
+      $this->setRangeFrom($rangeFrom);
+      $this->setRangeTo($rangeTo);
       $this->setUpdateFrequency($updateFrequency);
       $this->setMessage($message);
       $this->notifications = new ArrayCollection();
@@ -125,15 +120,12 @@ namespace App\Core\Entities {
 
 
     /** @Field() */
-    public function getComparator(): string {
-      return $this->comparator;
+    public function getRangeFrom(): float {
+      return $this->rangeFrom;
     }
 
-    /**
-     * @throws GraphQLException
-     */
-    public function setComparator(string $comparator): Alert {
-      $this->comparator = Validator::oneOf("comparator", $comparator, [ 'LESS_THAN', 'LESS_THAN_OR_EQUAL_TO', 'EQUAL_TO', 'GREATER_THAN_OR_EQUAL_TO', 'GREATER_THAN' ]);
+    public function setRangeFrom(float $rangeFrom): Alert {
+      $this->rangeFrom = $rangeFrom;
 
       return $this;
     }
@@ -141,12 +133,12 @@ namespace App\Core\Entities {
 
 
     /** @Field() */
-    public function getValue(): float {
-      return $this->value;
+    public function getRangeTo(): float {
+      return $this->rangeTo;
     }
 
-    public function setValue(float $value): Alert {
-      $this->value = $value;
+    public function setRangeTo(float $rangeTo): Alert {
+      $this->rangeTo = $rangeTo;
 
       return $this;
     }
