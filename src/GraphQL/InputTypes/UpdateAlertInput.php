@@ -4,7 +4,6 @@
 
 namespace App\GraphQL\InputTypes {
 
-  use App\Core\Enums\ComparatorEnum;
   use App\Core\Enums\CriteriaEnum;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Input;
@@ -20,10 +19,10 @@ namespace App\GraphQL\InputTypes {
     public ?CriteriaEnum $criteria;
 
     /** @Field() */
-    public ?ComparatorEnum $comparator;
+    public ?float $rangeFrom;
 
     /** @Field() */
-    public ?float $value;
+    public ?float $rangeTo;
 
     /** @Field() */
     public ?int $updateFrequency;
