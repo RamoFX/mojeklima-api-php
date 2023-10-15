@@ -68,7 +68,7 @@ namespace App\GraphQL {
 
 
   // orm
-  $connectionParameters = [
+  $connection_parameters = [
     "dbname" => $_ENV["DB_DATABASE"],
     "user" => $_ENV["DB_USERNAME"],
     "password" => $_ENV["DB_PASSWORD"],
@@ -78,7 +78,7 @@ namespace App\GraphQL {
   ];
 
   $configuration = ORMSetup::createAnnotationMetadataConfiguration([__DIR__ . "/../Core/Entities"], $is_dev_mode);
-  $connection = DriverManager::getConnection($connectionParameters, $configuration);
+  $connection = DriverManager::getConnection($connection_parameters, $configuration);
   EntityManagerProxy::$entity_manager = new EntityManager($connection, $configuration);
 
 
