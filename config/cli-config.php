@@ -11,7 +11,7 @@ use Doctrine\DBAL\DriverManager;
 
 
 
-$connection_parameters = [
+$connectionParameters = [
   "dbname" => $_ENV["DB_DATABASE"],
   "user" => $_ENV["DB_USERNAME"],
   "password" => $_ENV["DB_PASSWORD"],
