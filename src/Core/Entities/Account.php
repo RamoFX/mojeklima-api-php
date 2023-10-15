@@ -34,7 +34,7 @@ namespace App\Core\Entities {
 
     /**
      * @var string|AccountRoleEnum
-     * @ORM\Column(type="string", columnDefinition="enum('USER', 'ADMIN')")
+     * @ORM\Column(type="string", columnDefinition="enum('USER', 'SYSTEM', 'ADMIN')")
      */
     private $role;
 
