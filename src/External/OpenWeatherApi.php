@@ -33,6 +33,7 @@ namespace App\External {
 
       return new Weather(
         $data["main"]["temp"],
+        $data["main"]["feels_like"],
         $data["main"]["humidity"],
         $data["main"]["pressure"],
         $data["wind"]["speed"],

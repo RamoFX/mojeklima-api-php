@@ -11,6 +11,8 @@ namespace App\Core\Enums {
   class CriteriaEnum extends Enum {
     private const TEMPERATURE = "TEMPERATURE";
 
+    private const FEELS_LIKE = "FEELS_LIKE";
+
     private const HUMIDITY = "HUMIDITY";
 
     private const PRESSURE = "PRESSURE";

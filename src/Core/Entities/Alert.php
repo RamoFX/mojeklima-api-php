@@ -38,7 +38,7 @@ namespace App\Core\Entities {
 
     /**
      * @var string|CriteriaEnum
-     * @ORM\Column(type="string", columnDefinition="enum('TEMPERATURE', 'HUMIDITY', 'WIND_SPEED', 'WIND_GUST', 'WIND_DIRECTION', 'PRESSURE', 'CLOUDINESS')")
+     * @ORM\Column(type="string", columnDefinition="enum('TEMPERATURE', 'FEELS_LIKE', 'HUMIDITY', 'WIND_SPEED', 'WIND_GUST', 'WIND_DIRECTION', 'PRESSURE', 'CLOUDINESS')")
      */
     private $criteria;
 

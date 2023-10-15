@@ -14,6 +14,7 @@ namespace App\Core\Entities {
    */
   class Weather {
     private float $temperature;
+    private float $feelsLike;
     private int $humidity;
     private int $pressure;
     private float $windSpeed;
@@ -31,6 +32,7 @@ namespace App\Core\Entities {
 
     public function __construct(
       float $temperature,
+      float $feelsLike,
       int $humidity,
       int $pressure,
       float $windSpeed,
@@ -45,6 +47,7 @@ namespace App\Core\Entities {
       int $timezone
     ) {
       $this->setTemperature($temperature);
+      $this->setFeelsLike($feelsLike);
       $this->setHumidity($humidity);
       $this->setPressure($pressure);
       $this->setWindSpeed($windSpeed);
@@ -68,6 +71,17 @@ namespace App\Core\Entities {
     
     public function setTemperature(float $temperature): float {
       return $this->temperature = $temperature;
+    }
+
+
+
+    /** @Field() */
+    public function getFeelsLike(): float {
+      return $this->feelsLike;
+    }
+    
+    public function setFeelsLike(float $feelsLike): float {
+      return $this->feelsLike = $feelsLike;
     }
 
 
