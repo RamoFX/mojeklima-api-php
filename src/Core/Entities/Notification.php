@@ -4,13 +4,8 @@
 
 namespace App\Core\Entities {
 
-  use App\Core\Enums\AccountRoleEnum;
-  use App\Core\Validator;
   use DateTimeImmutable;
-  use Doctrine\Common\Collections\ArrayCollection;
-  use Doctrine\Common\Collections\Collection;
   use Doctrine\ORM\Event\PrePersistEventArgs;
-  use Doctrine\ORM\Event\PreUpdateEventArgs;
   use Doctrine\ORM\Mapping as ORM;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;

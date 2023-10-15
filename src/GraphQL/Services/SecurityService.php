@@ -6,7 +6,6 @@ namespace App\GraphQL\Services {
 
   use App\Core\Entities\Account;
   use App\Core\EntityManagerProxy;
-  use App\Core\Enums\AccountRoleEnum;
   use App\GraphQL\Exceptions\AuthorizationHeaderMissing;
   use App\GraphQL\Exceptions\BearerTokenMissing;
   use App\GraphQL\Exceptions\InvalidToken;
