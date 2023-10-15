@@ -5,22 +5,25 @@
 namespace App\External {
 
   use App\Core\Entities\Weather;
+  use App\GraphQL\DevelopmentOutputBuffer;
   use RestClient;
   use Exception;
 
 
 
   class OpenWeatherApi {
-    public static function get_weather(float $latitude, float $longitude): Weather {
+    public static function get_weather(float $latitude, float $longitude, string $units, string $language): Weather {
       $api = self::get_rest_client();
       $apiKey = self::get_api_key();
 
-      // "https://api.openweathermap.org/data/2.5/weather?appid=$apiKey&lat=$latitude&lon=$longitude&units=metric";
+      DevelopmentOutputBuffer::set('units', $units);
+
       $result = $api->get("weather", [
         'appid' => $apiKey,
         'lat' => $latitude,
         'lon' => $longitude,
-        'units' => 'metric'
+        'units' => $units,
+        'lang' => $language
       ]);
 
       if ($result->error)
@@ -32,7 +35,15 @@ namespace App\External {
         $data["main"]["temp"],
         $data["main"]["humidity"],
         $data["main"]["pressure"],
-        $data["wind"]["speed"]
+        $data["wind"]["speed"],
+        $data["wind"]["gust"],
+        $data["wind"]["deg"],
+        $data["weather"][0]["description"],
+        $data["weather"][0]["icon"],
+        $data["dt"],
+        $data["sys"]["sunrise"],
+        $data["sys"]["sunset"],
+        $data["timezone"]
       );
     }
 
