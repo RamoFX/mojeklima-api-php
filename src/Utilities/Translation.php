@@ -11,13 +11,13 @@ namespace App\Utilities {
   class Translation {
     public static function get_preferred_language(): string {
       $supported_languages = ["cs", "en", "de"];
-      $preferred_language = $_SERVER["HTTP_PREFERRED_LANGUAGE"];
-      $accept_language = $_SERVER["HTTP_ACCEPT_LANGUAGE"];
+      $preferred_language = isset($_SERVER["HTTP_PREFERRED_LANGUAGE"]) ? $_SERVER["HTTP_PREFERRED_LANGUAGE"] : null;
+      $accept_language = isset($_SERVER["HTTP_ACCEPT_LANGUAGE"]) ? $_SERVER["HTTP_ACCEPT_LANGUAGE"] : null;
 
-      if (isset($preferred_language) && in_array($preferred_language, $supported_languages)) {
+      if ($preferred_language !== null && in_array($preferred_language, $supported_languages)) {
         DevelopmentOutputBuffer::set('final-language-from', 'preferred-language');
         return $preferred_language;
-      } else if (isset($accept_language)) {
+      } else if ($accept_language !== null) {
         $accept_languages = explode(',', $accept_language);
 
         foreach ($accept_languages as $l) {

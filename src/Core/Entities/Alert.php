@@ -4,7 +4,6 @@
 
 namespace App\Core\Entities {
 
-  use App\Core\Enums\ComparatorEnum;
   use App\Core\Enums\CriteriaEnum;
   use App\Core\Validator;
   use DateTimeImmutable;
