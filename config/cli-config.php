@@ -11,7 +11,7 @@ use Doctrine\DBAL\DriverManager;
 
 
 
-$connectionParameters = [
+$connection_parameters = [
   "dbname" => $_ENV["DB_DATABASE"],
   "user" => $_ENV["DB_USERNAME"],
   "password" => $_ENV["DB_PASSWORD"],
@@ -21,7 +21,7 @@ $connectionParameters = [
 ];
 
 $configuration = ORMSetup::createAnnotationMetadataConfiguration([__DIR__ . "/../src/Core/Entities"], true);
-$connection = DriverManager::getConnection($connectionParameters, $configuration);
+$connection = DriverManager::getConnection($connection_parameters, $configuration);
 $entityManager = new EntityManager($connection, $configuration);
 
 return ConsoleRunner::createHelperSet($entityManager);
