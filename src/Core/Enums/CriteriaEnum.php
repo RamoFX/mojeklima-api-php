@@ -13,8 +13,14 @@ namespace App\Core\Enums {
 
     private const HUMIDITY = "HUMIDITY";
 
+    private const PRESSURE = "PRESSURE";
+
     private const WIND_SPEED = "WIND_SPEED";
 
-    private const PRESSURE = "PRESSURE";
+    private const WIND_GUST = "WIND_GUST";
+
+    private const WIND_DIRECTION = "WIND_DIRECTION";
+
+    private const CLOUDINESS = "CLOUDINESS";
   }
 }

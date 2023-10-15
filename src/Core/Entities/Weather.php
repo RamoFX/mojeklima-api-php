@@ -19,6 +19,7 @@ namespace App\Core\Entities {
     private float $windSpeed;
     private float $windGust;
     private int $windDirection;
+    private int $cloudiness;
     private string $description;
     private string $iconCode;
     private int $dateTime;
@@ -35,6 +36,7 @@ namespace App\Core\Entities {
       float $windSpeed,
       float $windGust,
       int $windDirection,
+      int $cloudiness,
       string $description,
       string $iconCode,
       int $dateTime,
@@ -48,6 +50,7 @@ namespace App\Core\Entities {
       $this->setWindSpeed($windSpeed);
       $this->setWindGust($windGust);
       $this->setWindDirection($windDirection);
+      $this->setCloudiness($cloudiness);
       $this->setDescription($description);
       $this->setIconCode($iconCode);
       $this->setDateTime($dateTime);
@@ -95,7 +98,7 @@ namespace App\Core\Entities {
     public function getWindSpeed(): float {
       return $this->windSpeed;
     }
-    
+
     public function setWindSpeed(float $windSpeed): float {
       return $this->windSpeed = $windSpeed;
     }
@@ -117,9 +120,20 @@ namespace App\Core\Entities {
     public function getWindDirection(): int {
       return $this->windDirection;
     }
-    
+
     public function setWindDirection(int $windDirection): int {
       return $this->windDirection = $windDirection;
+    }
+
+
+
+    /** @Field() */
+    public function getCloudiness(): int {
+      return $this->cloudiness;
+    }
+
+    public function setCloudiness(int $cloudiness): int {
+      return $this->cloudiness = $cloudiness;
     }
 
 
@@ -189,9 +203,3 @@ namespace App\Core\Entities {
     }
   }
 }
-
-
-
-
-
-

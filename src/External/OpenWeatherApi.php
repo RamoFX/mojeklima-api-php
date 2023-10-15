@@ -38,6 +38,7 @@ namespace App\External {
         $data["wind"]["speed"],
         $data["wind"]["gust"],
         $data["wind"]["deg"],
+        $data["clouds"]["all"],
         $data["weather"][0]["description"],
         $data["weather"][0]["icon"],
         $data["dt"],
