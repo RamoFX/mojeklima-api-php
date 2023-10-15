@@ -160,19 +160,6 @@ namespace App\GraphQL {
 
 
 
-  // output errors
-  if (isset($output["errors"])) {
-    $formatted_errors = [];
-
-    foreach ($output["errors"] as $error) {
-      $formatted_errors[] = $error["message"];
-    }
-
-    $output["errors"] = $formatted_errors;
-  }
-
-
-
   // add optional development output from buffer
   if ($is_dev_mode) {
     $output["__development"] = DevelopmentOutputBuffer::getAll();
