@@ -19,11 +19,11 @@ namespace App\GraphQL\Controllers {
     /**
      * @Query()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      * @return Location[]
      */
-    public static function locations(Account $current_account): array {
-      return $current_account->getLocations();
+    public static function allLocations(Account $currentAccount): array {
+      return $currentAccount->getLocations();
     }
 
 
@@ -31,27 +31,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Query()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function locationsCount(Account $current_account): int {
-      // SPEED COMPARISON
-
-      // implementation 1 - should be slower (avg 220 ms)
-      return count($current_account->getLocations());
-
-      // implementation 21 - should be faster (avg yyy ms)
-//      $account_id = $current_account->getId();
-//
-//      /** @var $count int */
-//      $count = EntityManagerProxy::$entity_manager->createQueryBuilder()
-//        ->select("count(location.id)")
-//        ->from(Location::class, "location")
-//        ->where("location.account_id = :account_id")
-//        ->setParameter("account_id", $account_id)
-//        ->getQuery()
-//        ->getSingleScalarResult();
-//
-//      return $count;
+    public static function locationsCount(Account $currentAccount): int {
+      return count(self::allLocations($currentAccount));
     }
 
 
@@ -59,12 +42,12 @@ namespace App\GraphQL\Controllers {
     /**
      * @Query()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function location(Account $current_account, int $id): Location {
-      $locations = self::locations($current_account);
+    public static function location(Account $currentAccount, int $id): Location {
+      $allLocations = self::allLocations($currentAccount);
 
-      foreach ($locations as $location) {
+      foreach ($allLocations as $location) {
         if ($location->getId() === $id)
           return $location;
       }
@@ -77,12 +60,12 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function createLocation(Account $current_account, string $name, string $description, float $latitude, float $longitude): Location {
-      $new_location = new Location($name, $description, $latitude, $longitude);
+    public static function createLocation(Account $currentAccount, string $name, string $description, string $units, float $latitude, float $longitude): Location {
+      $new_location = new Location($name, $description, $units, $latitude, $longitude);
 
-      $current_account->addLocation($new_location);
+      $currentAccount->addLocation($new_location);
 
       EntityManagerProxy::$entity_manager->persist($new_location);
       EntityManagerProxy::$entity_manager->flush($new_location);
@@ -95,10 +78,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function updateLocation(Account $current_account, int $id, ?string $name, ?string $description, ?float $latitude, ?float $longitude): Location {
-      $outdated_location = self::location($current_account, $id);
+    public static function updateLocation(Account $currentAccount, int $id, ?string $name, ?string $description, ?float $latitude, ?float $longitude): Location {
+      $outdated_location = self::location($currentAccount, $id);
 
       if ($name !== null)
         $outdated_location->setName($name);
@@ -122,10 +105,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function deleteLocation(Account $current_account, int $id): Location {
-      $location = self::location($current_account, $id);
+    public static function deleteLocation(Account $currentAccount, int $id): Location {
+      $location = self::location($currentAccount, $id);
 
       EntityManagerProxy::$entity_manager->remove($location);
       EntityManagerProxy::$entity_manager->flush($location);

@@ -4,7 +4,8 @@
 
 namespace App\Core\Entities {
 
-  use App\Core\Validator;
+    use App\Core\Enums\WeatherUnitsEnum;
+    use App\Core\Validator;
   use DateTimeImmutable;
   use Doctrine\Common\Collections\ArrayCollection;
   use Doctrine\Common\Collections\Collection;
@@ -36,6 +37,12 @@ namespace App\Core\Entities {
     /** @ORM\Column(length=511) */
     private string $description;
 
+    /**
+     * @var string|WeatherUnitsEnum
+     * @ORM\Column(type="string", columnDefinition="enum('METRIC', 'IMPERIAL')")
+     */
+    private $units;
+
     /** @ORM\Column(type="decimal", precision=8, scale=4) */
     private float $latitude;
 
@@ -56,9 +63,10 @@ namespace App\Core\Entities {
 
 
 
-    public function __construct(string $name, string $description, float $latitude, float $longitude) {
+    public function __construct(string $name, string $description, string $units, float $latitude, float $longitude) {
       $this->setName($name);
       $this->setDescription($description);
+      $this->setUnits($units);
       $this->setLatitude($latitude);
       $this->setLongitude($longitude);
       $this->alerts = new ArrayCollection();
@@ -94,6 +102,19 @@ namespace App\Core\Entities {
     public function setDescription(string $description): Location {
       $this->description = Validator::maxLength("description", $description, 511);
 
+      return $this;
+    }
+
+
+
+    /** @Field() */
+    public function getUnits(): string {
+      return $this->units;
+    }
+
+    public function setUnits(string $units): Location {
+      $this->units = Validator::oneOf("units", $units, [ 'METRIC', 'IMPERIAL' ]);
+      
       return $this;
     }
 

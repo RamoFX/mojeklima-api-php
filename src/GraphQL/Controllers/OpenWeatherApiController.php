@@ -6,7 +6,6 @@ namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
   use App\Core\Entities\Weather;
-  use App\Core\Enums\WeatherUnitsEnum;
   use App\External\OpenWeatherApi;
   use App\Utilities\Translation;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -21,7 +20,7 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function weather(Account $currentAccount, int $locationId, WeatherUnitsEnum $units): Weather {
+    public static function weather(Account $currentAccount, int $locationId): Weather {
       $location = LocationController::location($currentAccount, $locationId);
       $language = Translation::get_preferred_language();
       // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (coutnry code).
@@ -33,7 +32,7 @@ namespace App\GraphQL\Controllers {
       return OpenWeatherApi::get_weather(
         $location->getLatitude(),
         $location->getLongitude(),
-        $units,
+        $location->getUnits(),
         $languageMap[$language] ?? $language
       );
     }

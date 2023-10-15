@@ -5,11 +5,9 @@
 namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
-  use App\Core\Entities\Alert;
   use App\Core\Entities\Notification;
-  use App\Core\Entities\PushSubscription;
   use App\Core\EntityManagerProxy;
-  use App\Utilities\Email;
+  use App\GraphQL\Exceptions\EntityNotFound;
   use GuzzleHttp\RequestOptions;
   use Minishlink\WebPush\Subscription;
   use Minishlink\WebPush\WebPush;
@@ -48,6 +46,24 @@ namespace App\GraphQL\Controllers {
       });
 
       return $allNotifications;
+    }
+
+
+
+    /**
+     * @Query()
+     * @Logged()
+     * @InjectUser(for="$currentAccount")
+     */
+    public static function notification(Account $currentAccount, int $id): Notification {
+      $allNotifications = self::allNotifications($currentAccount);
+
+      foreach ($allNotifications as $notification) {
+        if ($notification->getId() === $id)
+          return $notification;
+      }
+
+      throw new EntityNotFound("Notification");
     }
 
 
@@ -115,11 +131,13 @@ namespace App\GraphQL\Controllers {
 
 
       // send email
+      /*
       $email_successful = Email::send_notification(
         $account->getEmail(),
         $location_name,
         $alert_message
       );
+      */
 
 
 
@@ -218,12 +236,13 @@ namespace App\GraphQL\Controllers {
 
         foreach ($locations as $location) {
           $location_id = $location->getId();
+          $location_units = $location->getUnits();
 
           // handle location id null
           if ($location_id === null)
             continue;
 
-          $weather = OpenWeatherApiController::weather($account, $location_id);
+          $weather = OpenWeatherApiController::weather($account, $location_id, $location_units);
           $alerts = $location->getAlerts();
 
           foreach ($alerts as $alert) {
@@ -265,16 +284,10 @@ namespace App\GraphQL\Controllers {
               continue;
 
             // comparison
-            $comparator = $alert->getComparator();
-            $value = $alert->getValue();
+            $rangeFrom = $alert->getRangeFrom();
+            $rangeTo = $alert->getRangeTo();
 
-            $should_notify = (
-              $comparator === 'LESS_THAN' && $current_value < $value
-              || $comparator === 'LESS_THAN_OR_EQUAL_TO' && $current_value <= $value
-              || $comparator === 'EQUAL_TO' && $current_value == $value
-              || $comparator === 'GREATER_THAN_OR_EQUAL_TO' && $current_value >= $value
-              || $comparator === 'GREATER_THAN' && $current_value > $value
-            );
+            $should_notify = $rangeFrom <= $current_value && $current_value <= $rangeTo;
 
             if ($should_notify)
               self::notify($account_id, $alert_id);
@@ -283,6 +296,22 @@ namespace App\GraphQL\Controllers {
       }
 
       return "";
+    }
+
+
+
+    /**
+     * @Mutation()
+     * @Logged()
+     * @InjectUser(for="$currentAccount")
+     */
+    public static function deleteNotification(Account $currentAccount, int $id): Notification {
+      $notification = self::notification($currentAccount, $id);
+
+      EntityManagerProxy::$entity_manager->remove($notification);
+      EntityManagerProxy::$entity_manager->flush($notification);
+
+      return $notification;
     }
   }
 }
