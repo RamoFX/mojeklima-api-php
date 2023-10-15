@@ -10,8 +10,6 @@ namespace App\GraphQL\Controllers {
   use App\Core\EntityManagerProxy;
   use App\GraphQL\Exceptions\EntityNotFound;
   use App\GraphQL\Exceptions\LimitExceeded;
-  use App\GraphQL\InputTypes\CreateAlertInput;
-  use App\GraphQL\InputTypes\UpdateAlertInput;
   use App\GraphQL\Proxies\ContainerProxy;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -37,11 +35,11 @@ namespace App\GraphQL\Controllers {
     /**
      * @Query()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      * @return Alert[]
      */
-    public static function allAlerts(Account $current_account): array {
-      $locations = $current_account->getLocations();
+    public static function allAlerts(Account $currentAccount): array {
+      $locations = $currentAccount->getLocations();
       $alerts = [];
 
       foreach ($locations as $location) {
@@ -56,10 +54,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Query()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function allAlertsCount(Account $current_account): int {
-      return count(self::allAlerts($current_account));
+    public static function allAlertsCount(Account $currentAccount): int {
+      return count(self::allAlerts($currentAccount));
     }
 
 
@@ -67,11 +65,11 @@ namespace App\GraphQL\Controllers {
     /**
      * @Query()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      * @return Alert[]
      */
-    public static function locationAlerts(Account $current_account, int $locationId): array {
-      $location = self::getLocation($current_account, $locationId);
+    public static function locationAlerts(Account $currentAccount, int $locationId): array {
+      $location = self::getLocation($currentAccount, $locationId);
 
       return $location->getAlerts();
     }
@@ -91,10 +89,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Query()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function alert(Account $current_account, int $id): Alert {
-      $alerts = self::allAlerts($current_account);
+    public static function alert(Account $currentAccount, int $id): Alert {
+      $alerts = self::allAlerts($currentAccount);
 
       foreach ($alerts as $alert) {
         if ($alert->getId() === $id)
@@ -109,10 +107,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function toggleAlert(Account $current_account, int $id, bool $isEnabled): Alert {
-      return self::updateAlert($current_account, $id, $isEnabled, null, null, null, null, null);
+    public static function toggleAlert(Account $currentAccount, int $id, bool $isEnabled): Alert {
+      return self::updateAlert($currentAccount, $id, $isEnabled, null, null, null, null, null);
     }
 
 
@@ -120,11 +118,11 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function createAlert(Account $current_account, int $locationId, bool $isEnabled, string $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message): Alert {
+    public static function createAlert(Account $currentAccount, int $locationId, bool $isEnabled, string $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message): Alert {
       // check whether user exceeds the limit
-      $alerts_count = self::allAlertsCount($current_account);
+      $alerts_count = self::allAlertsCount($currentAccount);
 
       if ($alerts_count >= 32)
         throw new LimitExceeded("Alert", 32);
@@ -132,7 +130,7 @@ namespace App\GraphQL\Controllers {
 
 
       // create
-      $location = self::getLocation($current_account, $locationId);
+      $location = self::getLocation($currentAccount, $locationId);
 
       $new_alert = new Alert($isEnabled, $criteria, $rangeFrom, $rangeTo, $updateFrequency, $message);
 
@@ -149,10 +147,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function updateAlert(Account $current_account, int $id, ?bool $isEnabled, ?string $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message): Alert {
-      $alert = self::alert($current_account, $id);
+    public static function updateAlert(Account $currentAccount, int $id, ?bool $isEnabled, ?string $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message): Alert {
+      $alert = self::alert($currentAccount, $id);
 
       if ($isEnabled !== null)
         $alert->setIsEnabled($isEnabled);
@@ -182,10 +180,10 @@ namespace App\GraphQL\Controllers {
     /**
      * @Mutation()
      * @Logged()
-     * @InjectUser(for="$current_account")
+     * @InjectUser(for="$currentAccount")
      */
-    public static function deleteAlert(Account $current_account, int $id): Alert {
-      $alert = self::alert($current_account, $id);
+    public static function deleteAlert(Account $currentAccount, int $id): Alert {
+      $alert = self::alert($currentAccount, $id);
 
       EntityManagerProxy::$entity_manager->remove($alert);
       EntityManagerProxy::$entity_manager->flush($alert);
