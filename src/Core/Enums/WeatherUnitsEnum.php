@@ -9,8 +9,8 @@ namespace App\Core\Enums {
 
 
   class WeatherUnitsEnum extends Enum {
-    private const METRIC = "metric";
+    private const METRIC = "METRIC";
 
-    private const IMPERIAL = "imperial";
+    private const IMPERIAL = "IMPERIAL";
   }
 }

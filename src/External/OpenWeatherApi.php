@@ -22,7 +22,7 @@ namespace App\External {
         'appid' => $apiKey,
         'lat' => $latitude,
         'lon' => $longitude,
-        'units' => $units,
+        'units' => strtolower($units),
         'lang' => $language
       ]);
 
