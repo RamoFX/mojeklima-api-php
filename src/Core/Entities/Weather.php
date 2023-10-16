@@ -4,6 +4,8 @@
 
 namespace App\Core\Entities {
 
+  use App\Core\Validator;
+  use App\Utilities\UnitsConverter;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
 
@@ -23,7 +25,6 @@ namespace App\Core\Entities {
     private int $cloudiness;
     private string $description;
     private string $iconCode;
-    private int $dateTime;
     private int $sunrise;
     private int $sunset;
     private int $timezone;
@@ -41,7 +42,6 @@ namespace App\Core\Entities {
       int $cloudiness,
       string $description,
       string $iconCode,
-      int $dateTime,
       int $sunrise,
       int $sunset,
       int $timezone
@@ -56,10 +56,62 @@ namespace App\Core\Entities {
       $this->setCloudiness($cloudiness);
       $this->setDescription($description);
       $this->setIconCode($iconCode);
-      $this->setDateTime($dateTime);
       $this->setSunrise($sunrise);
       $this->setSunset($sunset);
       $this->setTimezone($timezone);
+    }
+
+
+
+    public function convertTemperature(string $toUnits) {
+      Validator::oneOf("toUnits", $toUnits, [ "CELSIUS", "FAHRENHEIT", "KELVIN", "RANKINE" ]);
+
+      $this->setTemperature(
+        UnitsConverter::fromMetric(
+          $this->getTemperature(),
+          $toUnits
+        )
+      );
+
+      $this->setFeelsLike(
+        UnitsConverter::fromMetric(
+          $this->getFeelsLike(),
+          $toUnits
+        )
+      );
+    }
+
+
+
+    public function convertSpeed(string $toUnits) {
+      Validator::oneOf("toUnits", $toUnits, [ "METERS_PER_SECOND", "KILOMETERS_PER_HOUR", "MILES_PER_HOUR", "KNOTS" ]);
+
+      $this->setWindSpeed(
+        UnitsConverter::fromMetric(
+          $this->getWindSpeed(),
+          $toUnits
+        )
+      );
+
+      $this->setWindGust(
+        UnitsConverter::fromMetric(
+          $this->getWindGust(),
+          $toUnits
+        )
+      );
+    }
+
+
+
+    public function convertPressure(string $toUnits) {
+      Validator::oneOf("toUnits", $toUnits, [ "HECTOPASCAL", "MILLIBAR", "INCHES_OF_MERCURY" ]);
+      
+      $this->setPressure(
+        UnitsConverter::fromMetric(
+          $this->getPressure(),
+          $toUnits
+        )
+      );
     }
 
 
@@ -170,17 +222,6 @@ namespace App\Core\Entities {
 
     public function setIconCode(string $iconCode): string {
       return $this->iconCode = $iconCode;
-    }
-
-
-
-    /** @Field() */
-    public function getDateTime(): int {
-      return $this->dateTime;
-    }
-
-    public function setDateTime(int $dateTime): int {
-      return $this->dateTime = $dateTime;
     }
 
 

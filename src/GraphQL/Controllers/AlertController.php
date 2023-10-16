@@ -8,6 +8,7 @@ namespace App\GraphQL\Controllers {
   use App\Core\Entities\Alert;
   use App\Core\Entities\Location;
   use App\Core\EntityManagerProxy;
+  use App\Core\Enums\WeatherUnitsEnum;
   use App\GraphQL\Exceptions\EntityNotFound;
   use App\GraphQL\Exceptions\LimitExceeded;
   use App\GraphQL\Proxies\ContainerProxy;
@@ -15,6 +16,7 @@ namespace App\GraphQL\Controllers {
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
@@ -110,7 +112,7 @@ namespace App\GraphQL\Controllers {
      * @InjectUser(for="$currentAccount")
      */
     public static function toggleAlert(Account $currentAccount, int $id, bool $isEnabled): Alert {
-      return self::updateAlert($currentAccount, $id, $isEnabled, null, null, null, null, null);
+      return self::updateAlert($currentAccount, $id, $isEnabled, null, null, null, null, null, null);
     }
 
 
@@ -120,19 +122,18 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function createAlert(Account $currentAccount, int $locationId, bool $isEnabled, string $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message): Alert {
+    public static function createAlert(Account $currentAccount, int $locationId, bool $isEnabled, string $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message, WeatherUnitsEnum $units): Alert {
       // check whether user exceeds the limit
       $alerts_count = self::allAlertsCount($currentAccount);
 
       if ($alerts_count >= 32)
         throw new LimitExceeded("Alert", 32);
 
-
-
       // create
       $location = self::getLocation($currentAccount, $locationId);
 
       $new_alert = new Alert($isEnabled, $criteria, $rangeFrom, $rangeTo, $updateFrequency, $message);
+      $new_alert->convertRange($criteria, $units);
 
       $location->addAlert($new_alert);
 
@@ -149,20 +150,31 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function updateAlert(Account $currentAccount, int $id, ?bool $isEnabled, ?string $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message): Alert {
+    public static function updateAlert(Account $currentAccount, int $id, ?bool $isEnabled, ?string $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message, ?WeatherUnitsEnum $units): Alert {
       $alert = self::alert($currentAccount, $id);
+      $criteria = $alert->getCriteria();
 
+      // validate units
+      if (($rangeFrom !== null || $rangeTo !== null) && $units === null) {
+        throw new GraphQLException("If you are specifying range values, then you have to provide units.");
+      }
+
+      // update
       if ($isEnabled !== null)
         $alert->setIsEnabled($isEnabled);
 
       if ($criteria !== null)
         $alert->setCriteria($criteria);
 
-      if ($rangeFrom !== null)
+      if ($rangeFrom !== null) {
         $alert->setRangeFrom($rangeFrom);
+        $alert->convertRangeFrom($criteria, $units);
+      }
 
-      if ($rangeTo !== null)
+      if ($rangeTo !== null) {
         $alert->setRangeTo($rangeTo);
+        $alert->convertRangeTo($criteria, $units);
+      }
 
       if ($updateFrequency !== null)
         $alert->setUpdateFrequency($updateFrequency);

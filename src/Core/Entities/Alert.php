@@ -6,6 +6,7 @@ namespace App\Core\Entities {
 
   use App\Core\Enums\CriteriaEnum;
   use App\Core\Validator;
+  use App\Utilities\UnitsConverter;
   use DateTimeImmutable;
   use Doctrine\Common\Collections\ArrayCollection;
   use Doctrine\Common\Collections\Collection;
@@ -41,10 +42,10 @@ namespace App\Core\Entities {
      */
     private $criteria;
 
-    /** @ORM\Column(name="range_from", type="decimal", precision=6, scale=2) */
+    /** @ORM\Column(name="range_from", type="decimal", precision=8, scale=2) */
     private float $rangeFrom;
 
-    /** @ORM\Column(name="range_to", type="decimal", precision=6, scale=2) */
+    /** @ORM\Column(name="range_to", type="decimal", precision=8, scale=2) */
     private float $rangeTo;
 
     /** @ORM\Column(name="update_frequency", type="integer", options={"unsigned": true}) */
@@ -82,6 +83,53 @@ namespace App\Core\Entities {
 
 
 
+    private function validateRangeUnits(string $criteria, string $units) {
+      switch ($criteria) {
+        case 'TEMPERATURE':
+        case 'FEELS_LIKE':
+          Validator::oneOf("units", $units, [ "CELSIUS", "FAHRENHEIT", "KELVIN", "RANKINE" ]);
+          break;
+
+        case 'WIND_SPEED':
+        case 'WIND_GUST':
+          Validator::oneOf("units", $units, [ "METERS_PER_SECOND", "KILOMETERS_PER_HOUR", "MILES_PER_HOUR", "KNOTS" ]);
+          break;
+
+        case 'PRESSURE':
+          Validator::oneOf("units", $units, [ "HECTOPASCAL", "MILLIBAR", "INCHES_OF_MERCURY" ]);
+          break;
+      }
+    }
+
+    public function convertRangeFrom(?string $criteria, string $units) {
+      $this->validateRangeUnits($criteria ?? $this->getCriteria(), $units);
+
+      $this->setRangeFrom(
+        UnitsConverter::toMetric(
+          $this->getRangeFrom(),
+          $units
+        )
+      );
+    }
+
+    public function convertRangeTo(?string $criteria, string $units) {
+      $this->validateRangeUnits($criteria ?? $this->getCriteria(), $units);
+
+      $this->setRangeTo(
+        UnitsConverter::toMetric(
+          $this->getRangeTo(),
+          $units
+        )
+      );
+    }
+
+    public function convertRange(string $criteria, string $units) {
+      $this->convertRangeFrom($criteria, $units);
+      $this->convertRangeTo($criteria, $units);
+    }
+
+
+
     /** @Field() */
     public function getId(): ?int {
       return $this->id;
@@ -111,7 +159,7 @@ namespace App\Core\Entities {
      * @throws GraphQLException
      */
     public function setCriteria(string $criteria): Alert {
-      $this->criteria = Validator::oneOf("criteria", $criteria, [ 'TEMPERATURE', 'HUMIDITY', 'WIND_SPEED', 'PRESSURE' ]);
+      $this->criteria = Validator::oneOf("criteria", $criteria, [ 'TEMPERATURE', 'FEELS_LIKE', 'HUMIDITY', 'WIND_SPEED', 'WIND_GUST', 'WIND_DIRECTION', 'PRESSURE', 'CLOUDINESS' ]);
 
       return $this;
     }

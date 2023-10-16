@@ -12,17 +12,15 @@ namespace App\External {
 
 
   class OpenWeatherApi {
-    public static function get_weather(float $latitude, float $longitude, string $units, string $language): Weather {
+    public static function get_weather(float $latitude, float $longitude, string $language): Weather {
       $api = self::get_rest_client();
       $apiKey = self::get_api_key();
-
-      DevelopmentOutputBuffer::set('units', $units);
 
       $result = $api->get("weather", [
         'appid' => $apiKey,
         'lat' => $latitude,
         'lon' => $longitude,
-        'units' => strtolower($units),
+        'units' => 'metric',
         'lang' => $language
       ]);
 
@@ -42,7 +40,6 @@ namespace App\External {
         $data["clouds"]["all"],
         $data["weather"][0]["description"],
         $data["weather"][0]["icon"],
-        $data["dt"],
         $data["sys"]["sunrise"],
         $data["sys"]["sunset"],
         $data["timezone"]

@@ -6,6 +6,9 @@ namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
   use App\Core\Entities\Weather;
+  use App\Core\Enums\PressureUnitsEnum;
+  use App\Core\Enums\SpeedUnitsEnum;
+  use App\Core\Enums\TemperatureUnitsEnum;
   use App\External\OpenWeatherApi;
   use App\Utilities\Translation;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -20,7 +23,7 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function weather(Account $currentAccount, int $locationId): Weather {
+    public static function weather(Account $currentAccount, int $locationId, ?TemperatureUnitsEnum $temperatureUnits, ?SpeedUnitsEnum $speedUnits, ?PressureUnitsEnum $pressureUnits): Weather {
       $location = LocationController::location($currentAccount, $locationId);
       $language = Translation::get_preferred_language();
       // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (coutnry code).
@@ -29,12 +32,17 @@ namespace App\GraphQL\Controllers {
         'cs' => 'cz'
       ];
       
-      return OpenWeatherApi::get_weather(
+      $weather = OpenWeatherApi::get_weather(
         $location->getLatitude(),
         $location->getLongitude(),
-        $location->getUnits(),
         $languageMap[$language] ?? $language
       );
+
+      $weather->convertTemperature($temperatureUnits ?? TemperatureUnitsEnum::CELSIUS());
+      $weather->convertSpeed($speedUnits ?? SpeedUnitsEnum::METERS_PER_SECOND());
+      $weather->convertPressure($pressureUnits ?? PressureUnitsEnum::HECTOPASCAL());
+
+      return $weather;
     }
   }
 }

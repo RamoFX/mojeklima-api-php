@@ -236,13 +236,12 @@ namespace App\GraphQL\Controllers {
 
         foreach ($locations as $location) {
           $location_id = $location->getId();
-          $location_units = $location->getUnits();
 
           // handle location id null
           if ($location_id === null)
             continue;
 
-          $weather = OpenWeatherApiController::weather($account, $location_id, $location_units);
+          $weather = OpenWeatherApiController::weather($account, $location_id, null, null, null);
           $alerts = $location->getAlerts();
 
           foreach ($alerts as $alert) {

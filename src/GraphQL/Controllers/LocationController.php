@@ -62,8 +62,8 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function createLocation(Account $currentAccount, string $name, string $description, string $units, float $latitude, float $longitude): Location {
-      $new_location = new Location($name, $description, $units, $latitude, $longitude);
+    public static function createLocation(Account $currentAccount, string $name, string $description, float $latitude, float $longitude): Location {
+      $new_location = new Location($name, $description, $latitude, $longitude);
 
       $currentAccount->addLocation($new_location);
 
