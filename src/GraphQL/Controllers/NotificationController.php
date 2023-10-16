@@ -259,10 +259,14 @@ namespace App\GraphQL\Controllers {
 
             // get weather value set in alert
             $current_value = null;
-
+            
             switch ($criteria) {
               case 'TEMPERATURE':
                 $current_value = $weather->getTemperature();
+                break;
+
+              case 'FEELS_LIKE':
+                $current_value = $weather->getFeelsLike();
                 break;
 
               case 'HUMIDITY':
@@ -273,8 +277,20 @@ namespace App\GraphQL\Controllers {
                 $current_value = $weather->getWindSpeed();
                 break;
 
+              case 'WIND_GUST':
+                $current_value = $weather->getWindGust();
+                break;
+
+              case 'WIND_DIRECTION':
+                $current_value = $weather->getWindDirection();
+                break;
+
               case 'PRESSURE':
                 $current_value = $weather->getPressure();
+                break;
+
+              case 'CLOUDINES':
+                $current_value = $weather->getCloudiness();
                 break;
             }
 
