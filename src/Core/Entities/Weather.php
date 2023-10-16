@@ -20,7 +20,7 @@ namespace App\Core\Entities {
     private int $humidity;
     private int $pressure;
     private float $windSpeed;
-    private float $windGust;
+    private ?float $windGust;
     private int $windDirection;
     private int $cloudiness;
     private string $description;
@@ -37,7 +37,7 @@ namespace App\Core\Entities {
       int $humidity,
       int $pressure,
       float $windSpeed,
-      float $windGust,
+      ?float $windGust,
       int $windDirection,
       int $cloudiness,
       string $description,
@@ -93,12 +93,14 @@ namespace App\Core\Entities {
         )
       );
 
-      $this->setWindGust(
-        UnitsConverter::fromMetric(
-          $this->getWindGust(),
-          $toUnits
-        )
-      );
+      if ($this->getWindGust() !== null) {
+        $this->setWindGust(
+          UnitsConverter::fromMetric(
+            $this->getWindGust(),
+            $toUnits
+          )
+        );
+      }
     }
 
 
@@ -172,11 +174,11 @@ namespace App\Core\Entities {
 
 
     /** @Field() */
-    public function getWindGust(): float {
+    public function getWindGust(): ?float {
       return $this->windGust;
     }
 
-    public function setWindGust(float $windGust): float {
+    public function setWindGust(?float $windGust): ?float {
       return $this->windGust = $windGust;
     }
 

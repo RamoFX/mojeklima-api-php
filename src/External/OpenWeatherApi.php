@@ -28,7 +28,7 @@ namespace App\External {
         throw new Exception($result->error);
 
       $data = $result->decode_response();
-
+  
       return new Weather(
         $data["main"]["temp"],
         $data["main"]["feels_like"],

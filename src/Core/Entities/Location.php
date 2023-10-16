@@ -4,8 +4,8 @@
 
 namespace App\Core\Entities {
 
-    use App\Core\Enums\WeatherUnitsEnum;
-    use App\Core\Validator;
+  use App\Core\Enums\WeatherUnitsEnum;
+  use App\Core\Validator;
   use DateTimeImmutable;
   use Doctrine\Common\Collections\ArrayCollection;
   use Doctrine\Common\Collections\Collection;
