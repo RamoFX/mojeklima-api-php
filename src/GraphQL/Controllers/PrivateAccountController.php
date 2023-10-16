@@ -206,11 +206,11 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$current_account")
      */
-    public static function deleteAccount(Account $current_account): string {
+    public static function deleteAccount(Account $current_account): Account {
       EntityManagerProxy::$entity_manager->remove($current_account);
       EntityManagerProxy::$entity_manager->flush($current_account);
 
-      return "ok";
+      return $current_account;
     }
   }
 }
