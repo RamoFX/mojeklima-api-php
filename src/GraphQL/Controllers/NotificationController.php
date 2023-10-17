@@ -216,8 +216,9 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @Right("CAN_SEND_PUSH_NOTIFICATIONS")
      */
-    public static function checkForNotifications(): string {
+    public static function checkForNotifications(): int {
       $accounts = PrivateAccountController::accounts();
+      $notifications_dispatched = 0;
 
       foreach ($accounts as $account) {
         // handle account id null
@@ -304,13 +305,15 @@ namespace App\GraphQL\Controllers {
 
             $should_notify = $rangeFrom <= $current_value && $current_value <= $rangeTo;
 
-            if ($should_notify)
+            if ($should_notify) {
               self::notify($account_id, $alert_id);
+              $notifications_dispatched += 1;
+            }
           }
         }
       }
 
-      return "";
+      return $notifications_dispatched;
     }
 
 
