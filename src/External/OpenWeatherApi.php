@@ -7,6 +7,8 @@ namespace App\External {
   use App\Core\Entities\Location;
   use App\Core\Entities\Weather;
   use App\Core\EntityManagerProxy;
+  use App\GraphQL\DevelopmentOutputBuffer;
+  use App\GraphQL\Proxies\RedisProxy;
   use App\Utilities\Translation;
   use Exception;
   use RestClient;
@@ -20,14 +22,30 @@ namespace App\External {
      * @throws Exception
      */
     public static function getWeather(int $locationId): Weather {
+      // language
       $language = Translation::get_preferred_language();
       $languageMap = [
         'cs' => 'cz'
       ];
+
+      // location
       $location = EntityManagerProxy::$entity_manager->find(Location::class, $locationId);
       $latitude = $location->getLatitude();
       $longitude = $location->getLongitude();
 
+      // check cache
+      $cacheKey = Weather::createKey($latitude, $longitude);
+      $cachedWeather = RedisProxy::$redis->get($cacheKey);
+
+      if ($cachedWeather) {
+        DevelopmentOutputBuffer::set('weather retrieved from cache', true);
+        $weather = Weather::fromJson($cachedWeather);
+        $weather->setLocation($location);
+
+        return $weather;
+      }
+
+      // api call
       $api = self::get_rest_client();
       $apiKey = self::get_api_key();
 
@@ -62,6 +80,11 @@ namespace App\External {
       );
 
       $weather->setLocation($location);
+
+      // set cache
+      $weatherJson = $weather->toJson();
+      RedisProxy::$redis->set($cacheKey, $weatherJson, 'EX', 600);
+      DevelopmentOutputBuffer::set('weather retrieved from cache', false);
 
       return $weather;
     }

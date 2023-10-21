@@ -65,6 +65,38 @@ namespace App\Core\Entities {
       $this->setTimezone($timezone);
     }
 
+    public static function createKey(float $latitude, float $longitude): string {
+      return "Weather=$latitude,$longitude";
+    }
+
+    public static function fromJson(string $json): Weather {
+      $data = json_decode($json, true);
+
+      return new self(
+        $data['temperature'],
+        $data['feelsLike'],
+        $data['humidity'],
+        $data['pressure'],
+        $data['windSpeed'],
+        $data['windGust'],
+        $data['windDirection'],
+        $data['cloudiness'],
+        $data['description'],
+        $data['iconCode'],
+        $data['dateTime'],
+        $data['sunrise'],
+        $data['sunset'],
+        $data['timezone']
+      );
+    }
+
+    public function toJson(): string {
+      $fields = get_object_vars($this);
+      unset($fields['location']);
+
+      return json_encode($fields);
+    }
+
     /**
      * @throws GraphQLException
      * @throws Exception

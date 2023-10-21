@@ -17,6 +17,7 @@ namespace App\GraphQL {
   use App\GraphQL\Controllers\PublicAccountController;
   use App\GraphQL\Controllers\PushSubscriptionController;
   use App\GraphQL\Proxies\ContainerProxy;
+  use App\GraphQL\Proxies\RedisProxy;
   use App\GraphQL\Services\SecurityService;
   use App\Utilities\Translation;
   use Doctrine\DBAL\DriverManager;
@@ -25,6 +26,7 @@ namespace App\GraphQL {
   use Exception;
   use GraphQL\Error\DebugFlag;
   use GraphQL\GraphQL;
+  use Predis\Client;
   use Symfony\Component\Cache\Adapter\FilesystemAdapter;
   use Symfony\Component\Cache\Psr16Cache;
   use Symfony\Component\DependencyInjection\Container;
@@ -87,6 +89,15 @@ namespace App\GraphQL {
   $configuration = ORMSetup::createAttributeMetadataConfiguration([__DIR__ . "/../Core/Entities"], $is_dev_mode);
   $connection = DriverManager::getConnection($connection_parameters, $configuration);
   EntityManagerProxy::$entity_manager = new EntityManager($connection, $configuration);
+
+
+
+  // redis
+  RedisProxy::$redis = new Client([
+    'scheme' => $_ENV["REDIS_SCHEME"],
+    'host' => $_ENV["REDIS_HOST"],
+    'port' => $_ENV["REDIS_PORT"]
+  ]);
 
 
 
