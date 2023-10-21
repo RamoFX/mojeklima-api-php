@@ -3,14 +3,18 @@
 
 
 namespace App\GraphQL {
+
   use App\Core\EntityManagerProxy;
+  use App\Core\Enums\AccountRole;
+  use App\Core\Enums\Criteria;
+  use App\Doctrine\EnumType;
   use App\GraphQL\Controllers\AlertController;
   use App\GraphQL\Controllers\LocationController;
   use App\GraphQL\Controllers\NotificationController;
   use App\GraphQL\Controllers\OpenCageGeocodingApiController;
+  use App\GraphQL\Controllers\OpenWeatherApiController;
   use App\GraphQL\Controllers\PrivateAccountController;
   use App\GraphQL\Controllers\PublicAccountController;
-  use App\GraphQL\Controllers\OpenWeatherApiController;
   use App\GraphQL\Controllers\PushSubscriptionController;
   use App\GraphQL\Proxies\ContainerProxy;
   use App\GraphQL\Services\SecurityService;
@@ -77,7 +81,10 @@ namespace App\GraphQL {
     'charset'  => 'utf8'
   ];
 
-  $configuration = ORMSetup::createAnnotationMetadataConfiguration([__DIR__ . "/../Core/Entities"], $is_dev_mode);
+  EnumType::addEnumType(AccountRole::class);
+  EnumType::addEnumType(Criteria::class);
+
+  $configuration = ORMSetup::createAttributeMetadataConfiguration([__DIR__ . "/../Core/Entities"], $is_dev_mode);
   $connection = DriverManager::getConnection($connection_parameters, $configuration);
   EntityManagerProxy::$entity_manager = new EntityManager($connection, $configuration);
 
