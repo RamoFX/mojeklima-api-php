@@ -31,9 +31,7 @@ namespace App\Core\Entities {
     public function __construct() {
     }
 
-
-
-    /** @Field() */
+    #[Field(outputType: "ID")]
     public function getId(): ?int {
       return $this->id;
     }

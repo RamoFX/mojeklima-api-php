@@ -44,9 +44,7 @@ namespace App\Core\Entities {
       $this->userAgent = $userAgent;
     }
 
-
-
-    /** @Field() */
+    #[Field(outputType: "ID")]
     public function getId(): ?int {
       return $this->id;
     }

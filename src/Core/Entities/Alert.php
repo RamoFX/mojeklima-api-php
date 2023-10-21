@@ -109,9 +109,7 @@ namespace App\Core\Entities {
       $this->convertRangeTo($criteria, $units);
     }
 
-
-
-    /** @Field() */
+    #[Field(outputType: "ID")]
     public function getId(): ?int {
       return $this->id;
     }
