@@ -27,6 +27,7 @@ namespace App\Core\Entities {
     private int $cloudiness;
     private string $description;
     private string $iconCode;
+    private int $dateTime;
     private int $sunrise;
     private int $sunset;
     private int $timezone;
@@ -44,6 +45,7 @@ namespace App\Core\Entities {
       int $cloudiness,
       string $description,
       string $iconCode,
+      int $dateTime,
       int $sunrise,
       int $sunset,
       int $timezone
@@ -58,6 +60,7 @@ namespace App\Core\Entities {
       $this->setCloudiness($cloudiness);
       $this->setDescription($description);
       $this->setIconCode($iconCode);
+      $this->setDateTime($dateTime);
       $this->setSunrise($sunrise);
       $this->setSunset($sunset);
       $this->setTimezone($timezone);
@@ -228,7 +231,16 @@ namespace App\Core\Entities {
       return $this;
     }
 
+    #[Field]
+    public function getDateTime(): int {
+      return $this->dateTime;
+    }
 
+    public function setDateTime(int $dateTime): Weather {
+      $this->dateTime = $dateTime;
+
+      return $this;
+    }
 
     #[Field]
     public function getSunrise(): int {

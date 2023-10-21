@@ -44,6 +44,7 @@ namespace App\External {
         $data["clouds"]["all"],
         $data["weather"][0]["description"],
         $data["weather"][0]["icon"],
+        $data["dt"],
         $data["sys"]["sunrise"],
         $data["sys"]["sunset"],
         $data["timezone"]
