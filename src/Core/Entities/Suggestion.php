@@ -13,18 +13,14 @@ namespace App\Core\Entities {
   class Suggestion {
     private float $latitude;
     private float $longitude;
-    private string $formatted;
-    private ?string $countryCode;
-    private ?string $region;
+    private string $cityName;
+    private string $countryName;
 
-
-
-    public function __construct(float $latitude, float $longitude, string $formatted, ?string $countryCode, ?string $region) {
+    public function __construct(float $latitude, float $longitude, string $cityName, string $countryName) {
       $this->latitude = $latitude;
       $this->longitude = $longitude;
-      $this->formatted = $formatted;
-      $this->countryCode = $countryCode;
-      $this->region = $region;
+      $this->cityName = $cityName;
+      $this->countryName = $countryName;
     }
 
     #[Field]
@@ -49,37 +45,24 @@ namespace App\Core\Entities {
       return $this;
     }
 
-    public function getFormatted(): string {
-      return $this->formatted;
     #[Field]
+    public function getCityName(): string {
+      return $this->cityName;
     }
 
-    public function setFormatted(string $formatted): Suggestion {
-      $this->formatted = $formatted;
+    public function setCityName(string $cityName): Suggestion {
+      $this->cityName = $cityName;
 
       return $this;
     }
 
-    public function getCountryCode(): ?string {
-      return $this->countryCode;
     #[Field]
+    public function getCountryName(): ?string {
+      return $this->countryName;
     }
 
-    public function setCountryCode(?string $countryCode): Suggestion {
-      $this->countryCode = $countryCode;
-
-      return $this;
-    }
-
-
-
-    /** @Field() */
-    public function getRegion(): ?string {
-      return $this->region;
-    }
-
-    public function setRegion(?string $region): Suggestion {
-      $this->region = $region;
+    public function setCountryName(?string $countryName): Suggestion {
+      $this->countryName = $countryName;
 
       return $this;
     }

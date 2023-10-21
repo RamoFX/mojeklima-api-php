@@ -43,21 +43,14 @@ namespace App\External {
       foreach ($data['results'] as $result) {
         $latitude = $result["geometry"]["lat"];
         $longitude = $result["geometry"]["lng"];
-        $formatted = $result["formatted"];
-        $countryCode = $result["components"]['ISO_3166-1_alpha-3']
-          ?: null;
-        $region = $result["components"]["region"]
-          ?: $result["components"]["municipality"]
-          ?: $result["components"]["county"]
-          ?: $result["components"]["state"]
-          ?: null;
+        $cityName = $result["components"]["city"];
+        $countryName = $result["components"]["country"];
 
         $suggestion = new Suggestion(
           $latitude,
           $longitude,
-          $formatted,
-          $countryCode,
-          $region
+          $cityName,
+          $countryName
         );
 
         $suggestions[] = $suggestion;

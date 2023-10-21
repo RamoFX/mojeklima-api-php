@@ -125,7 +125,9 @@ namespace App\GraphQL\Controllers {
 
 
       // prepare notification data
-      $location_name = $alert->getLocation()->getName();
+      $location = $alert->getLocation();
+      $cityName = $location->getCityName();
+      $countryName = $location->getCountryName();
       $alert_message = $alert->getMessage();
 
 
@@ -164,7 +166,7 @@ namespace App\GraphQL\Controllers {
       $web_push = new WebPush($auth, $options, $timeout, $network_client_options);
 
       // prepare sending
-      $title = "$location_name | MojeKlima";
+      $title = "$cityName, $countryName | MojeKlima";
       $data = [
         "notificationId" => $notification->getId()
       ];

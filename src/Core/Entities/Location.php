@@ -4,8 +4,9 @@
 
 namespace App\Core\Entities {
 
-  use App\Core\Enums\WeatherUnitsEnum;
   use App\Core\Validator;
+  use App\External\OpenWeatherApi;
+  use App\Utilities\Translation;
   use DateTimeImmutable;
   use Doctrine\Common\Collections\ArrayCollection;
   use Doctrine\Common\Collections\Collection;
@@ -28,13 +29,12 @@ namespace App\Core\Entities {
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", options: ["unsigned" => true])]
     private ?int $id = null;
-
-    /** @ORM\Column(length=127) */
-    private string $name;
-
-    /** @ORM\Column(length=511) */
-    private string $description;
-
+    #[ORM\Column(name: "city_name", length: 127)]
+    private string $cityName;
+    #[ORM\Column(name: "country_name", length: 127)]
+    private string $countryName;
+    #[ORM\Column(length: 511, nullable: true)]
+    private ?string $label;
     #[ORM\Column(type: "decimal", precision: 8, scale: 4)]
     private float $latitude;
     #[ORM\Column(type: "decimal", precision: 9, scale: 4)]
@@ -49,13 +49,13 @@ namespace App\Core\Entities {
     private Collection $alerts;
 
 
-
-    public function __construct(string $name, string $description, float $latitude, float $longitude) {
-      $this->setName($name);
-      $this->setDescription($description);
     /**
      * @throws GraphQLException
      */
+    public function __construct(string $cityName, string $countryName, ?string $label, float $latitude, float $longitude) {
+      $this->setCityName($cityName);
+      $this->setCountryName($countryName);
+      $this->setLabel($label);
       $this->setLatitude($latitude);
       $this->setLongitude($longitude);
       $this->alerts = new ArrayCollection();
@@ -66,31 +66,46 @@ namespace App\Core\Entities {
       return $this->id;
     }
 
-
-
-    /** @Field() */
-    public function getName(): string {
-      return $this->name;
+    #[Field]
+    public function getCityName(): string {
+      return $this->cityName;
     }
 
-    public function setName(string $name): Location {
-      $this->name = Validator::maxLength("name", $name, 127);
+    /**
+     * @throws GraphQLException
+     */
+    public function setCityName(string $cityName): Location {
+      $this->cityName = Validator::maxLength("cityName", $cityName, 127);
 
       return $this;
     }
 
-
-
-    /** @Field() */
-    public function getDescription(): string {
-      return $this->description;
+    #[Field]
+    public function getCountryName(): string {
+      return $this->countryName;
     }
 
-    public function setDescription(string $description): Location {
-      $this->description = Validator::maxLength("description", $description, 511);
     /**
      * @throws GraphQLException
      */
+    public function setCountryName(string $countryName): Location {
+      $this->countryName = Validator::maxLength("countryName", $countryName, 127);
+
+      return $this;
+    }
+
+    #[Field]
+    public function getLabel(): ?string {
+      return $this->label;
+    }
+
+    /**
+     * @throws GraphQLException
+     */
+    public function setLabel(?string $label): Location {
+      $this->label = $label === null
+        ? $label
+        : Validator::maxLength("label", $label, 127);
 
       return $this;
     }
@@ -106,7 +121,7 @@ namespace App\Core\Entities {
     public function setLatitude(float $latitude): Location {
       $this->latitude = Validator::multiple(
         Validator::greaterOrEqual("latitude", $latitude, -90),
-        Validator::lessOrEqual("latitude", $latitude, +90)
+        Validator::lessOrEqual("latitude", $latitude, 90)
       );
 
       return $this;

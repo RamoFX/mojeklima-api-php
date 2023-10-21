@@ -78,11 +78,14 @@ namespace App\GraphQL\Controllers {
     public static function updateLocation(#[InjectUser] Account $currentAccount, int $id, ?string $cityName, ?string $countryName, ?string $label, ?float $latitude, ?float $longitude): Location {
       $outdated_location = self::location($currentAccount, $id);
 
-      if ($name !== null)
-        $outdated_location->setName($name);
+      if ($cityName !== null)
+        $outdated_location->setCityName($cityName);
 
-      if ($description !== null)
-        $outdated_location->setDescription($description);
+      if ($countryName !== null)
+        $outdated_location->setCountryName($countryName);
+
+      if ($label !== null)
+        $outdated_location->setLabel($label);
 
       if ($latitude !== null)
         $outdated_location->setLatitude($latitude);
