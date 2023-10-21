@@ -17,18 +17,14 @@ namespace App\Core\Entities {
 
 
 
-  /**
-   * @ORM\Entity()
-   * @ORM\Table(name="locations", options={"collate"="utf8_czech_ci", "charset"="utf8"})
-   * @ORM\HasLifecycleCallbacks()
-   * @Type()
-   */
+  #[ORM\Entity]
+  #[ORM\Table(name: "locations", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[ORM\HasLifecycleCallbacks]
+  #[Type]
   class Location {
-    /**
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
     private ?int $id = null;
 
     /** @ORM\Column(length=127) */
@@ -37,22 +33,17 @@ namespace App\Core\Entities {
     /** @ORM\Column(length=511) */
     private string $description;
 
-    /** @ORM\Column(type="decimal", precision=8, scale=4) */
+    #[ORM\Column(type: "decimal", precision: 8, scale: 4)]
     private float $latitude;
-
-    /** @ORM\Column(type="decimal", precision=9, scale=4) */
+    #[ORM\Column(type: "decimal", precision: 9, scale: 4)]
     private float $longitude;
-
-    /** @ORM\Column(name="created_at", type="datetime_immutable") */
+    #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
-
-    /** @ORM\Column(name="updated_at", type="datetime_immutable") */
+    #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
-
-    /** @ORM\ManyToOne(targetEntity="Account", inversedBy="locations", cascade={"persist"}) */
+    #[ORM\ManyToOne(targetEntity: "Account", cascade: ["persist"], inversedBy: "locations")]
     private Account $account;
-
-    /** @ORM\OneToMany(targetEntity="\App\Core\Entities\Alert", mappedBy="location", orphanRemoval=true, cascade={"persist"}) */
+    #[ORM\OneToMany(mappedBy: "location", targetEntity: "Alert", cascade: ["persist"], orphanRemoval: true)]
     private Collection $alerts;
 
 
@@ -98,9 +89,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getLatitude(): float {
       return $this->latitude;
     }
@@ -114,9 +103,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getLongitude(): float {
       return $this->longitude;
     }
@@ -130,23 +117,17 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getUpdatedAt(): DateTimeImmutable {
       return $this->updatedAt;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getAccount(): Account {
       return $this->account;
     }
@@ -157,11 +138,10 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
     /**
-     * @Field()
      * @return Alert[]
      */
+    #[Field]
     public function getAlerts(): array {
       return $this->alerts->toArray();
     }
@@ -175,14 +155,14 @@ namespace App\Core\Entities {
 
 
 
-    /** @ORM\PrePersist() */
     public function on_pre_persist(PrePersistEventArgs $args) {
+    #[ORM\PrePersist]
       $this->createdAt = new DateTimeImmutable();
       $this->updatedAt = new DateTimeImmutable();
     }
 
-    /** @ORM\PreUpdate() */
     public function on_pre_update(PreUpdateEventArgs $args) {
+    #[ORM\PreUpdate]
       $this->updatedAt = new DateTimeImmutable();
     }
   }

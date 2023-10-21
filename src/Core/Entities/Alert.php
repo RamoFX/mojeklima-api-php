@@ -19,54 +19,35 @@ namespace App\Core\Entities {
 
 
 
-  /**
-   * @ORM\Entity()
-   * @ORM\Table(name="alerts", options={"collate"="utf8_czech_ci", "charset"="utf8"})
-   * @ORM\HasLifecycleCallbacks()
-   * @Type()
-   */
+  #[ORM\Entity]
+  #[ORM\Table(name: "alerts", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[ORM\HasLifecycleCallbacks]
+  #[Type]
   class Alert {
-    /**
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
     private ?int $id = null;
-
-    /** @ORM\Column(name="is_enabled", type="boolean") */
+    #[ORM\Column(name: "is_enabled", type: "boolean")]
     private bool $isEnabled;
-
-    /**
-     * @var string|CriteriaEnum
-     * @ORM\Column(type="string", columnDefinition="enum('TEMPERATURE', 'FEELS_LIKE', 'HUMIDITY', 'WIND_SPEED', 'WIND_GUST', 'WIND_DIRECTION', 'PRESSURE', 'CLOUDINESS')")
-     */
-
-    /** @ORM\Column(name="range_from", type="decimal", precision=8, scale=2) */
+    #[ORM\Column(type: Criteria::class)]
     private Criteria $criteria;
+    #[ORM\Column(name: "range_from", type: "decimal", precision: 8, scale: 2)]
     private float $rangeFrom;
-
-    /** @ORM\Column(name="range_to", type="decimal", precision=8, scale=2) */
+    #[ORM\Column(name: "range_to", type: "decimal", precision: 8, scale: 2)]
     private float $rangeTo;
-
-    /** @ORM\Column(name="update_frequency", type="integer", options={"unsigned": true}) */
+    #[ORM\Column(name: "update_frequency", type: "integer", options: ["unsigned" => true])]
     private int $updateFrequency;
-
-    /** @ORM\Column(length=511) */
+    #[ORM\Column(length: 511)]
     private string $message;
-
-    /** @ORM\Column(name="created_at", type="datetime_immutable") */
+    #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
-
-    /** @ORM\Column(name="updated_at", type="datetime_immutable") */
+    #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
-
-    /** @ORM\ManyToOne(targetEntity="\App\Core\Entities\Location", inversedBy="alerts", cascade={"persist"}) */
+    #[ORM\ManyToOne(targetEntity: "\App\Core\Entities\Location", cascade: ["persist"], inversedBy: "alerts")]
     private Location $location;
-
-    /** @ORM\OneToMany(targetEntity="Notification", mappedBy="alert", orphanRemoval=true, cascade={"persist"}) */
+    #[ORM\OneToMany(mappedBy: "alert", targetEntity: "Notification", cascade: ["persist"], orphanRemoval: true)]
     private Collection $notifications;
-
-
 
     /**
      * @throws GraphQLException
@@ -87,7 +68,7 @@ namespace App\Core\Entities {
       switch ($criteria) {
         case Criteria::TEMPERATURE:
         case 'FEELS_LIKE':
-          Validator::oneOf("units", $units, [ "CELSIUS", "FAHRENHEIT", "KELVIN", "RANKINE" ]);
+          Validator::oneOf("units", $units, ["CELSIUS", "FAHRENHEIT", "KELVIN", "RANKINE"]);
           break;
 
         case Criteria::WIND_SPEED:
@@ -135,9 +116,7 @@ namespace App\Core\Entities {
       return $this->id;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getIsEnabled(): bool {
       return $this->isEnabled;
     }
@@ -148,25 +127,18 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getCriteria(): Criteria {
       return $this->criteria;
     }
 
-    /**
-     * @throws GraphQLException
-     */
     public function setCriteria(Criteria $criteria): Alert {
       $this->criteria = $criteria;
 
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getRangeFrom(): float {
       return $this->rangeFrom;
     }
@@ -177,9 +149,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getRangeTo(): float {
       return $this->rangeTo;
     }
@@ -190,9 +160,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getUpdateFrequency(): int {
       return $this->updateFrequency;
     }
@@ -209,9 +177,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getMessage(): string {
       return $this->message;
     }
@@ -225,23 +191,17 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getUpdatedAt(): DateTimeImmutable {
       return $this->updatedAt;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getLocation(): Location {
       return $this->location;
     }
@@ -252,11 +212,10 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
     /**
-     * @Field()
      * @return Notification[]
      */
+    #[Field]
     public function getNotifications(): array {
       return $this->notifications->toArray();
     }
@@ -268,16 +227,14 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @ORM\PrePersist() */
     public function on_pre_persist(PrePersistEventArgs $args) {
+    #[ORM\PrePersist]
       $this->createdAt = new DateTimeImmutable();
       $this->updatedAt = new DateTimeImmutable();
     }
 
-    /** @ORM\PreUpdate() */
     public function on_pre_update(PreUpdateEventArgs $args) {
+    #[ORM\PreUpdate]
       $this->updatedAt = new DateTimeImmutable();
     }
   }

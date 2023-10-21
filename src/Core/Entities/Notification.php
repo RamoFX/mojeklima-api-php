@@ -12,30 +12,21 @@ namespace App\Core\Entities {
 
 
 
-  /**
-   * @ORM\Entity()
-   * @ORM\Table(name="notifications", options={"collate"="utf8_czech_ci", "charset"="utf8"})
-   * @ORM\HasLifecycleCallbacks()
-   * @Type()
-   */
+  #[ORM\Entity]
+  #[ORM\Table(name: "notifications", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[ORM\HasLifecycleCallbacks]
+  #[Type]
   class Notification {
-    /**
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
     private ?int $id = null;
-
-    /** @ORM\Column(type="boolean", options={"default": false}) */
+    #[ORM\Column(type: "boolean", options: ["default" => false])]
     private bool $seen = false;
-
-    /** @ORM\Column(name="created_at", type="datetime_immutable") */
+    #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
-
-    /** @ORM\ManyToOne(targetEntity="Alert", inversedBy="pushNotifications", cascade={"persist"}) */
+    #[ORM\ManyToOne(targetEntity: "Alert", cascade: ["persist"], inversedBy: "pushNotifications")]
     private Alert $alert;
-
-
 
     public function __construct() {
     }
@@ -47,9 +38,7 @@ namespace App\Core\Entities {
       return $this->id;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getSeen(): bool {
       return $this->seen;
     }
@@ -60,16 +49,12 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getAlert(): Alert {
       return $this->alert;
     }
@@ -80,10 +65,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @ORM\PrePersist() */
     public function on_pre_persist(PrePersistEventArgs $args) {
+    #[ORM\PrePersist]
       $this->createdAt = new DateTimeImmutable();
     }
   }

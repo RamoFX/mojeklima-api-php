@@ -9,7 +9,7 @@ namespace App\Core\Entities {
 
 
 
-  /** @Type() */
+  #[Type]
   class Suggestion {
     private float $latitude;
     private float $longitude;
@@ -27,9 +27,7 @@ namespace App\Core\Entities {
       $this->region = $region;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getLatitude(): float {
       return $this->latitude;
     }
@@ -40,9 +38,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getLongitude(): float {
       return $this->longitude;
     }
@@ -53,11 +49,9 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
     public function getFormatted(): string {
       return $this->formatted;
+    #[Field]
     }
 
     public function setFormatted(string $formatted): Suggestion {
@@ -66,11 +60,9 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
     public function getCountryCode(): ?string {
       return $this->countryCode;
+    #[Field]
     }
 
     public function setCountryCode(?string $countryCode): Suggestion {

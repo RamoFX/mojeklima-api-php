@@ -9,15 +9,13 @@ namespace App\GraphQL\InputTypes {
 
 
 
-  /** @Input() */
+  #[Input]
   class UpdateAccountInput {
-    /** @Field() */
+    #[Field]
     public ?string $name;
-
-    /** @Field() */
+    #[Field]
     public ?string $email;
-
-    /** @Field() */
+    #[Field]
     public ?string $password;
   }
 }

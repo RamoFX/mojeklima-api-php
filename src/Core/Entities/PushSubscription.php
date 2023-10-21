@@ -13,42 +13,29 @@ namespace App\Core\Entities {
 
 
 
-  /**
-   * @ORM\Entity()
-   * @ORM\Table(name="push_subscriptions", options={"collate"="utf8_czech_ci", "charset"="utf8"})
-   * @ORM\HasLifecycleCallbacks()
-   * @Type()
-   */
+  #[ORM\Entity]
+  #[ORM\Table(name: "push_subscriptions", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[ORM\HasLifecycleCallbacks]
+  #[Type]
   class PushSubscription {
-    /**
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
     private ?int $id = null;
-
-    /** @ORM\Column(length=511) */
+    #[ORM\Column(length: 511)]
     private string $endpoint;
-
-    /** @ORM\Column(length=511) */
+    #[ORM\Column(length: 511)]
     private string $p256dh;
-
-    /** @ORM\Column(length=511) */
+    #[ORM\Column(length: 511)]
     private string $auth;
-
-    /** @ORM\Column(name="user_agent", length=511) */
+    #[ORM\Column(name: "user_agent", length: 511)]
     private string $userAgent;
-
-    /** @ORM\Column(name="created_at", type="datetime_immutable") */
+    #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
-
-    /** @ORM\Column(name="updated_at", type="datetime_immutable") */
+    #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
-
-    /** @ORM\ManyToOne(targetEntity="Account", inversedBy="pushSubscriptions", cascade={"persist"}) */
+    #[ORM\ManyToOne(targetEntity: "Account", cascade: ["persist"], inversedBy: "pushSubscriptions")]
     private Account $account;
-
-
 
     public function __construct(string $endpoint, string $p256dh, string $auth, string $userAgent) {
       $this->endpoint = $endpoint;
@@ -64,9 +51,7 @@ namespace App\Core\Entities {
       return $this->id;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getEndpoint(): string {
       return $this->endpoint;
     }
@@ -77,9 +62,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getP256dh(): string {
       return $this->p256dh;
     }
@@ -90,9 +73,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getAuth(): string {
       return $this->auth;
     }
@@ -103,9 +84,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getUserAgent(): string {
       return $this->userAgent;
     }
@@ -116,23 +95,17 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getUpdatedAt(): DateTimeImmutable {
       return $this->updatedAt;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getAccount(): Account {
       return $this->account;
     }
@@ -143,16 +116,14 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @ORM\PrePersist() */
     public function on_pre_persist(PrePersistEventArgs $args) {
+    #[ORM\PrePersist]
       $this->createdAt = new DateTimeImmutable();
       $this->updatedAt = new DateTimeImmutable();
     }
 
-    /** @ORM\PreUpdate() */
     public function on_pre_update(PreUpdateEventArgs $args) {
+    #[ORM\PreUpdate]
       $this->updatedAt = new DateTimeImmutable();
     }
   }

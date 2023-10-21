@@ -4,16 +4,16 @@
 
 namespace App\Core\Entities {
 
-  use App\Core\Validator;
+  use App\Core\Enums\PressureUnits;
+  use App\Core\Enums\SpeedUnits;
+  use App\Core\Enums\TemperatureUnits;
   use App\Utilities\UnitsConverter;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
 
 
 
-  /**
-   * @Type()
-   */
+  #[Type]
   class Weather {
     private float $temperature;
     private float $feelsLike;
@@ -77,6 +77,10 @@ namespace App\Core\Entities {
       );
     }
 
+    /**
+     * @throws GraphQLException
+     * @throws Exception
+     */
     public function convertSpeed(SpeedUnits $toUnits): void {
       $this->setWindSpeed(
         UnitsConverter::fromMetric(
@@ -95,6 +99,10 @@ namespace App\Core\Entities {
       }
     }
 
+    /**
+     * @throws GraphQLException
+     * @throws Exception
+     */
     public function convertPressure(PressureUnits $toUnits): void {
       $this->setPressure(
         UnitsConverter::fromMetric(
@@ -104,9 +112,7 @@ namespace App\Core\Entities {
       );
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getTemperature(): float {
       return $this->temperature;
     }
@@ -117,7 +123,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getFeelsLike(): float {
       return $this->feelsLike;
     }
@@ -128,7 +134,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getHumidity(): int {
       return $this->humidity;
     }
@@ -139,7 +145,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getPressure(): int {
       return $this->pressure;
     }
@@ -150,7 +156,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getWindSpeed(): float {
       return $this->windSpeed;
     }
@@ -161,7 +167,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getWindGust(): ?float {
       return $this->windGust;
     }
@@ -172,7 +178,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getWindDirection(): int {
       return $this->windDirection;
     }
@@ -183,7 +189,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getCloudiness(): int {
       return $this->cloudiness;
     }
@@ -194,7 +200,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getDescription(): string {
       return $this->description;
     }
@@ -205,7 +211,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getIconCode(): string {
       return $this->iconCode;
     }
@@ -216,7 +222,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getSunrise(): int {
       return $this->sunrise;
     }
@@ -227,7 +233,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getSunset(): int {
       return $this->sunset;
     }
@@ -238,7 +244,7 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getTimezone(): int {
       return $this->timezone;
     }

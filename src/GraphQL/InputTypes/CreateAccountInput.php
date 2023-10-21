@@ -9,12 +9,11 @@ namespace App\GraphQL\InputTypes {
 
 
 
-  /** @Input() */
+  #[Input]
   class CreateAccountInput {
-    /** @Field() */
+    #[Field]
     public string $name;
-
-    /** @Field() */
+    #[Field]
     public string $email;
   }
 }

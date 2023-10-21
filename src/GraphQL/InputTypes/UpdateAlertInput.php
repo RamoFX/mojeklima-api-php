@@ -10,24 +10,19 @@ namespace App\GraphQL\InputTypes {
 
 
 
-  /** @Input(name="UpdateAlertInput") */
+  #[Input(name: "UpdateAlertInput")]
   class UpdateAlertInput {
-    /** @Field() */
+    #[Field]
     public ?bool $isEnabled;
-
-    /** @Field() */
-
-    /** @Field() */
+    #[Field]
     public ?Criteria $criteria;
+    #[Field]
     public ?float $rangeFrom;
-
-    /** @Field() */
+    #[Field]
     public ?float $rangeTo;
-
-    /** @Field() */
+    #[Field]
     public ?int $updateFrequency;
-
-    /** @Field() */
+    #[Field]
     public ?string $message;
   }
 }

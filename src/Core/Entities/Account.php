@@ -21,51 +21,33 @@ namespace App\Core\Entities {
 
 
 
-  /**
-   * @ORM\Entity()
-   * @ORM\Table(name="accounts", options={"collate"="utf8_czech_ci", "charset"="utf8"})
-   * @ORM\HasLifecycleCallbacks()
-   * @Type()
-   */
+  #[Entity]
+  #[Table(name: "accounts", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[HasLifecycleCallbacks]
+  #[Type]
   class Account {
-    /**
-     * @ORM\Column(type="integer", options={"unsigned": true})
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
     private ?int $id = null;
-
-    /**
-     * @var string|AccountRoleEnum
-     * @ORM\Column(type="string", columnDefinition="enum('USER', 'SYSTEM', 'ADMIN')")
-     */
-
-    /** @ORM\Column(length=127) */
+    #[ORM\Column(type: AccountRole::class)]
     private AccountRole $role;
+    #[ORM\Column(length: 127)]
     private string $name;
-
-    /** @ORM\Column(name="avatar_url", length=511, nullable=true) */
+    #[ORM\Column(name: "avatar_url", length: 511, nullable: true)]
     private ?string $avatarUrl;
-
-    /** @ORM\Column(length=255) */
+    #[ORM\Column(length: 255)]
     private string $email;
-
-    /** @ORM\Column(name="password_hash", length=60, options={"fixed": true}) */
+    #[ORM\Column(name: "password_hash", length: 60, options: ["fixed" => true])]
     private string $passwordHash;
-
-    /** @ORM\Column(name="created_at", type="datetime_immutable") */
+    #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
-
-    /** @ORM\Column(name="updated_at", type="datetime_immutable") */
+    #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
-
-    /** @ORM\OneToMany(targetEntity="\App\Core\Entities\Location", mappedBy="account", orphanRemoval=true, cascade={"persist"}) */
+    #[ORM\OneToMany(mappedBy: "account", targetEntity: "\App\Core\Entities\Location", cascade: ["persist"], orphanRemoval: true)]
     private Collection $locations;
-
-    /** @ORM\OneToMany(targetEntity="\App\Core\Entities\PushSubscription", mappedBy="account", orphanRemoval=true, cascade={"persist"}) */
+    #[ORM\OneToMany(mappedBy: "account", targetEntity: "\App\Core\Entities\PushSubscription", cascade: ["persist"], orphanRemoval: true)]
     private Collection $pushSubscriptions;
-
-
 
     /**
      * @throws GraphQLException
@@ -88,22 +70,18 @@ namespace App\Core\Entities {
 
 
 
-    /** @Field() */
+    #[Field]
     public function getRole(): AccountRole {
       return $this->role;
     }
 
-    /**
-     * @throws GraphQLException
-     */
     public function setRole(AccountRole $role): Account {
+      $this->role = $role;
 
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getName(): string {
       return $this->name;
     }
@@ -117,9 +95,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getAvatarUrl(): ?string {
       return $this->avatarUrl;
     }
@@ -135,9 +111,7 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getEmail(): string {
       return $this->email;
     }
@@ -154,8 +128,6 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
     public function getPasswordHash(): string {
       return $this->passwordHash;
     }
@@ -166,26 +138,20 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
 
-
-
-    /** @Field() */
+    #[Field]
     public function getUpdatedAt(): DateTimeImmutable {
       return $this->updatedAt;
     }
 
-
-
     /**
-     * @Field()
      * @return Location[]
      */
+    #[Field]
     public function getLocations(): array {
       return $this->locations->toArray();
     }
@@ -197,12 +163,10 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
     /**
-     * @Field()
      * @return PushSubscription[]
      */
+    #[Field]
     public function getPushSubscriptions(): array {
       return $this->pushSubscriptions->toArray();
     }
@@ -214,16 +178,14 @@ namespace App\Core\Entities {
       return $this;
     }
 
-
-
-    /** @ORM\PrePersist() */
     public function on_pre_persist(PrePersistEventArgs $args) {
+    #[ORM\PrePersist]
       $this->createdAt = new DateTimeImmutable();
       $this->updatedAt = new DateTimeImmutable();
     }
 
-    /** @ORM\PreUpdate() */
     public function on_pre_update(PreUpdateEventArgs $args) {
+    #[ORM\PreUpdate]
       $this->updatedAt = new DateTimeImmutable();
     }
   }
