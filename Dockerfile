@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.2-apache
 RUN a2enmod rewrite
 COPY custom.conf /etc/apache2/conf-available/custom.conf
 RUN ln -s /etc/apache2/conf-available/custom.conf /etc/apache2/conf-enabled/custom.conf
