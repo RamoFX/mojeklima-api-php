@@ -119,47 +119,13 @@ namespace App\GraphQL\Controllers {
       return $current_account;
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$current_account")
      */
-    public static function updateAvatar(Account $current_account): Account {
-//      // check whether avatar present
-//      if (!isset($_FILES["avatar"]))
-//        throw new FileMissing();
-//
-//      // get avatar
-//      $avatar = $_FILES["avatar"];
-//
-//      // check size
-//      $max_size = 5_000_000; // 5 MB
-//
-//      if ($avatar['size'] > $max_size)
-//        throw new FileTooBig($max_size);
-//
-//      // check type
-//      $allowed_types = [ 'apng', 'avif', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'webp' ]; // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
-//      $type = strtolower(pathinfo($avatar['name'], PATHINFO_EXTENSION)) ?? "unknown";
-//
-//      if (!in_array($type, $allowed_types))
-//        throw new FileTypeUnsupported($type, $allowed_types);
-//
-//      // save avatar
-//      $id = $current_account->getId();
-//      $final_path = realpath(__DIR__ . "/../../../uploads/avatars/$id.$type");
-//      move_uploaded_file($avatar["tmp_name"], $final_path);
-//
-//      // save avatar_url
-//      $current_account->setAvatarUrl($avatar);
-//
-//      // save
-//      EntityManagerProxy::$entity_manager->persist($current_account);
-//      EntityManagerProxy::$entity_manager->flush($current_account);
-
-      return $current_account;
+    public static function updateAvatar(#[InjectUser] Account $currentAccount): Account {
+      return $currentAccount;
     }
 
 
