@@ -28,12 +28,11 @@ namespace App\GraphQL\Controllers {
 
   class NotificationController {
     /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
      * @return Notification[]
      */
-    public static function allNotifications(Account $currentAccount): array {
+    #[Query]
+    #[Logged]
+    public static function allNotifications(#[InjectUser] Account $currentAccount): array {
       $alerts = AlertController::allAlerts($currentAccount);
       $allNotifications = [];
 
@@ -55,14 +54,14 @@ namespace App\GraphQL\Controllers {
       return $allNotifications;
     }
 
-
-
     /**
      * @Query()
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function notification(Account $currentAccount, int $id): Notification {
+    #[Query]
+    #[Logged]
+    public static function notification(#[InjectUser] Account $currentAccount, int $id): Notification {
       $allNotifications = self::allNotifications($currentAccount);
 
       foreach ($allNotifications as $notification) {
@@ -73,14 +72,9 @@ namespace App\GraphQL\Controllers {
       throw new EntityNotFound("Notification");
     }
 
-
-
-    /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
-     */
-    public static function hasUnseen(Account $currentAccount): bool {
+    #[Query]
+    #[Logged]
+    public static function hasUnseen(#[InjectUser] Account $currentAccount): bool {
       $allNotifications = self::allNotifications($currentAccount);
 
       foreach ($allNotifications as $notification) {
@@ -91,14 +85,14 @@ namespace App\GraphQL\Controllers {
       return false;
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function seenAll(Account $currentAccount): string {
+    #[Mutation]
+    #[Logged]
+    public static function seenAll(#[InjectUser] Account $currentAccount): string {
       $allNotifications = self::allNotifications($currentAccount);
 
       foreach ($allNotifications as $notification) {
@@ -113,13 +107,14 @@ namespace App\GraphQL\Controllers {
       return "";
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @Right("CAN_SEND_PUSH_NOTIFICATIONS")
      */
+    #[Mutation]
+    #[Logged]
+    #[Right("CAN_SEND_PUSH_NOTIFICATIONS")]
     public static function notify(int $accountId, int $alertId): Notification {
       $account = PrivateAccountController::account($accountId);
       $alert = AlertController::alert($account, $alertId);
@@ -216,13 +211,14 @@ namespace App\GraphQL\Controllers {
       return $notification;
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @Right("CAN_SEND_PUSH_NOTIFICATIONS")
      */
+    #[Mutation]
+    #[Logged]
+    #[Right("CAN_SEND_PUSH_NOTIFICATIONS")]
     public static function checkForNotifications(): int {
       $accounts = PrivateAccountController::accounts();
       $notifications_dispatched = 0;
@@ -297,14 +293,14 @@ namespace App\GraphQL\Controllers {
       return $notifications_dispatched;
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function deleteNotification(Account $currentAccount, int $id): Notification {
+    #[Mutation]
+    #[Logged]
+    public static function deleteNotification(#[InjectUser] Account $currentAccount, int $id): Notification {
       $notification = self::notification($currentAccount, $id);
 
       EntityManagerProxy::$entity_manager->remove($notification);

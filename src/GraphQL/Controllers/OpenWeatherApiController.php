@@ -23,7 +23,9 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function weather(Account $currentAccount, int $locationId, ?TemperatureUnitsEnum $temperatureUnits, ?SpeedUnitsEnum $speedUnits, ?PressureUnitsEnum $pressureUnits): Weather {
+    #[Query]
+    #[Logged]
+    public static function weather(#[InjectUser] Account $currentAccount, int $locationId, ?TemperatureUnits $temperatureUnits, ?SpeedUnits $speedUnits, ?PressureUnits $pressureUnits): Weather {
       $location = LocationController::location($currentAccount, $locationId);
       $language = Translation::get_preferred_language();
 

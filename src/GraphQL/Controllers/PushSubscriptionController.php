@@ -5,15 +5,12 @@
 namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
-  use App\Core\Entities\Notification;
   use App\Core\Entities\PushSubscription;
   use App\Core\EntityManagerProxy;
   use App\GraphQL\DevelopmentOutputBuffer;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
-  use TheCodingMachine\GraphQLite\Annotations\Query;
-  use TheCodingMachine\GraphQLite\Annotations\Right;
 
 
 
@@ -23,7 +20,9 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function subscribeForPushNotifications(Account $currentAccount, string $userAgent, string $endpoint, string $p256dh, string $auth): PushSubscription {
+    #[Mutation]
+    #[Logged]
+    public static function subscribeForPushNotifications(#[InjectUser] Account $currentAccount, string $userAgent, string $endpoint, string $p256dh, string $auth): PushSubscription {
       // if push subscription exists then update it
       $push_subscriptions = $currentAccount->getPushSubscriptions();
 

@@ -14,14 +14,18 @@ namespace App\GraphQL\Controllers {
   use App\GraphQL\Services\JWTService;
   use App\Utilities\Email;
   use App\Utilities\Random;
+  use Doctrine\ORM\Exception\ORMException;
+  use Doctrine\ORM\NonUniqueResultException;
   use Doctrine\ORM\NoResultException;
+  use Doctrine\ORM\OptimisticLockException;
   use Exception;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
   class PublicAccountController {
-    /** @Mutation() */
+    #[Mutation]
     public static function login(string $email, string $password, bool $remember): string {
       try {
         /** @var $account Account */
@@ -44,9 +48,7 @@ namespace App\GraphQL\Controllers {
       return JWTService::createToken($account->getId(), $remember);
     }
 
-
-
-    /** @Mutation() */
+    #[Mutation]
     public static function register(CreateAccountInput $account): bool {
       $emails_count = EntityManagerProxy::$entity_manager->createQueryBuilder()
         ->select("count(account.id)")
@@ -69,9 +71,7 @@ namespace App\GraphQL\Controllers {
       return Email::sendPassword($account->email, $random_password);
     }
 
-
-
-    /** @Mutation() */
+    #[Mutation]
     public static function resetPassword(string $email): bool {
       try {
         /* @var Account $account */

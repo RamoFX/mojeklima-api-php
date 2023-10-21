@@ -31,63 +31,57 @@ namespace App\GraphQL\Controllers {
 
 
   class PrivateAccountController {
-    /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$current_account")
-     */
-    public static function me(Account $current_account): Account {
-      return $current_account;
+    #[Query]
+    #[Logged]
+    public static function me(#[InjectUser] Account $currentAccount): Account {
+      return $currentAccount;
     }
-
-
 
     /**
      * @Query()
      * @Logged()
      * @Right("CAN_ACCESS_USERS")
      */
+    #[Query]
+    #[Logged]
+    #[Right("CAN_ACCESS_USERS")]
     public static function account(int $id): Account {
       try {
         return EntityManagerProxy::$entity_manager->find(Account::class, $id);
-      } catch (Exception $exception) {
+      } catch (Exception) {
         throw new EntityNotFound("Account");
       }
     }
 
-
-
     /**
-     * @Query()
-     * @Logged()
-     * @Right("CAN_ACCESS_USERS")
      * @return Account[]
      */
+    #[Query]
+    #[Logged]
+    #[Right("CAN_ACCESS_USERS")]
     public static function accounts(): array {
-      /** @var Account[] $accounts */
-      $accounts = EntityManagerProxy::$entity_manager->getRepository(Account::class)->findAll();
-      return $accounts;
+      return EntityManagerProxy::$entity_manager->getRepository(Account::class)->findAll();
     }
-
-
 
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function renewToken(Account $currentAccount, bool $remember): string {
+    #[Mutation]
+    #[Logged]
+    public static function renewToken(#[InjectUser] Account $currentAccount, bool $remember): string {
       return JWTService::renewToken($currentAccount->getId(), $remember);
     }
-
-
 
     /**
      * @Mutation()
      * @Logged()
      * @Right("CAN_CHANGE_ROLE")
      */
-      /** @var $account Account */
+    #[Mutation]
+    #[Logged]
+    #[Right("CAN_CHANGE_ROLE")]
     public static function changeRole(int $id, AccountRole $role): Account {
       $account = EntityManagerProxy::$entity_manager->find(Account::class, $id);
 
@@ -101,39 +95,36 @@ namespace App\GraphQL\Controllers {
       return $account;
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$current_account")
      */
-    public static function updateName(Account $current_account, string $name): Account {
-      $current_account->setName($name);
+    #[Mutation]
+    #[Logged]
+    public static function updateName(#[InjectUser] Account $currentAccount, string $name): Account {
+      $currentAccount->setName($name);
 
-      EntityManagerProxy::$entity_manager->persist($current_account);
-      EntityManagerProxy::$entity_manager->flush($current_account);
+      EntityManagerProxy::$entity_manager->persist($currentAccount);
+      EntityManagerProxy::$entity_manager->flush($currentAccount);
 
-      return $current_account;
+      return $currentAccount;
     }
 
-    /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$current_account")
-     */
+    #[Mutation]
+    #[Logged]
     public static function updateAvatar(#[InjectUser] Account $currentAccount): Account {
       return $currentAccount;
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$current_account")
      */
-    public static function updateEmail(Account $current_account, string $email): Account {
+    #[Mutation]
+    #[Logged]
+    public static function updateEmail(#[InjectUser] Account $currentAccount, string $email): Account {
       // check whether email is already in use
       $emails_count = EntityManagerProxy::$entity_manager->createQueryBuilder()
         ->select("count(account.id)")
@@ -146,42 +137,42 @@ namespace App\GraphQL\Controllers {
       if ($emails_count > 0)
         throw new EmailAlreadyInUse();
 
-      $current_account->setEmail($email);
+      $currentAccount->setEmail($email);
 
-      EntityManagerProxy::$entity_manager->persist($current_account);
-      EntityManagerProxy::$entity_manager->flush($current_account);
+      EntityManagerProxy::$entity_manager->persist($currentAccount);
+      EntityManagerProxy::$entity_manager->flush($currentAccount);
 
-      return $current_account;
+      return $currentAccount;
     }
-
-
 
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$current_account")
      */
-    public static function updatePassword(Account $current_account, string $password): Account {
-      $current_account->setPassword($password);
+    #[Mutation]
+    #[Logged]
+    public static function updatePassword(#[InjectUser] Account $currentAccount, string $password): Account {
+      $currentAccount->setPassword($password);
 
-      EntityManagerProxy::$entity_manager->persist($current_account);
-      EntityManagerProxy::$entity_manager->flush($current_account);
+      EntityManagerProxy::$entity_manager->persist($currentAccount);
+      EntityManagerProxy::$entity_manager->flush($currentAccount);
 
-      return $current_account;
+      return $currentAccount;
     }
-
-
 
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$current_account")
      */
-    public static function deleteAccount(Account $current_account): Account {
-      EntityManagerProxy::$entity_manager->remove($current_account);
-      EntityManagerProxy::$entity_manager->flush($current_account);
+    #[Mutation]
+    #[Logged]
+    public static function deleteAccount(#[InjectUser] Account $currentAccount): Account {
+      EntityManagerProxy::$entity_manager->remove($currentAccount);
+      EntityManagerProxy::$entity_manager->flush($currentAccount);
 
-      return $current_account;
+      return $currentAccount;
     }
   }
 }

@@ -17,34 +17,28 @@ namespace App\GraphQL\Controllers {
 
   class LocationController {
     /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
      * @return Location[]
      */
-    public static function allLocations(Account $currentAccount): array {
+    #[Query]
+    #[Logged]
+    public static function allLocations(#[InjectUser] Account $currentAccount): array {
       return $currentAccount->getLocations();
     }
 
-
-
-    /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
-     */
-    public static function locationsCount(Account $currentAccount): int {
+    #[Query]
+    #[Logged]
+    public static function locationsCount(#[InjectUser] Account $currentAccount): int {
       return count(self::allLocations($currentAccount));
     }
 
-
-
     /**
      * @Query()
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function location(Account $currentAccount, int $id): Location {
+    #[Query]
+    #[Logged]
+    public static function location(#[InjectUser] Account $currentAccount, int $id): Location {
       $allLocations = self::allLocations($currentAccount);
 
       foreach ($allLocations as $location) {
@@ -55,14 +49,14 @@ namespace App\GraphQL\Controllers {
       throw new EntityNotFound("Location");
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function createLocation(Account $currentAccount, string $name, string $description, float $latitude, float $longitude): Location {
+    #[Mutation]
+    #[Logged]
+    public static function createLocation(#[InjectUser] Account $currentAccount, string $cityName, string $countryName, ?string $label, float $latitude, float $longitude): Location {
       $new_location = new Location($cityName, $countryName, $label, $latitude, $longitude);
       $currentAccount->addLocation($new_location);
 
@@ -72,14 +66,14 @@ namespace App\GraphQL\Controllers {
       return $new_location;
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function updateLocation(Account $currentAccount, int $id, ?string $name, ?string $description, ?float $latitude, ?float $longitude): Location {
+    #[Mutation]
+    #[Logged]
+    public static function updateLocation(#[InjectUser] Account $currentAccount, int $id, ?string $cityName, ?string $countryName, ?string $label, ?float $latitude, ?float $longitude): Location {
       $outdated_location = self::location($currentAccount, $id);
 
       if ($name !== null)
@@ -99,14 +93,14 @@ namespace App\GraphQL\Controllers {
       return $outdated_location;
     }
 
-
-
     /**
      * @Mutation()
      * @Logged()
      * @InjectUser(for="$currentAccount")
      */
-    public static function deleteLocation(Account $currentAccount, int $id): Location {
+    #[Mutation]
+    #[Logged]
+    public static function deleteLocation(#[InjectUser] Account $currentAccount, int $id): Location {
       $location = self::location($currentAccount, $id);
 
       EntityManagerProxy::$entity_manager->remove($location);

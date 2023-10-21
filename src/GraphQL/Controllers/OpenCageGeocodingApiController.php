@@ -14,10 +14,10 @@ namespace App\GraphQL\Controllers {
 
   class OpenCageGeocodingApiController {
     /**
-     * @Query()
-     * @Logged()
      * @return Suggestion[]
      */
+    #[Query]
+    #[Logged]
     public static function suggestions(string $query): array {
       $language = Translation::get_preferred_language();
 
