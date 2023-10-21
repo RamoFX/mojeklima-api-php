@@ -31,8 +31,7 @@ namespace App\Core\Entities {
     private int $sunrise;
     private int $sunset;
     private int $timezone;
-
-
+    private Location $location;
 
     public function __construct(
       float $temperature,
@@ -269,10 +268,19 @@ namespace App\Core\Entities {
       return $this->timezone;
     }
 
-    public function setTimezone(int $timezone): int {
-      return $this->timezone = $timezone;
     public function setTimezone(int $timezone): Weather {
       $this->timezone = $timezone;
+
+      return $this;
+    }
+
+    #[Field]
+    public function getLocation(): Location {
+      return $this->location;
+    }
+
+    public function setLocation(Location $location): Weather {
+      $this->location = $location;
 
       return $this;
     }

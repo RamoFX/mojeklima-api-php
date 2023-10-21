@@ -47,7 +47,7 @@ namespace App\Core\Entities {
     private Account $account;
     #[ORM\OneToMany(mappedBy: "location", targetEntity: "Alert", cascade: ["persist"], orphanRemoval: true)]
     private Collection $alerts;
-
+    private ?Weather $weather;
 
     /**
      * @throws GraphQLException
@@ -58,6 +58,7 @@ namespace App\Core\Entities {
       $this->setLabel($label);
       $this->setLatitude($latitude);
       $this->setLongitude($longitude);
+      $this->setWeather(null);
       $this->alerts = new ArrayCollection();
     }
 
@@ -180,8 +181,27 @@ namespace App\Core\Entities {
       return $this;
     }
 
+    /**
+     * @throws Exception
+     */
+    #[Field]
+    public function getWeather(): ?Weather {
+      if (!isset($this->weather)) {
+        $latitude = $this->getLatitude();
+        $longitude = $this->getLongitude();
+        $language = Translation::get_preferred_language();
 
+        return OpenWeatherApi::get_weather($latitude, $longitude, $language);
+      } else {
+        return $this->weather;
+      }
+    }
 
+    public function setWeather(?Weather $weather): Location {
+      $this->weather = $weather;
+
+      return $this;
+    }
 
     #[ORM\PrePersist]
     public function onPrePersist(PrePersistEventArgs $args): void {
