@@ -122,108 +122,110 @@ namespace App\Core\Entities {
     public function getTemperature(): float {
       return $this->temperature;
     }
-    
-    public function setTemperature(float $temperature): float {
-      return $this->temperature = $temperature;
+
+    public function setTemperature(float $temperature): Weather {
+      $this->temperature = $temperature;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getFeelsLike(): float {
       return $this->feelsLike;
     }
-    
-    public function setFeelsLike(float $feelsLike): float {
-      return $this->feelsLike = $feelsLike;
+
+    public function setFeelsLike(float $feelsLike): Weather {
+      $this->feelsLike = $feelsLike;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getHumidity(): int {
       return $this->humidity;
     }
 
-    public function setHumidity(int $humidity): int {
-      return $this->humidity = $humidity;
+    public function setHumidity(int $humidity): Weather {
+      $this->humidity = $humidity;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getPressure(): int {
       return $this->pressure;
     }
-    
-    public function setPressure(int $pressure): int {
-      return $this->pressure = $pressure;
+
+    public function setPressure(int $pressure): Weather {
+      $this->pressure = $pressure;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getWindSpeed(): float {
       return $this->windSpeed;
     }
 
-    public function setWindSpeed(float $windSpeed): float {
-      return $this->windSpeed = $windSpeed;
+    public function setWindSpeed(float $windSpeed): Weather {
+      $this->windSpeed = $windSpeed;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getWindGust(): ?float {
       return $this->windGust;
     }
 
-    public function setWindGust(?float $windGust): ?float {
-      return $this->windGust = $windGust;
+    public function setWindGust(?float $windGust): Weather {
+      $this->windGust = $windGust;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getWindDirection(): int {
       return $this->windDirection;
     }
 
-    public function setWindDirection(int $windDirection): int {
-      return $this->windDirection = $windDirection;
+    public function setWindDirection(int $windDirection): Weather {
+      $this->windDirection = $windDirection;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getCloudiness(): int {
       return $this->cloudiness;
     }
 
-    public function setCloudiness(int $cloudiness): int {
-      return $this->cloudiness = $cloudiness;
+    public function setCloudiness(int $cloudiness): Weather {
+      $this->cloudiness = $cloudiness;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getDescription(): string {
       return $this->description;
     }
 
-    public function setDescription(string $description): string {
-      return $this->description = $description;
+    public function setDescription(string $description): Weather {
+      $this->description = $description;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getIconCode(): string {
       return $this->iconCode;
     }
 
-    public function setIconCode(string $iconCode): string {
-      return $this->iconCode = $iconCode;
+    public function setIconCode(string $iconCode): Weather {
+      $this->iconCode = $iconCode;
+
+      return $this;
     }
 
 
@@ -233,22 +235,22 @@ namespace App\Core\Entities {
       return $this->sunrise;
     }
 
-    public function setSunrise(int $sunrise): int {
-      return $this->sunrise = $sunrise;
+    public function setSunrise(int $sunrise): Weather {
+      $this->sunrise = $sunrise;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getSunset(): int {
       return $this->sunset;
     }
 
-    public function setSunset(int $sunset): int {
-      return $this->sunset = $sunset;
+    public function setSunset(int $sunset): Weather {
+      $this->sunset = $sunset;
+
+      return $this;
     }
-
-
 
     #[Field]
     public function getTimezone(): int {
@@ -257,6 +259,10 @@ namespace App\Core\Entities {
 
     public function setTimezone(int $timezone): int {
       return $this->timezone = $timezone;
+    public function setTimezone(int $timezone): Weather {
+      $this->timezone = $timezone;
+
+      return $this;
     }
   }
 }
