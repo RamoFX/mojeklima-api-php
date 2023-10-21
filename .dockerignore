@@ -5,3 +5,4 @@ deploy.sh
 docker.env
 .env
 .htaccess
+/.run/
