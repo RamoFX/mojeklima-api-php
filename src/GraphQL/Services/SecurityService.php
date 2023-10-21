@@ -62,9 +62,7 @@ namespace App\GraphQL\Services {
         return false;
 
       return match ($right) {
-        "CAN_CHANGE_ROLE" => self::isAdminAccount($account),
-        "CAN_ACCESS_USERS" => self::isSystemAccount($account),
-        "CAN_SEND_PUSH_NOTIFICATIONS" => self::isAdminAccount($account) || self::isSystemAccount($account),
+        "ACCOUNT_MANAGEMENT" => self::isAdminAccount($account) || self::isSystemAccount($account),
         default => false,
       };
     }

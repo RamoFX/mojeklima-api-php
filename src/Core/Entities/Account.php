@@ -30,6 +30,8 @@ namespace App\Core\Entities {
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", options: ["unsigned" => true])]
     private ?int $id = null;
+    #[ORM\Column(name: "is_removed", type: "boolean")]
+    private bool $isMarkedAsRemoved;
     #[ORM\Column(type: AccountRole::class)]
     private AccountRole $role;
     #[ORM\Column(length: 127)]
@@ -54,6 +56,7 @@ namespace App\Core\Entities {
      */
     public function __construct(AccountRole $role, string $name, string $email, string $password) {
       $this->setRole($role);
+      $this->setIsMarkedAsRemoved(false);
       $this->setName($name);
       $this->setEmail($email);
       $this->setPassword($password);
@@ -66,7 +69,16 @@ namespace App\Core\Entities {
       return $this->id;
     }
 
+    #[Field]
+    public function getIsMarkedAsRemoved(): bool {
+      return $this->isMarkedAsRemoved;
+    }
 
+    public function setIsMarkedAsRemoved(bool $isMarkedAsRemoved): Account {
+      $this->isMarkedAsRemoved = $isMarkedAsRemoved;
+
+      return $this;
+    }
 
     #[Field]
     public function getRole(): AccountRole {

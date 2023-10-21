@@ -8,6 +8,7 @@ namespace App\GraphQL\Controllers {
   use App\Core\EntityManagerProxy;
   use App\Core\Enums\AccountRole;
   use App\GraphQL\Exceptions\AccountAlreadyExist;
+  use App\GraphQL\Exceptions\AccountMarkedAsRemoved;
   use App\GraphQL\Exceptions\EmailNotFound;
   use App\GraphQL\Exceptions\IncorrectPassword;
   use App\GraphQL\InputTypes\CreateAccountInput;
@@ -28,6 +29,7 @@ namespace App\GraphQL\Controllers {
     /**
      * @throws IncorrectPassword
      * @throws EmailNotFound
+     * @throws AccountMarkedAsRemoved
      */
     #[Mutation]
     public static function login(string $email, string $password, bool $remember): string {
@@ -43,6 +45,9 @@ namespace App\GraphQL\Controllers {
       } catch (Exception $exception) {
         throw new EmailNotFound();
       }
+
+      if ($account->getIsMarkedAsRemoved())
+        throw new AccountMarkedAsRemoved();
 
       $do_passwords_match = password_verify($password, $account->getPasswordHash());
 
@@ -85,6 +90,7 @@ namespace App\GraphQL\Controllers {
      * @throws ORMException
      * @throws NonUniqueResultException
      * @throws EmailNotFound
+     * @throws AccountMarkedAsRemoved
      */
     #[Mutation]
     public static function resetPassword(string $email): bool {
@@ -97,6 +103,9 @@ namespace App\GraphQL\Controllers {
           ->setParameter("email", $email)
           ->getQuery()
           ->getSingleResult();
+
+        if ($account->getIsMarkedAsRemoved())
+          throw new AccountMarkedAsRemoved();
 
         $random_password = Random::randomString(6, "abc123");
 

@@ -42,7 +42,7 @@ namespace App\GraphQL\Controllers {
      */
     #[Query]
     #[Logged]
-    #[Right("CAN_ACCESS_USERS")]
+    #[Right("ACCOUNT_MANAGEMENT")]
     public static function account(int $id): Account {
       try {
         return EntityManagerProxy::$entity_manager->find(Account::class, $id);
@@ -57,7 +57,7 @@ namespace App\GraphQL\Controllers {
      */
     #[Query]
     #[Logged]
-    #[Right("CAN_ACCESS_USERS")]
+    #[Right("ACCOUNT_MANAGEMENT")]
     public static function accounts(): array {
       return EntityManagerProxy::$entity_manager->getRepository(Account::class)->findAll();
     }
@@ -82,7 +82,7 @@ namespace App\GraphQL\Controllers {
      */
     #[Mutation]
     #[Logged]
-    #[Right("CAN_CHANGE_ROLE")]
+    #[Right("ACCOUNT_MANAGEMENT")]
     public static function changeRole(int $id, AccountRole $role): Account {
       $account = EntityManagerProxy::$entity_manager->find(Account::class, $id);
 
@@ -170,7 +170,23 @@ namespace App\GraphQL\Controllers {
      */
     #[Mutation]
     #[Logged]
-    public static function deleteAccount(#[InjectUser] Account $currentAccount): Account {
+    public static function markAccountRemoved(#[InjectUser] Account $currentAccount): Account {
+      $currentAccount->setIsMarkedAsRemoved(true);
+
+      EntityManagerProxy::$entity_manager->persist($currentAccount);
+      EntityManagerProxy::$entity_manager->flush($currentAccount);
+
+      return $currentAccount;
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    #[Mutation]
+    #[Logged]
+    #[Right('ACCOUNT_MANAGEMENT')]
+    public static function permanentlyDeleteAccount(#[InjectUser] Account $currentAccount): Account {
       EntityManagerProxy::$entity_manager->remove($currentAccount);
       EntityManagerProxy::$entity_manager->flush($currentAccount);
 
