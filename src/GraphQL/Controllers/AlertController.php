@@ -124,8 +124,7 @@ namespace App\GraphQL\Controllers {
 
       $location = self::getLocation($currentAccount, $locationId);
       $new_alert = new Alert($isEnabled, $criteria, $rangeFrom, $rangeTo, $updateFrequency, $message);
-      $new_alert->convertRange($criteria, $units);
-
+      //    $new_alert->convertRange($criteria, $units);
       $location->addAlert($new_alert);
 
       EntityManagerProxy::$entity_manager->persist($new_alert);
@@ -147,10 +146,9 @@ namespace App\GraphQL\Controllers {
       $alert = self::alert($currentAccount, $id);
       $criteria = $criteria ?? $alert->getCriteria();
 
-      // validate units
-      if (($rangeFrom !== null || $rangeTo !== null) && $units === null) {
-        throw new GraphQLException("If you are specifying range values, then you have to provide units.");
-      }
+      //    if (($rangeFrom !== null || $rangeTo !== null) && $units === null) {
+      //      throw new GraphQLException("If you are specifying range values, then you have to provide units.");
+      //    }
 
       if ($isEnabled !== null)
         $alert->setIsEnabled($isEnabled);
@@ -160,12 +158,12 @@ namespace App\GraphQL\Controllers {
 
       if ($rangeFrom !== null) {
         $alert->setRangeFrom($rangeFrom);
-        $alert->convertRangeFrom($criteria, $units);
+        //      $alert->convertRangeFrom($criteria, $units);
       }
 
       if ($rangeTo !== null) {
         $alert->setRangeTo($rangeTo);
-        $alert->convertRangeTo($criteria, $units);
+        //      $alert->convertRangeTo($criteria, $units);
       }
 
       if ($updateFrequency !== null)
