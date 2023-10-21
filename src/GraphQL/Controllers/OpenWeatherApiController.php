@@ -6,9 +6,9 @@ namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
   use App\Core\Entities\Weather;
-  use App\Core\Enums\PressureUnitsEnum;
-  use App\Core\Enums\SpeedUnitsEnum;
-  use App\Core\Enums\TemperatureUnitsEnum;
+  use App\Core\Enums\PressureUnits;
+  use App\Core\Enums\SpeedUnits;
+  use App\Core\Enums\TemperatureUnits;
   use App\External\OpenWeatherApi;
   use App\Utilities\Translation;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
@@ -38,9 +38,9 @@ namespace App\GraphQL\Controllers {
         $languageMap[$language] ?? $language
       );
 
-      $weather->convertTemperature($temperatureUnits ?? TemperatureUnitsEnum::CELSIUS());
-      $weather->convertSpeed($speedUnits ?? SpeedUnitsEnum::METERS_PER_SECOND());
-      $weather->convertPressure($pressureUnits ?? PressureUnitsEnum::HECTOPASCAL());
+      $weather->convertTemperature($temperatureUnits ?? TemperatureUnits::CELSIUS);
+      $weather->convertSpeed($speedUnits ?? SpeedUnits::METERS_PER_SECOND);
+      $weather->convertPressure($pressureUnits ?? PressureUnits::HECTOPASCAL);
 
       return $weather;
     }

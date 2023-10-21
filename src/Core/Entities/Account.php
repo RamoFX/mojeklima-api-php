@@ -4,7 +4,7 @@
 
 namespace App\Core\Entities {
 
-  use App\Core\Enums\AccountRoleEnum;
+  use App\Core\Enums\AccountRole;
   use App\Core\Validator;
   use DateTimeImmutable;
   use Doctrine\Common\Collections\ArrayCollection;
@@ -12,6 +12,9 @@ namespace App\Core\Entities {
   use Doctrine\ORM\Event\PrePersistEventArgs;
   use Doctrine\ORM\Event\PreUpdateEventArgs;
   use Doctrine\ORM\Mapping as ORM;
+  use Doctrine\ORM\Mapping\Entity;
+  use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+  use Doctrine\ORM\Mapping\Table;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
@@ -36,9 +39,9 @@ namespace App\Core\Entities {
      * @var string|AccountRoleEnum
      * @ORM\Column(type="string", columnDefinition="enum('USER', 'SYSTEM', 'ADMIN')")
      */
-    private $role;
 
     /** @ORM\Column(length=127) */
+    private AccountRole $role;
     private string $name;
 
     /** @ORM\Column(name="avatar_url", length=511, nullable=true) */
@@ -67,7 +70,7 @@ namespace App\Core\Entities {
     /**
      * @throws GraphQLException
      */
-    public function __construct(string $role, string $name, string $email, string $password) {
+    public function __construct(AccountRole $role, string $name, string $email, string $password) {
       $this->setRole($role);
       $this->setName($name);
       $this->setEmail($email);
@@ -86,15 +89,14 @@ namespace App\Core\Entities {
 
 
     /** @Field() */
-    public function getRole(): string {
+    public function getRole(): AccountRole {
       return $this->role;
     }
 
     /**
      * @throws GraphQLException
      */
-    public function setRole(string $role): Account {
-      $this->role = Validator::oneOf("role", $role, [ 'SYSTEM', 'ADMIN', 'USER' ]);
+    public function setRole(AccountRole $role): Account {
 
       return $this;
     }

@@ -6,6 +6,7 @@ namespace App\GraphQL\Services {
 
   use App\Core\Entities\Account;
   use App\Core\EntityManagerProxy;
+  use App\Core\Enums\AccountRole;
   use App\GraphQL\Exceptions\AuthorizationHeaderMissing;
   use App\GraphQL\Exceptions\BearerTokenMissing;
   use App\GraphQL\Exceptions\InvalidToken;
@@ -68,29 +69,20 @@ namespace App\GraphQL\Services {
       if ($account === null)
         return false;
 
-      switch ($right) {
-        case "CAN_CHANGE_ROLE":
-          return self::isAdminAccount($account);
-
-        case "CAN_ACCESS_USERS":
-          return self::isSystemAccount($account);
-
-        case "CAN_SEND_PUSH_NOTIFICATIONS":
-          return self::isAdminAccount($account) || self::isSystemAccount($account);
-
-        default:
-          return false;
-      }
+      return match ($right) {
+        "CAN_CHANGE_ROLE" => self::isAdminAccount($account),
+        "CAN_ACCESS_USERS" => self::isSystemAccount($account),
+        "CAN_SEND_PUSH_NOTIFICATIONS" => self::isAdminAccount($account) || self::isSystemAccount($account),
+        default => false,
+      };
     }
 
-
-
     private static function isAdminAccount(Account $account): bool {
-      return $account->getRole() === 'ADMIN';
+      return $account->getRole() === AccountRole::ADMIN;
     }
 
     private static function isSystemAccount(Account $account): bool {
-      return $account->getRole() === 'SYSTEM';
+      return $account->getRole() === AccountRole::SYSTEM;
     }
   }
 }

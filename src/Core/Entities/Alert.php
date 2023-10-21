@@ -4,7 +4,7 @@
 
 namespace App\Core\Entities {
 
-  use App\Core\Enums\CriteriaEnum;
+  use App\Core\Enums\Criteria;
   use App\Core\Validator;
   use App\Utilities\UnitsConverter;
   use DateTimeImmutable;
@@ -40,9 +40,9 @@ namespace App\Core\Entities {
      * @var string|CriteriaEnum
      * @ORM\Column(type="string", columnDefinition="enum('TEMPERATURE', 'FEELS_LIKE', 'HUMIDITY', 'WIND_SPEED', 'WIND_GUST', 'WIND_DIRECTION', 'PRESSURE', 'CLOUDINESS')")
      */
-    private $criteria;
 
     /** @ORM\Column(name="range_from", type="decimal", precision=8, scale=2) */
+    private Criteria $criteria;
     private float $rangeFrom;
 
     /** @ORM\Column(name="range_to", type="decimal", precision=8, scale=2) */
@@ -71,7 +71,7 @@ namespace App\Core\Entities {
     /**
      * @throws GraphQLException
      */
-    public function __construct(bool $isEnabled, string $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message) {
+    public function __construct(bool $isEnabled, Criteria $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message) {
       $this->setIsEnabled($isEnabled);
       $this->setCriteria($criteria);
       $this->setRangeFrom($rangeFrom);
@@ -83,25 +83,25 @@ namespace App\Core\Entities {
 
 
 
-    private function validateRangeUnits(string $criteria, string $units) {
+    private function validateRangeUnits(Criteria $criteria, string $units): void {
       switch ($criteria) {
-        case 'TEMPERATURE':
+        case Criteria::TEMPERATURE:
         case 'FEELS_LIKE':
           Validator::oneOf("units", $units, [ "CELSIUS", "FAHRENHEIT", "KELVIN", "RANKINE" ]);
           break;
 
-        case 'WIND_SPEED':
-        case 'WIND_GUST':
-          Validator::oneOf("units", $units, [ "METERS_PER_SECOND", "KILOMETERS_PER_HOUR", "MILES_PER_HOUR", "KNOTS" ]);
+        case Criteria::WIND_SPEED:
+        case Criteria::WIND_GUST:
+          Validator::oneOf("units", $units, ["METERS_PER_SECOND", "KILOMETERS_PER_HOUR", "MILES_PER_HOUR", "KNOTS"]);
           break;
 
-        case 'PRESSURE':
-          Validator::oneOf("units", $units, [ "HECTOPASCAL", "MILLIBAR", "INCHES_OF_MERCURY" ]);
+        case Criteria::PRESSURE:
+          Validator::oneOf("units", $units, ["HECTOPASCAL", "MILLIBAR", "INCHES_OF_MERCURY"]);
           break;
       }
     }
 
-    public function convertRangeFrom(?string $criteria, string $units) {
+    public function convertRangeFrom(?Criteria $criteria, string $units): void {
       $this->validateRangeUnits($criteria ?? $this->getCriteria(), $units);
 
       $this->setRangeFrom(
@@ -112,7 +112,7 @@ namespace App\Core\Entities {
       );
     }
 
-    public function convertRangeTo(?string $criteria, string $units) {
+    public function convertRangeTo(?Criteria $criteria, string $units): void {
       $this->validateRangeUnits($criteria ?? $this->getCriteria(), $units);
 
       $this->setRangeTo(
@@ -123,7 +123,7 @@ namespace App\Core\Entities {
       );
     }
 
-    public function convertRange(string $criteria, string $units) {
+    public function convertRange(Criteria $criteria, string $units): void {
       $this->convertRangeFrom($criteria, $units);
       $this->convertRangeTo($criteria, $units);
     }
@@ -151,15 +151,15 @@ namespace App\Core\Entities {
 
 
     /** @Field() */
-    public function getCriteria(): string {
+    public function getCriteria(): Criteria {
       return $this->criteria;
     }
 
     /**
      * @throws GraphQLException
      */
-    public function setCriteria(string $criteria): Alert {
-      $this->criteria = Validator::oneOf("criteria", $criteria, [ 'TEMPERATURE', 'FEELS_LIKE', 'HUMIDITY', 'WIND_SPEED', 'WIND_GUST', 'WIND_DIRECTION', 'PRESSURE', 'CLOUDINESS' ]);
+    public function setCriteria(Criteria $criteria): Alert {
+      $this->criteria = $criteria;
 
       return $this;
     }

@@ -6,16 +6,27 @@ namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
   use App\Core\EntityManagerProxy;
-  use App\Core\Enums\AccountRoleEnum;
+  use App\Core\Enums\AccountRole;
+  use App\GraphQL\Exceptions\AuthorizationHeaderMissing;
+  use App\GraphQL\Exceptions\BearerTokenMissing;
   use App\GraphQL\Exceptions\EmailAlreadyInUse;
   use App\GraphQL\Exceptions\EntityNotFound;
+  use App\GraphQL\Exceptions\InvalidToken;
+  use App\GraphQL\Exceptions\TokenExpired;
   use App\GraphQL\Services\JWTService;
+  use Doctrine\ORM\Exception\NotSupported;
+  use Doctrine\ORM\Exception\ORMException;
+  use Doctrine\ORM\NonUniqueResultException;
+  use Doctrine\ORM\NoResultException;
+  use Doctrine\ORM\OptimisticLockException;
+  use Doctrine\ORM\TransactionRequiredException;
   use Exception;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
   use TheCodingMachine\GraphQLite\Annotations\Right;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
@@ -76,8 +87,8 @@ namespace App\GraphQL\Controllers {
      * @Logged()
      * @Right("CAN_CHANGE_ROLE")
      */
-    public static function changeRole(int $id, AccountRoleEnum $role): Account {
       /** @var $account Account */
+    public static function changeRole(int $id, AccountRole $role): Account {
       $account = EntityManagerProxy::$entity_manager->find(Account::class, $id);
 
       if ($account === null)

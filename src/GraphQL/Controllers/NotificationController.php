@@ -7,7 +7,13 @@ namespace App\GraphQL\Controllers {
   use App\Core\Entities\Account;
   use App\Core\Entities\Notification;
   use App\Core\EntityManagerProxy;
+  use App\Core\Enums\AccountRole;
+  use App\Core\Enums\Criteria;
   use App\GraphQL\Exceptions\EntityNotFound;
+  use Doctrine\ORM\Exception\NotSupported;
+  use Doctrine\ORM\Exception\ORMException;
+  use Doctrine\ORM\OptimisticLockException;
+  use ErrorException;
   use GuzzleHttp\RequestOptions;
   use Minishlink\WebPush\Subscription;
   use Minishlink\WebPush\WebPush;
@@ -16,6 +22,7 @@ namespace App\GraphQL\Controllers {
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
   use TheCodingMachine\GraphQLite\Annotations\Right;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
@@ -230,7 +237,7 @@ namespace App\GraphQL\Controllers {
         // skip system accounts
         $role = $account->getRole();
 
-        if ($role === "SYSTEM")
+        if ($role === AccountRole::ADMIN)
           continue;
 
         $locations = $account->getLocations();
@@ -259,43 +266,17 @@ namespace App\GraphQL\Controllers {
             $criteria = $alert->getCriteria();
 
             // get weather value set in alert
-            $current_value = null;
-            
-            switch ($criteria) {
-              case 'TEMPERATURE':
-                $current_value = $weather->getTemperature();
-                break;
+            $current_value = match ($criteria) {
+              Criteria::TEMPERATURE => $weather->getTemperature(),
+              Criteria::FEELS_LIKE => $weather->getFeelsLike(),
+              Criteria::HUMIDITY => $weather->getHumidity(),
+              Criteria::WIND_SPEED => $weather->getWindSpeed(),
+              Criteria::WIND_GUST => $weather->getWindGust(),
+              Criteria::WIND_DIRECTION => $weather->getWindDirection(),
+              Criteria::PRESSURE => $weather->getPressure(),
+              Criteria::CLOUDINESS => $weather->getCloudiness(),
+            };
 
-              case 'FEELS_LIKE':
-                $current_value = $weather->getFeelsLike();
-                break;
-
-              case 'HUMIDITY':
-                $current_value = $weather->getHumidity();
-                break;
-
-              case 'WIND_SPEED':
-                $current_value = $weather->getWindSpeed();
-                break;
-
-              case 'WIND_GUST':
-                $current_value = $weather->getWindGust();
-                break;
-
-              case 'WIND_DIRECTION':
-                $current_value = $weather->getWindDirection();
-                break;
-
-              case 'PRESSURE':
-                $current_value = $weather->getPressure();
-                break;
-
-              case 'CLOUDINES':
-                $current_value = $weather->getCloudiness();
-                break;
-            }
-
-            // PHP 7.4 limitation - no enums, string used as criteria type instead - need to handle all the possible values
             if ($current_value === null)
               continue;
 

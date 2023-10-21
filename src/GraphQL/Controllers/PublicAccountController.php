@@ -6,7 +6,7 @@ namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
   use App\Core\EntityManagerProxy;
-  use App\Core\Enums\AccountRoleEnum;
+  use App\Core\Enums\AccountRole;
   use App\GraphQL\Exceptions\AccountAlreadyExist;
   use App\GraphQL\Exceptions\EmailNotFound;
   use App\GraphQL\Exceptions\IncorrectPassword;
@@ -61,7 +61,7 @@ namespace App\GraphQL\Controllers {
 
       $random_password = Random::randomString(6, "abc123");
 
-      $new_account = new Account(AccountRoleEnum::USER(), $account->name, $account->email, $random_password);
+      $new_account = new Account(AccountRole::USER, $account->name, $account->email, $random_password);
 
       EntityManagerProxy::$entity_manager->persist($new_account);
       EntityManagerProxy::$entity_manager->flush($new_account);

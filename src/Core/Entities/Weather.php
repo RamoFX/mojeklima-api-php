@@ -61,11 +61,7 @@ namespace App\Core\Entities {
       $this->setTimezone($timezone);
     }
 
-
-
-    public function convertTemperature(string $toUnits) {
-      Validator::oneOf("toUnits", $toUnits, [ "CELSIUS", "FAHRENHEIT", "KELVIN", "RANKINE" ]);
-
+    public function convertTemperature(TemperatureUnits $toUnits): void {
       $this->setTemperature(
         UnitsConverter::fromMetric(
           $this->getTemperature(),
@@ -81,11 +77,7 @@ namespace App\Core\Entities {
       );
     }
 
-
-
-    public function convertSpeed(string $toUnits) {
-      Validator::oneOf("toUnits", $toUnits, [ "METERS_PER_SECOND", "KILOMETERS_PER_HOUR", "MILES_PER_HOUR", "KNOTS" ]);
-
+    public function convertSpeed(SpeedUnits $toUnits): void {
       $this->setWindSpeed(
         UnitsConverter::fromMetric(
           $this->getWindSpeed(),
@@ -103,11 +95,7 @@ namespace App\Core\Entities {
       }
     }
 
-
-
-    public function convertPressure(string $toUnits) {
-      Validator::oneOf("toUnits", $toUnits, [ "HECTOPASCAL", "MILLIBAR", "INCHES_OF_MERCURY" ]);
-      
+    public function convertPressure(PressureUnits $toUnits): void {
       $this->setPressure(
         UnitsConverter::fromMetric(
           $this->getPressure(),

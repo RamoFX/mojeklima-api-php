@@ -8,10 +8,13 @@ namespace App\GraphQL\Controllers {
   use App\Core\Entities\Alert;
   use App\Core\Entities\Location;
   use App\Core\EntityManagerProxy;
-  use App\Core\Enums\WeatherUnitsEnum;
+  use App\Core\Enums\Criteria;
   use App\GraphQL\Exceptions\EntityNotFound;
   use App\GraphQL\Exceptions\LimitExceeded;
   use App\GraphQL\Proxies\ContainerProxy;
+  use Doctrine\ORM\Exception\ORMException;
+  use Doctrine\ORM\OptimisticLockException;
+  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -152,7 +155,7 @@ namespace App\GraphQL\Controllers {
      */
     public static function updateAlert(Account $currentAccount, int $id, ?bool $isEnabled, ?string $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message, ?WeatherUnitsEnum $units): Alert {
       $alert = self::alert($currentAccount, $id);
-      $criteria = $alert->getCriteria();
+      $criteria = $criteria ?? $alert->getCriteria();
 
       // validate units
       if (($rangeFrom !== null || $rangeTo !== null) && $units === null) {

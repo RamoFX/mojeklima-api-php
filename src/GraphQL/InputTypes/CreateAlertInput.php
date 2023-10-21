@@ -4,7 +4,7 @@
 
 namespace App\GraphQL\InputTypes {
 
-  use App\Core\Enums\CriteriaEnum;
+  use App\Core\Enums\Criteria;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Input;
 
@@ -16,9 +16,9 @@ namespace App\GraphQL\InputTypes {
     public bool $isEnabled;
 
     /** @Field() */
-    public CriteriaEnum $criteria;
 
     /** @Field() */
+    public Criteria $criteria;
     public float $rangeFrom;
 
     /** @Field() */
