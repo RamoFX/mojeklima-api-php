@@ -25,6 +25,10 @@ namespace App\GraphQL\Controllers {
 
 
   class PublicAccountController {
+    /**
+     * @throws IncorrectPassword
+     * @throws EmailNotFound
+     */
     #[Mutation]
     public static function login(string $email, string $password, bool $remember): string {
       try {
@@ -48,6 +52,11 @@ namespace App\GraphQL\Controllers {
       return JWTService::createToken($account->getId(), $remember);
     }
 
+    /**
+     * @throws GraphQLException
+     * @throws ORMException
+     * @throws Exception
+     */
     #[Mutation]
     public static function register(CreateAccountInput $account): bool {
       $emails_count = EntityManagerProxy::$entity_manager->createQueryBuilder()
@@ -71,6 +80,12 @@ namespace App\GraphQL\Controllers {
       return Email::sendPassword($account->email, $random_password);
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws NonUniqueResultException
+     * @throws EmailNotFound
+     */
     #[Mutation]
     public static function resetPassword(string $email): bool {
       try {

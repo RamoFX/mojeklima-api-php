@@ -10,18 +10,21 @@ namespace App\GraphQL\Controllers {
   use App\Core\Enums\SpeedUnits;
   use App\Core\Enums\TemperatureUnits;
   use App\External\OpenWeatherApi;
+  use App\GraphQL\Exceptions\EntityNotFound;
   use App\Utilities\Translation;
+  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Query;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
   class OpenWeatherApiController {
     /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws EntityNotFound
+     * @throws GraphQLException
+     * @throws Exception
      */
     #[Query]
     #[Logged]

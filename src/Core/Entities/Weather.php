@@ -8,8 +8,10 @@ namespace App\Core\Entities {
   use App\Core\Enums\SpeedUnits;
   use App\Core\Enums\TemperatureUnits;
   use App\Utilities\UnitsConverter;
+  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
@@ -61,6 +63,10 @@ namespace App\Core\Entities {
       $this->setTimezone($timezone);
     }
 
+    /**
+     * @throws GraphQLException
+     * @throws Exception
+     */
     public function convertTemperature(TemperatureUnits $toUnits): void {
       $this->setTemperature(
         UnitsConverter::fromMetric(

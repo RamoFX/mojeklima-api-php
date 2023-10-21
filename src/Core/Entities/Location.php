@@ -12,8 +12,10 @@ namespace App\Core\Entities {
   use Doctrine\ORM\Event\PrePersistEventArgs;
   use Doctrine\ORM\Event\PreUpdateEventArgs;
   use Doctrine\ORM\Mapping as ORM;
+  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
@@ -51,6 +53,9 @@ namespace App\Core\Entities {
     public function __construct(string $name, string $description, float $latitude, float $longitude) {
       $this->setName($name);
       $this->setDescription($description);
+    /**
+     * @throws GraphQLException
+     */
       $this->setLatitude($latitude);
       $this->setLongitude($longitude);
       $this->alerts = new ArrayCollection();
@@ -83,6 +88,9 @@ namespace App\Core\Entities {
 
     public function setDescription(string $description): Location {
       $this->description = Validator::maxLength("description", $description, 511);
+    /**
+     * @throws GraphQLException
+     */
 
       return $this;
     }
@@ -92,6 +100,9 @@ namespace App\Core\Entities {
       return $this->latitude;
     }
 
+    /**
+     * @throws GraphQLException
+     */
     public function setLatitude(float $latitude): Location {
       $this->latitude = Validator::multiple(
         Validator::greaterOrEqual("latitude", $latitude, -90),
@@ -106,6 +117,9 @@ namespace App\Core\Entities {
       return $this->longitude;
     }
 
+    /**
+     * @throws GraphQLException
+     */
     public function setLongitude(float $longitude): Location {
       $this->longitude = Validator::multiple(
         Validator::greaterOrEqual("longitude", $longitude, -180),

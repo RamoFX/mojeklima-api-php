@@ -7,6 +7,7 @@ namespace App\GraphQL\Controllers {
   use App\Core\Entities\Suggestion;
   use App\External\OpenCageGeocodingApi;
   use App\Utilities\Translation;
+  use RestClientException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Query;
 
@@ -15,6 +16,7 @@ namespace App\GraphQL\Controllers {
   class OpenCageGeocodingApiController {
     /**
      * @return Suggestion[]
+     * @throws RestClientException
      */
     #[Query]
     #[Logged]

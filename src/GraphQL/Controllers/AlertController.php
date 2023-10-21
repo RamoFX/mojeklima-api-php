@@ -25,7 +25,7 @@ namespace App\GraphQL\Controllers {
 
   class AlertController {
     /**
-     * @throws EntityNotFound
+     * @throws EntityNotFound|Exception
      */
     private static function getLocation(Account $currentAccount, int $locationId): Location {
       $location_controller = ContainerProxy::$container->get(LocationController::class);
@@ -57,6 +57,7 @@ namespace App\GraphQL\Controllers {
 
     /**
      * @return Alert[]
+     * @throws EntityNotFound
      */
     #[Query]
     #[Logged]
@@ -67,9 +68,7 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$current_account")
+     * @throws EntityNotFound
      */
     #[Query]
     #[Logged]
@@ -78,9 +77,7 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws EntityNotFound
      */
     #[Query]
     #[Logged]
@@ -97,9 +94,10 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws OptimisticLockException
+     * @throws GraphQLException
+     * @throws ORMException
+     * @throws EntityNotFound
      */
     #[Mutation]
     #[Logged]
@@ -108,9 +106,12 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws GraphQLException
+     * @throws EntityNotFound
+     * @throws LimitExceeded
+     * @throws Exception
      */
     #[Mutation]
     #[Logged]
@@ -134,9 +135,11 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws OptimisticLockException
+     * @throws GraphQLException
+     * @throws ORMException
+     * @throws EntityNotFound
+     * @throws Exception
      */
     #[Mutation]
     #[Logged]
@@ -177,9 +180,9 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws OptimisticLockException
+     * @throws EntityNotFound
+     * @throws ORMException
      */
     #[Mutation]
     #[Logged]

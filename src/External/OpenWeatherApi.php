@@ -5,13 +5,17 @@
 namespace App\External {
 
   use App\Core\Entities\Weather;
-  use App\GraphQL\DevelopmentOutputBuffer;
-  use RestClient;
   use Exception;
+  use RestClient;
+  use RestClientException;
 
 
 
   class OpenWeatherApi {
+    /**
+     * @throws RestClientException
+     * @throws Exception
+     */
     public static function get_weather(float $latitude, float $longitude, string $language): Weather {
       $api = self::get_rest_client();
       $apiKey = self::get_api_key();

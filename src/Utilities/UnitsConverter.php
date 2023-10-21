@@ -14,6 +14,9 @@ namespace App\Utilities {
   class UnitsConverter {
     const defaultMetric = [TemperatureUnits::CELSIUS, SpeedUnits::METERS_PER_SECOND, PressureUnits::HECTOPASCAL];
 
+    /**
+     * @throws Exception
+     */
     public static function fromMetric(float $value, TemperatureUnits|SpeedUnits|PressureUnits $toUnits): float {
       if (in_array($toUnits, self::defaultMetric)) {
         return $value;
@@ -59,6 +62,9 @@ namespace App\Utilities {
       throw new Exception($translatedMessage);
     }
 
+    /**
+     * @throws Exception
+     */
     public static function toMetric(float $value, TemperatureUnits|SpeedUnits|PressureUnits $fromUnits): float {
       if (in_array($fromUnits, self::defaultMetric)) {
         return $value;

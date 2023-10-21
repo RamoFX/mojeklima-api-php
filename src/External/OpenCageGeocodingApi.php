@@ -5,13 +5,18 @@
 namespace App\External {
 
   use App\Core\Entities\Suggestion;
-  use RestClient;
   use Exception;
+  use RestClient;
+  use RestClientException;
 
 
 
   class OpenCageGeocodingApi {
-    /** @return Suggestion[] */
+    /**
+     * @return Suggestion[]
+     * @throws RestClientException
+     * @throws Exception
+     */
     public static function get_suggestions(string $language, string $query): array {
       $api = self::get_rest_client();
       $apiKey = self::get_api_key();

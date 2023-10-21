@@ -8,10 +8,13 @@ namespace App\GraphQL\Controllers {
   use App\Core\Entities\Location;
   use App\Core\EntityManagerProxy;
   use App\GraphQL\Exceptions\EntityNotFound;
+  use Doctrine\ORM\Exception\ORMException;
+  use Doctrine\ORM\OptimisticLockException;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
@@ -32,9 +35,7 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws EntityNotFound
      */
     #[Query]
     #[Logged]
@@ -50,9 +51,9 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws GraphQLException
      */
     #[Mutation]
     #[Logged]
@@ -67,9 +68,10 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws OptimisticLockException
+     * @throws GraphQLException
+     * @throws ORMException
+     * @throws EntityNotFound
      */
     #[Mutation]
     #[Logged]
@@ -94,9 +96,9 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws OptimisticLockException
+     * @throws EntityNotFound
+     * @throws ORMException
      */
     #[Mutation]
     #[Logged]

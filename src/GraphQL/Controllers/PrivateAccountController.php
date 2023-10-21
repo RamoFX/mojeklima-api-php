@@ -38,9 +38,7 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Query()
-     * @Logged()
-     * @Right("CAN_ACCESS_USERS")
+     * @throws EntityNotFound
      */
     #[Query]
     #[Logged]
@@ -55,6 +53,7 @@ namespace App\GraphQL\Controllers {
 
     /**
      * @return Account[]
+     * @throws NotSupported
      */
     #[Query]
     #[Logged]
@@ -64,9 +63,10 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws InvalidToken
+     * @throws AuthorizationHeaderMissing
+     * @throws TokenExpired
+     * @throws BearerTokenMissing
      */
     #[Mutation]
     #[Logged]
@@ -75,9 +75,10 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @Right("CAN_CHANGE_ROLE")
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws EntityNotFound
+     * @throws TransactionRequiredException
      */
     #[Mutation]
     #[Logged]
@@ -96,9 +97,9 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$current_account")
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws GraphQLException
      */
     #[Mutation]
     #[Logged]
@@ -118,9 +119,12 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$current_account")
+     * @throws OptimisticLockException
+     * @throws EmailAlreadyInUse
+     * @throws GraphQLException
+     * @throws ORMException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
      */
     #[Mutation]
     #[Logged]
@@ -146,9 +150,8 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$current_account")
+     * @throws OptimisticLockException
+     * @throws ORMException
      */
     #[Mutation]
     #[Logged]
@@ -162,9 +165,8 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$current_account")
+     * @throws OptimisticLockException
+     * @throws ORMException
      */
     #[Mutation]
     #[Logged]

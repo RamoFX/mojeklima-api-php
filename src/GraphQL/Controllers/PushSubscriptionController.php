@@ -7,7 +7,7 @@ namespace App\GraphQL\Controllers {
   use App\Core\Entities\Account;
   use App\Core\Entities\PushSubscription;
   use App\Core\EntityManagerProxy;
-  use App\GraphQL\DevelopmentOutputBuffer;
+  use Doctrine\ORM\Exception\ORMException;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -16,9 +16,7 @@ namespace App\GraphQL\Controllers {
 
   class PushSubscriptionController {
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws ORMException
      */
     #[Mutation]
     #[Logged]

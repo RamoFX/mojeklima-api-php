@@ -55,9 +55,7 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Query()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws EntityNotFound
      */
     #[Query]
     #[Logged]
@@ -86,9 +84,8 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws OptimisticLockException
+     * @throws ORMException
      */
     #[Mutation]
     #[Logged]
@@ -108,9 +105,10 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @Right("CAN_SEND_PUSH_NOTIFICATIONS")
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws EntityNotFound
+     * @throws ErrorException
      */
     #[Mutation]
     #[Logged]
@@ -212,9 +210,12 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @Right("CAN_SEND_PUSH_NOTIFICATIONS")
+     * @throws OptimisticLockException
+     * @throws GraphQLException
+     * @throws ORMException
+     * @throws EntityNotFound
+     * @throws NotSupported
+     * @throws ErrorException
      */
     #[Mutation]
     #[Logged]
@@ -294,9 +295,8 @@ namespace App\GraphQL\Controllers {
     }
 
     /**
-     * @Mutation()
-     * @Logged()
-     * @InjectUser(for="$currentAccount")
+     * @throws EntityNotFound
+     * @throws ORMException
      */
     #[Mutation]
     #[Logged]

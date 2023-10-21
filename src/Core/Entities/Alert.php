@@ -13,6 +13,7 @@ namespace App\Core\Entities {
   use Doctrine\ORM\Event\PrePersistEventArgs;
   use Doctrine\ORM\Event\PreUpdateEventArgs;
   use Doctrine\ORM\Mapping as ORM;
+  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
@@ -62,8 +63,9 @@ namespace App\Core\Entities {
       $this->notifications = new ArrayCollection();
     }
 
-
-
+    /**
+     * @throws GraphQLException
+     */
     private function validateRangeUnits(Criteria $criteria, string $units): void {
       switch ($criteria) {
         case Criteria::TEMPERATURE:
@@ -82,6 +84,9 @@ namespace App\Core\Entities {
       }
     }
 
+    /**
+     * @throws Exception
+     */
     public function convertRangeFrom(?Criteria $criteria, string $units): void {
       $this->validateRangeUnits($criteria ?? $this->getCriteria(), $units);
 
@@ -93,6 +98,9 @@ namespace App\Core\Entities {
       );
     }
 
+    /**
+     * @throws Exception
+     */
     public function convertRangeTo(?Criteria $criteria, string $units): void {
       $this->validateRangeUnits($criteria ?? $this->getCriteria(), $units);
 
@@ -104,6 +112,9 @@ namespace App\Core\Entities {
       );
     }
 
+    /**
+     * @throws Exception
+     */
     public function convertRange(Criteria $criteria, string $units): void {
       $this->convertRangeFrom($criteria, $units);
       $this->convertRangeTo($criteria, $units);
