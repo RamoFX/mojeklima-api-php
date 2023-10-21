@@ -6,4 +6,4 @@ upload.sh
 .htaccess
 .rnd
 .vscode
-!/.run/
+.run
