@@ -191,7 +191,7 @@ namespace App\Core\Entities {
         $longitude = $this->getLongitude();
         $language = Translation::get_preferred_language();
 
-        return OpenWeatherApi::get_weather($latitude, $longitude, $language);
+        return OpenWeatherApi::getWeather($this->getId());
       } else {
         return $this->weather;
       }

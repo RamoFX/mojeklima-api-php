@@ -4,7 +4,10 @@
 
 namespace App\External {
 
+  use App\Core\Entities\Location;
   use App\Core\Entities\Weather;
+  use App\Core\EntityManagerProxy;
+  use App\Utilities\Translation;
   use Exception;
   use RestClient;
   use RestClientException;
@@ -16,7 +19,15 @@ namespace App\External {
      * @throws RestClientException
      * @throws Exception
      */
-    public static function get_weather(float $latitude, float $longitude, string $language): Weather {
+    public static function getWeather(int $locationId): Weather {
+      $language = Translation::get_preferred_language();
+      $languageMap = [
+        'cs' => 'cz'
+      ];
+      $location = EntityManagerProxy::$entity_manager->find(Location::class, $locationId);
+      $latitude = $location->getLatitude();
+      $longitude = $location->getLongitude();
+
       $api = self::get_rest_client();
       $apiKey = self::get_api_key();
 
@@ -25,7 +36,7 @@ namespace App\External {
         'lat' => $latitude,
         'lon' => $longitude,
         'units' => 'metric',
-        'lang' => $language
+        'lang' => $languageMap[$language] ?? $language
       ]);
 
       if ($result->error)
@@ -33,7 +44,7 @@ namespace App\External {
 
       $data = $result->decode_response();
 
-      return new Weather(
+      $weather = new Weather(
         $data["main"]["temp"],
         $data["main"]["feels_like"],
         $data["main"]["humidity"],
@@ -49,6 +60,10 @@ namespace App\External {
         $data["sys"]["sunset"],
         $data["timezone"]
       );
+
+      $weather->setLocation($location);
+
+      return $weather;
     }
 
     private static function get_rest_client(): RestClient {
