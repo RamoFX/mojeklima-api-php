@@ -23,6 +23,7 @@
     "tcdent/php-restclient": "0.1.8.3",
     "minishlink/web-push": "^8.0",
     "guzzlehttp/guzzle": "^7.8",
-    "vlucas/phpdotenv": "^5.5"
+    "vlucas/phpdotenv": "^5.5",
+    "predis/predis": "^2.2"
   }
 }
