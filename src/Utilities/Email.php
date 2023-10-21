@@ -4,7 +4,7 @@
 
 namespace App\Utilities {
 
-    use App\External\BrevoApi;
+  use App\External\BrevoApi;
 
 
 
@@ -13,9 +13,7 @@ namespace App\Utilities {
       return join("\n", $lines);
     }
 
-
-
-    public static function send_password(string $email, string $password): bool {
+    public static function sendPassword(string $email, string $password): bool {
       $language = Translation::get_preferred_language();
       $contact_email = "roman.dvorovoy123@gmail.com";
 
@@ -61,9 +59,7 @@ namespace App\Utilities {
       return BrevoApi::send_email($email, $translatedSubject, $translatedMessage);
     }
 
-
-
-    public static function send_notification(string $email, string $locationName, string $alertMessage): bool {
+    public static function sendNotification(string $email, string $locationName, string $alertMessage): bool {
       $message = self::lines(
         $alertMessage,
         "",

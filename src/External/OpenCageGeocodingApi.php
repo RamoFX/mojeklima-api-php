@@ -61,22 +61,18 @@ namespace App\External {
       return $suggestions;
     }
 
-
-
     private static function get_rest_client(): RestClient {
       $api = new RestClient([
         'base_url' => "https://api.opencagedata.com/geocode/v1/"
       ]);
 
       $api->register_decoder('json', function($data) {
-        return json_decode($data, TRUE);
+        return json_decode($data, true);
       });
 
       return $api;
     }
 
-
-    
     private static function get_api_key() {
       return $_ENV["OPEN_CAGE_GEOCODING_API_KEY"];
     }

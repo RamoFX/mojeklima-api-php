@@ -20,6 +20,7 @@ namespace App\GraphQL\Controllers {
      */
     public static function suggestions(string $query): array {
       $language = Translation::get_preferred_language();
+
       return OpenCageGeocodingApi::get_suggestions($language, $query);
     }
   }

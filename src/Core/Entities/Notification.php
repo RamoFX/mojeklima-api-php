@@ -65,8 +65,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
-    public function on_pre_persist(PrePersistEventArgs $args) {
     #[ORM\PrePersist]
+    public function onPrePersist(PrePersistEventArgs $args) {
       $this->createdAt = new DateTimeImmutable();
     }
   }

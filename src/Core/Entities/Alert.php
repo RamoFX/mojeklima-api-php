@@ -227,14 +227,14 @@ namespace App\Core\Entities {
       return $this;
     }
 
-    public function on_pre_persist(PrePersistEventArgs $args) {
     #[ORM\PrePersist]
+    public function onPrePersist(PrePersistEventArgs $args): void {
       $this->createdAt = new DateTimeImmutable();
       $this->updatedAt = new DateTimeImmutable();
     }
 
-    public function on_pre_update(PreUpdateEventArgs $args) {
     #[ORM\PreUpdate]
+    public function onPreUpdate(PreUpdateEventArgs $args): void {
       $this->updatedAt = new DateTimeImmutable();
     }
   }

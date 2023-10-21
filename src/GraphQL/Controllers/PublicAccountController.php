@@ -66,7 +66,7 @@ namespace App\GraphQL\Controllers {
       EntityManagerProxy::$entity_manager->persist($new_account);
       EntityManagerProxy::$entity_manager->flush($new_account);
 
-      return Email::send_password($account->email, $random_password);
+      return Email::sendPassword($account->email, $random_password);
     }
 
 
@@ -90,8 +90,8 @@ namespace App\GraphQL\Controllers {
         EntityManagerProxy::$entity_manager->persist($account);
         EntityManagerProxy::$entity_manager->flush($account);
 
-        return Email::send_password($email, $random_password);
-      } catch (NoResultException $exception) {
+        return Email::sendPassword($email, $random_password);
+      } catch (NoResultException) {
         throw new EmailNotFound();
       }
     }

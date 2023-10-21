@@ -34,31 +34,23 @@ namespace App\GraphQL\Services {
     public function getUser(): ?Account {
       $headerToken = HeadersService::getBearerToken();
       $tokenDecoded = JWTService::decodeToken($headerToken);
-      $account = EntityManagerProxy::$entity_manager->find(Account::class, $tokenDecoded["id"]);
 
-      return $account;
+      return EntityManagerProxy::$entity_manager->find(Account::class, $tokenDecoded["id"]);
     }
-
-
 
     public function isLogged(): bool {
       try {
-        $isAuthenticated = $this->getUser() !== null;
-
-        return $isAuthenticated;
-      } catch (Exception $exception) {
+        return $this->getUser() !== null;
+      } catch (Exception) {
         return false;
       }
     }
-
-
 
     /**
      * @throws AuthorizationHeaderMissing
      * @throws BearerTokenMissing
      * @throws InvalidToken
      * @throws TokenExpired
-     *
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws TransactionRequiredException

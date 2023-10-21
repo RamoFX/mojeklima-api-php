@@ -28,7 +28,7 @@ namespace App\External {
         throw new Exception($result->error);
 
       $data = $result->decode_response();
-  
+
       return new Weather(
         $data["main"]["temp"],
         $data["main"]["feels_like"],
@@ -46,22 +46,18 @@ namespace App\External {
       );
     }
 
-
-
     private static function get_rest_client(): RestClient {
       $api = new RestClient([
         'base_url' => "https://api.openweathermap.org/data/2.5/"
       ]);
 
       $api->register_decoder('json', function($data) {
-        return json_decode($data, TRUE);
+        return json_decode($data, true);
       });
 
       return $api;
     }
 
-
-    
     private static function get_api_key() {
       return $_ENV["OPEN_WEATHER_API_KEY"];
     }

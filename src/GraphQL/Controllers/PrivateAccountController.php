@@ -109,10 +109,8 @@ namespace App\GraphQL\Controllers {
      * @InjectUser(for="$current_account")
      */
     public static function updateName(Account $current_account, string $name): Account {
-      // update
       $current_account->setName($name);
 
-      // save
       EntityManagerProxy::$entity_manager->persist($current_account);
       EntityManagerProxy::$entity_manager->flush($current_account);
 
@@ -148,10 +146,8 @@ namespace App\GraphQL\Controllers {
       if ($emails_count > 0)
         throw new EmailAlreadyInUse();
 
-      // update
       $current_account->setEmail($email);
 
-      // save
       EntityManagerProxy::$entity_manager->persist($current_account);
       EntityManagerProxy::$entity_manager->flush($current_account);
 
@@ -166,10 +162,8 @@ namespace App\GraphQL\Controllers {
      * @InjectUser(for="$current_account")
      */
     public static function updatePassword(Account $current_account, string $password): Account {
-      // update
       $current_account->setPassword($password);
 
-      // save
       EntityManagerProxy::$entity_manager->persist($current_account);
       EntityManagerProxy::$entity_manager->flush($current_account);
 

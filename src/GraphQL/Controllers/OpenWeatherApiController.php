@@ -26,12 +26,13 @@ namespace App\GraphQL\Controllers {
     public static function weather(Account $currentAccount, int $locationId, ?TemperatureUnitsEnum $temperatureUnits, ?SpeedUnitsEnum $speedUnits, ?PressureUnitsEnum $pressureUnits): Weather {
       $location = LocationController::location($currentAccount, $locationId);
       $language = Translation::get_preferred_language();
-      // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (coutnry code).
+
+      // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (country code).
       // For that reason mapping needs to be done
       $languageMap = [
         'cs' => 'cz'
       ];
-      
+
       $weather = OpenWeatherApi::get_weather(
         $location->getLatitude(),
         $location->getLongitude(),

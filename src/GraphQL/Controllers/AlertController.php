@@ -28,11 +28,9 @@ namespace App\GraphQL\Controllers {
      * @throws EntityNotFound
      */
     private static function getLocation(Account $currentAccount, int $locationId): Location {
-      /** @var LocationController $location_controller */
       $location_controller = ContainerProxy::$container->get(LocationController::class);
-      $location = $location_controller->location($currentAccount, $locationId);
 
-      return $location;
+      return $location_controller->location($currentAccount, $locationId);
     }
 
 

@@ -35,7 +35,7 @@ namespace App\GraphQL {
   // helpers
   $is_dev_mode = $_ENV["APP_MODE"] === "development";
 
-  function respond($output) {
+  function respond($output): void {
     header('Content-Type: application/json');
     echo json_encode($output, JSON_INVALID_UTF8_IGNORE);
   }
@@ -78,7 +78,7 @@ namespace App\GraphQL {
     "password" => $_ENV["DB_PASSWORD"],
     "host" => $_ENV["DB_HOSTNAME"],
     "driver" => "pdo_mysql",
-    'charset'  => 'utf8'
+    'charset' => 'utf8'
   ];
 
   EnumType::addEnumType(AccountRole::class);
@@ -136,7 +136,7 @@ namespace App\GraphQL {
   $raw_input = file_get_contents('php://input');
   $input = json_decode($raw_input, true);
 
-  $query = isset($input['query']) ? $input['query'] : null;
+  $query = $input['query'] ?? null;
   $variables = $input['variables'] ?? null;
 
 

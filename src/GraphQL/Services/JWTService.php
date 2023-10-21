@@ -19,8 +19,6 @@ namespace App\GraphQL\Services {
   class JWTService {
     private static string $alg = "HS512";
 
-
-
     public static function createToken(int $id, bool $remember): string {
       $date = new DateTimeImmutable();
       $expireAt = $date->modify('+1 hour')->getTimestamp();
@@ -34,12 +32,8 @@ namespace App\GraphQL\Services {
       if ($remember)
         unset($payload["exp"]);
 
-      $encodedToken = JWT::encode($payload, $_ENV["SECURITY_SECRET"], self::$alg);
-
-      return $encodedToken;
+      return JWT::encode($payload, $_ENV["SECURITY_SECRET"], self::$alg);
     }
-
-
 
     /**
      * @throws InvalidToken
@@ -59,8 +53,6 @@ namespace App\GraphQL\Services {
         return $token;
     }
 
-
-
     /**
      * @throws InvalidToken
      * @throws TokenExpired
@@ -68,12 +60,11 @@ namespace App\GraphQL\Services {
     public static function decodeToken(string $token): array {
       try {
         $stdClass = JWT::decode($token, new Key($_ENV["SECURITY_SECRET"], self::$alg));
-        $decodedToken = json_decode(json_encode($stdClass), true);
 
-        return $decodedToken;
-      } catch (ExpiredException $exception) {
+        return json_decode(json_encode($stdClass), true);
+      } catch (ExpiredException) {
         throw new TokenExpired();
-      } catch (Exception $exception) {
+      } catch (Exception) {
         throw new InvalidToken();
       }
     }
