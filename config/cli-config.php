@@ -20,7 +20,7 @@ $connection_parameters = [
   'charset'  => 'utf8'
 ];
 
-$configuration = ORMSetup::createAnnotationMetadataConfiguration([__DIR__ . "/../src/Core/Entities"], true);
+$configuration = ORMSetup::createAttributeMetadataConfiguration([__DIR__ . "/../src/Core/Entities"], true);
 $connection = DriverManager::getConnection($connection_parameters, $configuration);
 $entityManager = new EntityManager($connection, $configuration);
 
