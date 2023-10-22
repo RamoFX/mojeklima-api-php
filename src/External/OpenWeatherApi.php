@@ -69,7 +69,7 @@ namespace App\External {
         ->setHumidity($data["main"]["humidity"])
         ->setPressure($data["main"]["pressure"])
         ->setWindSpeed($data["wind"]["speed"])
-        ->setWindGust($data["wind"]["gust"])
+        ->setWindGust($data["wind"]["gust"] ?? null)
         ->setWindDirection($data["wind"]["deg"])
         ->setCloudiness($data["clouds"]["all"])
         ->setDescription($data["weather"][0]["description"])
