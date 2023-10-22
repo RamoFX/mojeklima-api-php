@@ -5,8 +5,8 @@
 namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
-  use App\Core\EntityManagerProxy;
   use App\Core\Enums\AccountRole;
+  use App\GlobalProxy;
   use App\GraphQL\Exceptions\AccountAlreadyExist;
   use App\GraphQL\Exceptions\AccountMarkedAsRemoved;
   use App\GraphQL\Exceptions\EmailNotFound;
@@ -35,7 +35,7 @@ namespace App\GraphQL\Controllers {
     public static function login(string $email, string $password, bool $remember): string {
       try {
         /** @var $account Account */
-        $account = EntityManagerProxy::$entity_manager->createQueryBuilder()
+        $account = GlobalProxy::$entityManager->createQueryBuilder()
           ->select("account")
           ->from(Account::class, "account")
           ->where("account.email = :email")
@@ -64,7 +64,7 @@ namespace App\GraphQL\Controllers {
      */
     #[Mutation]
     public static function register(CreateAccountInput $account): bool {
-      $emails_count = EntityManagerProxy::$entity_manager->createQueryBuilder()
+      $emails_count = GlobalProxy::$entityManager->createQueryBuilder()
         ->select("count(account.id)")
         ->from(Account::class, "account")
         ->where("account.email = :email")
@@ -79,8 +79,8 @@ namespace App\GraphQL\Controllers {
 
       $new_account = new Account(AccountRole::USER, $account->name, $account->email, $random_password);
 
-      EntityManagerProxy::$entity_manager->persist($new_account);
-      EntityManagerProxy::$entity_manager->flush($new_account);
+      GlobalProxy::$entityManager->persist($new_account);
+      GlobalProxy::$entityManager->flush($new_account);
 
       return Email::sendPassword($account->email, $random_password);
     }
@@ -96,7 +96,7 @@ namespace App\GraphQL\Controllers {
     public static function resetPassword(string $email): bool {
       try {
         /* @var Account $account */
-        $account = EntityManagerProxy::$entity_manager->createQueryBuilder()
+        $account = GlobalProxy::$entityManager->createQueryBuilder()
           ->select("account")
           ->from(Account::class, "account")
           ->where("account.email = :email")
@@ -111,8 +111,8 @@ namespace App\GraphQL\Controllers {
 
         $account->setPassword($random_password);
 
-        EntityManagerProxy::$entity_manager->persist($account);
-        EntityManagerProxy::$entity_manager->flush($account);
+        GlobalProxy::$entityManager->persist($account);
+        GlobalProxy::$entityManager->flush($account);
 
         return Email::sendPassword($email, $random_password);
       } catch (NoResultException) {

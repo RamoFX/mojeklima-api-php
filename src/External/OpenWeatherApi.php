@@ -6,8 +6,7 @@ namespace App\External {
 
   use App\Core\Entities\Location;
   use App\Core\Entities\Weather;
-  use App\Core\EntityManagerProxy;
-  use App\GraphQL\Proxies\RedisProxy;
+  use App\GlobalProxy;
   use App\Utilities\Translation;
   use Exception;
   use RestClient;
@@ -15,6 +14,7 @@ namespace App\External {
 
 
 
+  // TODO: Isn't this a service of external data source kind?
   class OpenWeatherApi {
     /**
      * @throws RestClientException
@@ -23,19 +23,21 @@ namespace App\External {
     public static function getWeather(int $locationId): Weather {
       // language
       $language = Translation::get_preferred_language();
+      // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (country code).
+      // For that reason mapping needs to be done
       $languageMap = [
         'cs' => 'cz'
       ];
 
       // location
-      $location = EntityManagerProxy::$entity_manager->find(Location::class, $locationId);
+      $location = GlobalProxy::$entityManager->find(Location::class, $locationId);
       $latitude = $location->getLatitude();
       $longitude = $location->getLongitude();
 
       // check cache
       $cacheKey = Weather::getKey(strval($latitude), strval($longitude));
       $cacheExpiration = Weather::getExpiration();
-      $cachedWeather = RedisProxy::$redis->get($cacheKey);
+      $cachedWeather = GlobalProxy::$redis->get($cacheKey);
 
       if ($cachedWeather) {
         $weather = Weather::jsonDeserialize($cachedWeather);
@@ -80,7 +82,7 @@ namespace App\External {
 
       // set cache
       $cacheValue = $weather->jsonSerialize();
-      RedisProxy::$redis->set($cacheKey, $cacheValue, 'EX', $cacheExpiration);
+      GlobalProxy::$redis->set($cacheKey, $cacheValue, 'EX', $cacheExpiration);
 
       return $weather;
     }

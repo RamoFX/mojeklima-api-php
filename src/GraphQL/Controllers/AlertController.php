@@ -7,11 +7,10 @@ namespace App\GraphQL\Controllers {
   use App\Core\Entities\Account;
   use App\Core\Entities\Alert;
   use App\Core\Entities\Location;
-  use App\Core\EntityManagerProxy;
   use App\Core\Enums\Criteria;
+  use App\GlobalProxy;
   use App\GraphQL\Exceptions\EntityNotFound;
   use App\GraphQL\Exceptions\LimitExceeded;
-  use App\GraphQL\Proxies\ContainerProxy;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
   use Exception;
@@ -28,7 +27,7 @@ namespace App\GraphQL\Controllers {
      * @throws EntityNotFound|Exception
      */
     private static function getLocation(Account $currentAccount, int $locationId): Location {
-      $location_controller = ContainerProxy::$container->get(LocationController::class);
+      $location_controller = GlobalProxy::$container->get(LocationController::class);
 
       return $location_controller->location($currentAccount, $locationId);
     }
@@ -127,8 +126,8 @@ namespace App\GraphQL\Controllers {
       //    $new_alert->convertRange($criteria, $units);
       $location->addAlert($new_alert);
 
-      EntityManagerProxy::$entity_manager->persist($new_alert);
-      EntityManagerProxy::$entity_manager->flush($new_alert);
+      GlobalProxy::$entityManager->persist($new_alert);
+      GlobalProxy::$entityManager->flush($new_alert);
 
       return $new_alert;
     }
@@ -172,7 +171,7 @@ namespace App\GraphQL\Controllers {
       if ($message !== null)
         $alert->setMessage($message);
 
-      EntityManagerProxy::$entity_manager->flush($alert);
+      GlobalProxy::$entityManager->flush($alert);
 
       return $alert;
     }
@@ -187,8 +186,8 @@ namespace App\GraphQL\Controllers {
     public static function deleteAlert(#[InjectUser] Account $currentAccount, int $id): Alert {
       $alert = self::alert($currentAccount, $id);
 
-      EntityManagerProxy::$entity_manager->remove($alert);
-      EntityManagerProxy::$entity_manager->flush($alert);
+      GlobalProxy::$entityManager->remove($alert);
+      GlobalProxy::$entityManager->flush($alert);
 
       return $alert;
     }

@@ -5,8 +5,8 @@
 namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
-  use App\Core\EntityManagerProxy;
   use App\Core\Enums\AccountRole;
+  use App\GlobalProxy;
   use App\GraphQL\Exceptions\AuthorizationHeaderMissing;
   use App\GraphQL\Exceptions\BearerTokenMissing;
   use App\GraphQL\Exceptions\EmailAlreadyInUse;
@@ -45,7 +45,7 @@ namespace App\GraphQL\Controllers {
     #[Right("ACCOUNT_MANAGEMENT")]
     public static function account(int $id): Account {
       try {
-        return EntityManagerProxy::$entity_manager->find(Account::class, $id);
+        return GlobalProxy::$entityManager->find(Account::class, $id);
       } catch (Exception) {
         throw new EntityNotFound("Account");
       }
@@ -59,7 +59,7 @@ namespace App\GraphQL\Controllers {
     #[Logged]
     #[Right("ACCOUNT_MANAGEMENT")]
     public static function accounts(): array {
-      return EntityManagerProxy::$entity_manager->getRepository(Account::class)->findAll();
+      return GlobalProxy::$entityManager->getRepository(Account::class)->findAll();
     }
 
     /**
@@ -84,14 +84,14 @@ namespace App\GraphQL\Controllers {
     #[Logged]
     #[Right("ACCOUNT_MANAGEMENT")]
     public static function changeRole(int $id, AccountRole $role): Account {
-      $account = EntityManagerProxy::$entity_manager->find(Account::class, $id);
+      $account = GlobalProxy::$entityManager->find(Account::class, $id);
 
       if ($account === null)
         throw new EntityNotFound("Account");
 
       $account->setRole($role);
 
-      EntityManagerProxy::$entity_manager->flush($account);
+      GlobalProxy::$entityManager->flush($account);
 
       return $account;
     }
@@ -106,8 +106,8 @@ namespace App\GraphQL\Controllers {
     public static function updateName(#[InjectUser] Account $currentAccount, string $name): Account {
       $currentAccount->setName($name);
 
-      EntityManagerProxy::$entity_manager->persist($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+      GlobalProxy::$entityManager->persist($currentAccount);
+      GlobalProxy::$entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
@@ -130,7 +130,7 @@ namespace App\GraphQL\Controllers {
     #[Logged]
     public static function updateEmail(#[InjectUser] Account $currentAccount, string $email): Account {
       // check whether email is already in use
-      $emails_count = EntityManagerProxy::$entity_manager->createQueryBuilder()
+      $emails_count = GlobalProxy::$entityManager->createQueryBuilder()
         ->select("count(account.id)")
         ->from(Account::class, "account")
         ->where("account.email = :email")
@@ -143,8 +143,8 @@ namespace App\GraphQL\Controllers {
 
       $currentAccount->setEmail($email);
 
-      EntityManagerProxy::$entity_manager->persist($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+      GlobalProxy::$entityManager->persist($currentAccount);
+      GlobalProxy::$entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
@@ -158,8 +158,8 @@ namespace App\GraphQL\Controllers {
     public static function updatePassword(#[InjectUser] Account $currentAccount, string $password): Account {
       $currentAccount->setPassword($password);
 
-      EntityManagerProxy::$entity_manager->persist($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+      GlobalProxy::$entityManager->persist($currentAccount);
+      GlobalProxy::$entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
@@ -173,8 +173,8 @@ namespace App\GraphQL\Controllers {
     public static function markAccountRemoved(#[InjectUser] Account $currentAccount): Account {
       $currentAccount->setIsMarkedAsRemoved(true);
 
-      EntityManagerProxy::$entity_manager->persist($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+      GlobalProxy::$entityManager->persist($currentAccount);
+      GlobalProxy::$entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
@@ -187,8 +187,8 @@ namespace App\GraphQL\Controllers {
     #[Logged]
     #[Right('ACCOUNT_MANAGEMENT')]
     public static function permanentlyDeleteAccount(#[InjectUser] Account $currentAccount): Account {
-      EntityManagerProxy::$entity_manager->remove($currentAccount);
-      EntityManagerProxy::$entity_manager->flush($currentAccount);
+      GlobalProxy::$entityManager->remove($currentAccount);
+      GlobalProxy::$entityManager->flush($currentAccount);
 
       return $currentAccount;
     }

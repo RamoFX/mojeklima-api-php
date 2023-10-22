@@ -5,8 +5,8 @@
 namespace App\GraphQL\Services {
 
   use App\Core\Entities\Account;
-  use App\Core\EntityManagerProxy;
   use App\Core\Enums\AccountRole;
+  use App\GlobalProxy;
   use App\GraphQL\Exceptions\AuthorizationHeaderMissing;
   use App\GraphQL\Exceptions\BearerTokenMissing;
   use App\GraphQL\Exceptions\InvalidToken;
@@ -35,7 +35,7 @@ namespace App\GraphQL\Services {
       $headerToken = HeadersService::getBearerToken();
       $tokenDecoded = JWTService::decodeToken($headerToken);
 
-      return EntityManagerProxy::$entity_manager->find(Account::class, $tokenDecoded["id"]);
+      return GlobalProxy::$entityManager->find(Account::class, $tokenDecoded["id"]);
     }
 
     public function isLogged(): bool {

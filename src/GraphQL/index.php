@@ -4,10 +4,10 @@
 
 namespace App\GraphQL {
 
-  use App\Core\EntityManagerProxy;
   use App\Core\Enums\AccountRole;
   use App\Core\Enums\Criteria;
   use App\Doctrine\EnumType;
+  use App\GlobalProxy;
   use App\GraphQL\Controllers\AlertController;
   use App\GraphQL\Controllers\LocationController;
   use App\GraphQL\Controllers\NotificationController;
@@ -16,8 +16,6 @@ namespace App\GraphQL {
   use App\GraphQL\Controllers\PrivateAccountController;
   use App\GraphQL\Controllers\PublicAccountController;
   use App\GraphQL\Controllers\PushSubscriptionController;
-  use App\GraphQL\Proxies\ContainerProxy;
-  use App\GraphQL\Proxies\RedisProxy;
   use App\GraphQL\Services\SecurityService;
   use App\Utilities\Translation;
   use Doctrine\DBAL\DriverManager;
@@ -88,12 +86,12 @@ namespace App\GraphQL {
 
   $configuration = ORMSetup::createAttributeMetadataConfiguration([__DIR__ . "/../Core/Entities"], $is_dev_mode);
   $connection = DriverManager::getConnection($connection_parameters, $configuration);
-  EntityManagerProxy::$entity_manager = new EntityManager($connection, $configuration);
+  GlobalProxy::$entityManager = new EntityManager($connection, $configuration);
 
 
 
   // redis
-  RedisProxy::$redis = new Client([
+  GlobalProxy::$redis = new Client([
     'scheme' => $_ENV["REDIS_SCHEME"],
     'host' => $_ENV["REDIS_HOST"],
     'port' => $_ENV["REDIS_PORT"]
@@ -108,7 +106,7 @@ namespace App\GraphQL {
 
 
   // container
-  ContainerProxy::$container = new Container();
+  GlobalProxy::$container = new Container();
 
   $controllers = [
     new PublicAccountController(),
@@ -122,13 +120,13 @@ namespace App\GraphQL {
   ];
 
   foreach ($controllers as $controller) {
-    ContainerProxy::$container->set(get_class($controller), $controller);
+    GlobalProxy::$container->set(get_class($controller), $controller);
   }
 
 
 
   // schema
-  $factory = new SchemaFactory($cache, ContainerProxy::$container);
+  $factory = new SchemaFactory($cache, GlobalProxy::$container);
 
   $factory->addControllerNamespace("App\\GraphQL\\Controllers\\")
     ->addTypeNamespace("App\\Core\\Entities\\")

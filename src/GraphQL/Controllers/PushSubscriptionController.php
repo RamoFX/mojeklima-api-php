@@ -6,7 +6,7 @@ namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
   use App\Core\Entities\PushSubscription;
-  use App\Core\EntityManagerProxy;
+  use App\GlobalProxy;
   use Doctrine\ORM\Exception\ORMException;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
@@ -30,8 +30,8 @@ namespace App\GraphQL\Controllers {
           $push_subscription->setP256dh($p256dh);
           $push_subscription->setAuth($auth);
 
-          EntityManagerProxy::$entity_manager->persist($push_subscription);
-          EntityManagerProxy::$entity_manager->flush($push_subscription);
+          GlobalProxy::$entityManager->persist($push_subscription);
+          GlobalProxy::$entityManager->flush($push_subscription);
 
           return $push_subscription;
         }
@@ -42,8 +42,8 @@ namespace App\GraphQL\Controllers {
 
       $currentAccount->addPushSubscription($push_subscription);
 
-      EntityManagerProxy::$entity_manager->persist($push_subscription);
-      EntityManagerProxy::$entity_manager->flush($push_subscription);
+      GlobalProxy::$entityManager->persist($push_subscription);
+      GlobalProxy::$entityManager->flush($push_subscription);
 
       return $push_subscription;
     }

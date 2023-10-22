@@ -69,7 +69,8 @@ namespace App\Core\Entities {
     /**
      * @throws Exception
      */
-    public function convertRangeFrom(Criteria $criteria, TemperatureUnits|SpeedUnits|PressureUnits $units): void {
+    public function convertRangeFrom(TemperatureUnits|SpeedUnits|PressureUnits $units): void {
+      // TODO: Handle input conversion
       // TODO: make conversion service?
 
       //      if ($units instanceof TemperatureUnits) {

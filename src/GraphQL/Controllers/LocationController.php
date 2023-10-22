@@ -6,7 +6,7 @@ namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
   use App\Core\Entities\Location;
-  use App\Core\EntityManagerProxy;
+  use App\GlobalProxy;
   use App\GraphQL\Exceptions\EntityNotFound;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
@@ -61,8 +61,8 @@ namespace App\GraphQL\Controllers {
       $new_location = new Location($cityName, $countryName, $label, $latitude, $longitude);
       $currentAccount->addLocation($new_location);
 
-      EntityManagerProxy::$entity_manager->persist($new_location);
-      EntityManagerProxy::$entity_manager->flush($new_location);
+      GlobalProxy::$entityManager->persist($new_location);
+      GlobalProxy::$entityManager->flush($new_location);
 
       return $new_location;
     }
@@ -93,7 +93,7 @@ namespace App\GraphQL\Controllers {
       if ($longitude !== null)
         $outdated_location->setLongitude($longitude);
 
-      EntityManagerProxy::$entity_manager->flush($outdated_location);
+      GlobalProxy::$entityManager->flush($outdated_location);
 
       return $outdated_location;
     }
@@ -108,8 +108,8 @@ namespace App\GraphQL\Controllers {
     public static function deleteLocation(#[InjectUser] Account $currentAccount, int $id): Location {
       $location = self::location($currentAccount, $id);
 
-      EntityManagerProxy::$entity_manager->remove($location);
-      EntityManagerProxy::$entity_manager->flush($location);
+      GlobalProxy::$entityManager->remove($location);
+      GlobalProxy::$entityManager->flush($location);
 
       return $location;
     }

@@ -6,9 +6,9 @@ namespace App\GraphQL\Controllers {
 
   use App\Core\Entities\Account;
   use App\Core\Entities\Notification;
-  use App\Core\EntityManagerProxy;
   use App\Core\Enums\AccountRole;
   use App\Core\Enums\Criteria;
+  use App\GlobalProxy;
   use App\GraphQL\Exceptions\EntityNotFound;
   use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
@@ -96,8 +96,8 @@ namespace App\GraphQL\Controllers {
         if (!$notification->getSeen()) {
           $notification->setSeen(true);
 
-          EntityManagerProxy::$entity_manager->persist($notification);
-          EntityManagerProxy::$entity_manager->flush($notification);
+          GlobalProxy::$entityManager->persist($notification);
+          GlobalProxy::$entityManager->flush($notification);
         }
       }
 
@@ -119,8 +119,8 @@ namespace App\GraphQL\Controllers {
       $notification = new Notification();
       $alert->addNotification($notification);
 
-      EntityManagerProxy::$entity_manager->persist($notification);
-      EntityManagerProxy::$entity_manager->flush($notification);
+      GlobalProxy::$entityManager->persist($notification);
+      GlobalProxy::$entityManager->flush($notification);
 
 
 
@@ -305,8 +305,8 @@ namespace App\GraphQL\Controllers {
     public static function deleteNotification(#[InjectUser] Account $currentAccount, int $id): Notification {
       $notification = self::notification($currentAccount, $id);
 
-      EntityManagerProxy::$entity_manager->remove($notification);
-      EntityManagerProxy::$entity_manager->flush($notification);
+      GlobalProxy::$entityManager->remove($notification);
+      GlobalProxy::$entityManager->flush($notification);
 
       return $notification;
     }
