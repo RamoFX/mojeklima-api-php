@@ -7,7 +7,6 @@ namespace App\External {
   use App\Core\Entities\Location;
   use App\Core\Entities\Weather;
   use App\Core\EntityManagerProxy;
-  use App\GraphQL\DevelopmentOutputBuffer;
   use App\GraphQL\Proxies\RedisProxy;
   use App\Utilities\Translation;
   use Exception;
@@ -34,12 +33,12 @@ namespace App\External {
       $longitude = $location->getLongitude();
 
       // check cache
-      $cacheKey = Weather::createKey($latitude, $longitude);
+      $cacheKey = Weather::getKey(strval($latitude), strval($longitude));
+      $cacheExpiration = Weather::getExpiration();
       $cachedWeather = RedisProxy::$redis->get($cacheKey);
 
       if ($cachedWeather) {
-        DevelopmentOutputBuffer::set('weather retrieved from cache', true);
-        $weather = Weather::fromJson($cachedWeather);
+        $weather = Weather::jsonDeserialize($cachedWeather);
         $weather->setLocation($location);
 
         return $weather;
@@ -62,29 +61,26 @@ namespace App\External {
 
       $data = $result->decode_response();
 
-      $weather = new Weather(
-        $data["main"]["temp"],
-        $data["main"]["feels_like"],
-        $data["main"]["humidity"],
-        $data["main"]["pressure"],
-        $data["wind"]["speed"],
-        $data["wind"]["gust"],
-        $data["wind"]["deg"],
-        $data["clouds"]["all"],
-        $data["weather"][0]["description"],
-        $data["weather"][0]["icon"],
-        $data["dt"],
-        $data["sys"]["sunrise"],
-        $data["sys"]["sunset"],
-        $data["timezone"]
-      );
-
-      $weather->setLocation($location);
+      $weather = (new Weather)
+        ->setTemperature($data["main"]["temp"])
+        ->setFeelsLike($data["main"]["feels_like"])
+        ->setHumidity($data["main"]["humidity"])
+        ->setPressure($data["main"]["pressure"])
+        ->setWindSpeed($data["wind"]["speed"])
+        ->setWindGust($data["wind"]["gust"])
+        ->setWindDirection($data["wind"]["deg"])
+        ->setCloudiness($data["clouds"]["all"])
+        ->setDescription($data["weather"][0]["description"])
+        ->setIconCode($data["weather"][0]["icon"])
+        ->setDateTime($data["dt"])
+        ->setSunrise($data["sys"]["sunrise"])
+        ->setSunset($data["sys"]["sunset"])
+        ->setTimezone($data["timezone"])
+        ->setLocation($location);
 
       // set cache
-      $weatherJson = $weather->toJson();
-      RedisProxy::$redis->set($cacheKey, $weatherJson, 'EX', 600);
-      DevelopmentOutputBuffer::set('weather retrieved from cache', false);
+      $cacheValue = $weather->jsonSerialize();
+      RedisProxy::$redis->set($cacheKey, $cacheValue, 'EX', $cacheExpiration);
 
       return $weather;
     }

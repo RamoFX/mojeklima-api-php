@@ -4,11 +4,14 @@
 
 namespace App\Core\Entities {
 
+  use App\Core\Cacheable;
   use App\Core\Enums\PressureUnits;
   use App\Core\Enums\SpeedUnits;
   use App\Core\Enums\TemperatureUnits;
+  use App\Core\JsonDeserializable;
   use App\Utilities\UnitsConverter;
   use Exception;
+  use JsonSerializable;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
@@ -16,7 +19,7 @@ namespace App\Core\Entities {
 
 
   #[Type]
-  class Weather {
+  class Weather extends JsonDeserializable implements JsonSerializable, Cacheable {
     private float $temperature;
     private float $feelsLike;
     private int $humidity;
@@ -33,69 +36,43 @@ namespace App\Core\Entities {
     private int $timezone;
     private Location $location;
 
-    public function __construct(
-      float $temperature,
-      float $feelsLike,
-      int $humidity,
-      int $pressure,
-      float $windSpeed,
-      ?float $windGust,
-      int $windDirection,
-      int $cloudiness,
-      string $description,
-      string $iconCode,
-      int $dateTime,
-      int $sunrise,
-      int $sunset,
-      int $timezone
-    ) {
-      $this->setTemperature($temperature);
-      $this->setFeelsLike($feelsLike);
-      $this->setHumidity($humidity);
-      $this->setPressure($pressure);
-      $this->setWindSpeed($windSpeed);
-      $this->setWindGust($windGust);
-      $this->setWindDirection($windDirection);
-      $this->setCloudiness($cloudiness);
-      $this->setDescription($description);
-      $this->setIconCode($iconCode);
-      $this->setDateTime($dateTime);
-      $this->setSunrise($sunrise);
-      $this->setSunset($sunset);
-      $this->setTimezone($timezone);
+
+
+    /**
+     * @throws GraphQLException
+     */
+    public static function getKey(string ...$components): string {
+      if (count($components) !== 2)
+        throw new GraphQLException("Weather::getKey accepts exactly two arguments (latitude, longitude)"); // TODO: Translate
+
+      $latitude = $components[0];
+      $longitude = $components[1];
+
+      return "Weather:$latitude,$longitude";
     }
 
-    public static function createKey(float $latitude, float $longitude): string {
-      return "Weather=$latitude,$longitude";
+    public static function getExpiration(): int {
+      return 60 * 10;
     }
 
-    public static function fromJson(string $json): Weather {
-      $data = json_decode($json, true);
 
-      return new self(
-        $data['temperature'],
-        $data['feelsLike'],
-        $data['humidity'],
-        $data['pressure'],
-        $data['windSpeed'],
-        $data['windGust'],
-        $data['windDirection'],
-        $data['cloudiness'],
-        $data['description'],
-        $data['iconCode'],
-        $data['dateTime'],
-        $data['sunrise'],
-        $data['sunset'],
-        $data['timezone']
-      );
-    }
 
-    public function toJson(): string {
+    /**
+     * @throws GraphQLException
+     */
+    public function jsonSerialize(): string {
       $fields = get_object_vars($this);
       unset($fields['location']);
 
-      return json_encode($fields);
+      $encoded = json_encode($fields);
+
+      if ($encoded === false)
+        throw new GraphQLException('Cannot serialize Weather'); // TODO: Translate
+
+      return $encoded;
     }
+
+
 
     /**
      * @throws GraphQLException
@@ -152,6 +129,8 @@ namespace App\Core\Entities {
       );
     }
 
+
+
     #[Field]
     public function getTemperature(): float {
       return $this->temperature;
@@ -162,6 +141,8 @@ namespace App\Core\Entities {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getFeelsLike(): float {
@@ -174,6 +155,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
+
+
     #[Field]
     public function getHumidity(): int {
       return $this->humidity;
@@ -184,6 +167,8 @@ namespace App\Core\Entities {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getPressure(): int {
@@ -196,6 +181,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
+
+
     #[Field]
     public function getWindSpeed(): float {
       return $this->windSpeed;
@@ -206,6 +193,8 @@ namespace App\Core\Entities {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getWindGust(): ?float {
@@ -218,6 +207,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
+
+
     #[Field]
     public function getWindDirection(): int {
       return $this->windDirection;
@@ -228,6 +219,8 @@ namespace App\Core\Entities {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getCloudiness(): int {
@@ -240,6 +233,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
+
+
     #[Field]
     public function getDescription(): string {
       return $this->description;
@@ -250,6 +245,8 @@ namespace App\Core\Entities {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getIconCode(): string {
@@ -262,6 +259,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
+
+
     #[Field]
     public function getDateTime(): int {
       return $this->dateTime;
@@ -272,6 +271,8 @@ namespace App\Core\Entities {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getSunrise(): int {
@@ -284,6 +285,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
+
+
     #[Field]
     public function getSunset(): int {
       return $this->sunset;
@@ -295,6 +298,8 @@ namespace App\Core\Entities {
       return $this;
     }
 
+
+
     #[Field]
     public function getTimezone(): int {
       return $this->timezone;
@@ -305,6 +310,8 @@ namespace App\Core\Entities {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getLocation(): Location {
