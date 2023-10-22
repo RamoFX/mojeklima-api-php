@@ -12,6 +12,7 @@ namespace App\Core {
   class Validator {
     public static function multiple(...$validator_results) {
       $last_key = array_key_last($validator_results);
+
       return $validator_results[$last_key];
     }
 
