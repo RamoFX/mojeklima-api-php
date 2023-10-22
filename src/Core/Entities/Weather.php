@@ -20,7 +20,7 @@ namespace App\Core\Entities {
 
 
   #[Type]
-  class Weather extends JsonDeserializable implements JsonSerializable, Cacheable {
+  class Weather extends JsonDeserializable implements JsonSerializable, Cacheable { // TODO: make cache service?
     private float $temperature;
     private float $feelsLike;
     private int $humidity;
@@ -78,6 +78,7 @@ namespace App\Core\Entities {
       $encoded = json_encode($fields);
 
       if ($encoded === false) {
+        // TODO: make translation service?
         $language = Translation::get_preferred_language(); // TODO: This can be automated
         // TODO: In order to automate sibling logic this can be done differently
         $messages = [

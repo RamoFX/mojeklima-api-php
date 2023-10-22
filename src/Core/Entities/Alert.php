@@ -5,6 +5,9 @@
 namespace App\Core\Entities {
 
   use App\Core\Enums\Criteria;
+  use App\Core\Enums\PressureUnits;
+  use App\Core\Enums\SpeedUnits;
+  use App\Core\Enums\TemperatureUnits;
   use App\Core\Validator;
   use App\Utilities\UnitsConverter;
   use DateTimeImmutable;
@@ -64,60 +67,36 @@ namespace App\Core\Entities {
     }
 
     /**
-     * @throws GraphQLException
-     */
-    private function validateRangeUnits(Criteria $criteria, string $units): void {
-      switch ($criteria) {
-        case Criteria::TEMPERATURE:
-        case 'FEELS_LIKE':
-          Validator::oneOf("units", $units, ["CELSIUS", "FAHRENHEIT", "KELVIN", "RANKINE"]);
-          break;
-
-        case Criteria::WIND_SPEED:
-        case Criteria::WIND_GUST:
-          Validator::oneOf("units", $units, ["METERS_PER_SECOND", "KILOMETERS_PER_HOUR", "MILES_PER_HOUR", "KNOTS"]);
-          break;
-
-        case Criteria::PRESSURE:
-          Validator::oneOf("units", $units, ["HECTOPASCAL", "MILLIBAR", "INCHES_OF_MERCURY"]);
-          break;
-      }
-    }
-
-    /**
      * @throws Exception
      */
-    public function convertRangeFrom(?Criteria $criteria, string $units): void {
-      $this->validateRangeUnits($criteria ?? $this->getCriteria(), $units);
+    public function convertRangeFrom(Criteria $criteria, TemperatureUnits|SpeedUnits|PressureUnits $units): void {
+      // TODO: make conversion service?
+
+      //      if ($units instanceof TemperatureUnits) {
+      //      } else if ($units instanceof SpeedUnits) {
+      //      } else if ($units instanceof PressureUnits) {
+      //      }
 
       $this->setRangeFrom(
-        UnitsConverter::toMetric(
-          $this->getRangeFrom(),
-          $units
-        )
+        UnitsConverter::toMetric($this->getRangeFrom(), $units)
       );
     }
 
     /**
      * @throws Exception
      */
-    public function convertRangeTo(?Criteria $criteria, string $units): void {
-      $this->validateRangeUnits($criteria ?? $this->getCriteria(), $units);
-
+    public function convertRangeTo(TemperatureUnits|SpeedUnits|PressureUnits $units): void {
       $this->setRangeTo(
-        UnitsConverter::toMetric(
-          $this->getRangeTo(),
-          $units
-        )
+        UnitsConverter::toMetric($this->getRangeTo(), $units)
       );
     }
 
     /**
      * @throws Exception
      */
-    public function convertRange(Criteria $criteria, string $units): void {
-      $this->convertRangeFrom($criteria, $units);
-      $this->convertRangeTo($criteria, $units);
+    public function convertRange(TemperatureUnits|SpeedUnits|PressureUnits $units): void {
+      $this->convertRangeFrom($units);
+      $this->convertRangeTo($units);
     }
 
     #[Field(outputType: "ID")]
