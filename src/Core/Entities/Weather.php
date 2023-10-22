@@ -9,6 +9,7 @@ namespace App\Core\Entities {
   use App\Core\Enums\SpeedUnits;
   use App\Core\Enums\TemperatureUnits;
   use App\Core\JsonDeserializable;
+  use App\Utilities\Translation;
   use App\Utilities\UnitsConverter;
   use Exception;
   use JsonSerializable;
@@ -42,8 +43,18 @@ namespace App\Core\Entities {
      * @throws GraphQLException
      */
     public static function getKey(string ...$components): string {
-      if (count($components) !== 2)
-        throw new GraphQLException("Weather::getKey accepts exactly two arguments (latitude, longitude)"); // TODO: Translate
+      if (count($components) !== 2) {
+        $language = Translation::get_preferred_language(); // TODO: This can be automated
+        // TODO: In order to automate sibling logic this can be done differently
+        $messages = [
+          "cs" => "Weather::getKey přijímá právě dva argumenty (zeměpisná šířka, zeměpisná délka)",
+          "en" => "Weather::getKey accepts exactly two arguments (latitude, longitude)",
+          "de" => "Weather::getKey akzeptiert genau zwei Argumente (Breitengrad, Längengrad)",
+        ];
+        $translatedMessage = Translation::translate($messages, $language); // TODO: This can be automated
+
+        throw new GraphQLException($translatedMessage);
+      }
 
       $latitude = $components[0];
       $longitude = $components[1];
@@ -66,8 +77,18 @@ namespace App\Core\Entities {
 
       $encoded = json_encode($fields);
 
-      if ($encoded === false)
-        throw new GraphQLException('Cannot serialize Weather'); // TODO: Translate
+      if ($encoded === false) {
+        $language = Translation::get_preferred_language(); // TODO: This can be automated
+        // TODO: In order to automate sibling logic this can be done differently
+        $messages = [
+          "cs" => "Nelze serializovat Počasí",
+          "en" => "Cannot serialize Weather",
+          "de" => "Weather kann nicht serialisiert werden",
+        ];
+        $translatedMessage = Translation::translate($messages, $language); // TODO: This can be automated
+
+        throw new GraphQLException($translatedMessage);
+      }
 
       return $encoded;
     }
