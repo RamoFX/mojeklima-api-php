@@ -4,50 +4,88 @@
 
 namespace App\Resources\Weather {
 
+  use App\Resources\Account\AccountEntity;
   use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Common\Utilities\Translation;
-  use App\Resources\Location\LocationEntity;
+  use App\Resources\Location\LocationService;
+  use App\Resources\Weather\Enums\PressureUnits;
+  use App\Resources\Weather\Enums\SpeedUnits;
+  use App\Resources\Weather\Enums\TemperatureUnits;
   use Exception;
   use RestClient;
   use RestClientException;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
-  // TODO: Isn't this a service of external data source kind?
   class WeatherService {
+    private LocationService $locationService;
+
+
+
+    /**
+     * @throws Exception
+     */
+    public function __construct() {
+      $this->locationService = GlobalProxy::$container->get(LocationService::class);
+    }
+
+
+
+    private static function getRestClient(): RestClient {
+      $api = new RestClient([
+        'base_url' => "https://api.openweathermap.org/data/2.5/"
+      ]);
+
+      $api->register_decoder('json', function($data) {
+        return json_decode($data, true);
+      });
+
+      return $api;
+    }
+
+
+
     /**
      * @throws RestClientException
      * @throws Exception
+     * @throws GraphQLException
      */
-    public static function getWeather(int $locationId): WeatherEntity {
+    public function weather(
+      AccountEntity $currentAccount,
+      int $locationId,
+      ?TemperatureUnits $temperatureUnits,
+      ?SpeedUnits $speedUnits,
+      ?PressureUnits $pressureUnits
+    ) {
+      // TODO: Handle output conversion
+      $location = $this->locationService->location($currentAccount, $locationId);
+      $latitude = $location->getLatitude();
+      $longitude = $location->getLongitude();
+
       // language
       $language = Translation::getPreferredLanguage();
       // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (country code).
-      // For that reason mapping needs to be done
+      // For that reason additional mapping needs to be done
       $languageMap = [
         'cs' => 'cz'
       ];
 
-      // location
-      $location = GlobalProxy::$entityManager->find(LocationEntity::class, $locationId);
-      $latitude = $location->getLatitude();
-      $longitude = $location->getLongitude();
-
       // check cache
       $cacheKey = WeatherEntity::getKey(strval($latitude), strval($longitude));
       $cacheExpiration = WeatherEntity::getExpiration();
-      $cachedWeather = GlobalProxy::$redis->get($cacheKey);
+      $cachedValue = GlobalProxy::$redis->get($cacheKey);
 
-      if ($cachedWeather) {
-        $weather = WeatherEntity::jsonDeserialize($cachedWeather);
+      if ($cachedValue) {
+        $weather = WeatherEntity::jsonDeserialize($cachedValue);
         $weather->setLocation($location);
 
         return $weather;
       }
 
       // api call
-      $api = self::get_rest_client();
-      $apiKey = self::get_api_key();
+      $api = self::getRestClient();
+      $apiKey = $_ENV["OPEN_WEATHER_API_KEY"];
 
       $result = $api->get("weather", [
         'appid' => $apiKey,
@@ -62,7 +100,7 @@ namespace App\Resources\Weather {
 
       $data = $result->decode_response();
 
-      $weather = (new WeatherEntity)
+      $weather = (new WeatherEntity())
         ->setTemperature($data["main"]["temp"])
         ->setFeelsLike($data["main"]["feels_like"])
         ->setHumidity($data["main"]["humidity"])
@@ -84,22 +122,6 @@ namespace App\Resources\Weather {
       GlobalProxy::$redis->set($cacheKey, $cacheValue, 'EX', $cacheExpiration);
 
       return $weather;
-    }
-
-    private static function get_rest_client(): RestClient {
-      $api = new RestClient([
-        'base_url' => "https://api.openweathermap.org/data/2.5/"
-      ]);
-
-      $api->register_decoder('json', function($data) {
-        return json_decode($data, true);
-      });
-
-      return $api;
-    }
-
-    private static function get_api_key() {
-      return $_ENV["OPEN_WEATHER_API_KEY"];
     }
   }
 }

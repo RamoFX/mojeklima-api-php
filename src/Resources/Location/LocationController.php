@@ -9,6 +9,7 @@ namespace App\Resources\Location {
   use App\Resources\Common\Utilities\GlobalProxy;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
+  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -17,37 +18,49 @@ namespace App\Resources\Location {
 
 
 
-  class LocationController {
+  readonly class LocationController {
+    private LocationService $locationService;
+
+
+
+    /**
+     * @throws Exception
+     */
+    public function __construct() {
+      $this->locationService = GlobalProxy::$container->get(LocationService::class);
+    }
+
+
+
     /**
      * @return LocationEntity[]
      */
     #[Query]
     #[Logged]
-    public static function allLocations(#[InjectUser] AccountEntity $currentAccount): array {
-      return $currentAccount->getLocations();
+    public function locations(#[InjectUser] AccountEntity $currentAccount): array {
+      return $this->locationService->locations($currentAccount);
     }
+
+
 
     #[Query]
     #[Logged]
-    public static function locationsCount(#[InjectUser] AccountEntity $currentAccount): int {
-      return count(self::allLocations($currentAccount));
+    public function locationsCount(#[InjectUser] AccountEntity $currentAccount): int {
+      return $this->locationService->locationsCount($currentAccount);
     }
+
+
 
     /**
      * @throws EntityNotFound
      */
     #[Query]
     #[Logged]
-    public static function location(#[InjectUser] AccountEntity $currentAccount, int $id): LocationEntity {
-      $allLocations = self::allLocations($currentAccount);
-
-      foreach ($allLocations as $location) {
-        if ($location->getId() === $id)
-          return $location;
-      }
-
-      throw new EntityNotFound("Location");
+    public function location(#[InjectUser] AccountEntity $currentAccount, int $id): LocationEntity {
+      return $this->locationService->location($currentAccount, $id);
     }
+
+
 
     /**
      * @throws OptimisticLockException
@@ -56,15 +69,11 @@ namespace App\Resources\Location {
      */
     #[Mutation]
     #[Logged]
-    public static function createLocation(#[InjectUser] AccountEntity $currentAccount, string $cityName, string $countryName, ?string $label, float $latitude, float $longitude): LocationEntity {
-      $new_location = new LocationEntity($cityName, $countryName, $label, $latitude, $longitude);
-      $currentAccount->addLocation($new_location);
-
-      GlobalProxy::$entityManager->persist($new_location);
-      GlobalProxy::$entityManager->flush($new_location);
-
-      return $new_location;
+    public function createLocation(#[InjectUser] AccountEntity $currentAccount, string $cityName, string $countryName, ?string $label, float $latitude, float $longitude): LocationEntity {
+      return $this->locationService->createLocation($currentAccount, $cityName, $countryName, $label, $latitude, $longitude);
     }
+
+
 
     /**
      * @throws OptimisticLockException
@@ -74,28 +83,11 @@ namespace App\Resources\Location {
      */
     #[Mutation]
     #[Logged]
-    public static function updateLocation(#[InjectUser] AccountEntity $currentAccount, int $id, ?string $cityName, ?string $countryName, ?string $label, ?float $latitude, ?float $longitude): LocationEntity {
-      $outdated_location = self::location($currentAccount, $id);
-
-      if ($cityName !== null)
-        $outdated_location->setCityName($cityName);
-
-      if ($countryName !== null)
-        $outdated_location->setCountryName($countryName);
-
-      if ($label !== null)
-        $outdated_location->setLabel($label);
-
-      if ($latitude !== null)
-        $outdated_location->setLatitude($latitude);
-
-      if ($longitude !== null)
-        $outdated_location->setLongitude($longitude);
-
-      GlobalProxy::$entityManager->flush($outdated_location);
-
-      return $outdated_location;
+    public function updateLocation(#[InjectUser] AccountEntity $currentAccount, int $id, ?string $cityName, ?string $countryName, ?string $label, ?float $latitude, ?float $longitude): LocationEntity {
+      return $this->locationService->updateLocation($currentAccount, $id, $cityName, $countryName, $label, $latitude, $longitude);
     }
+
+
 
     /**
      * @throws OptimisticLockException
@@ -104,13 +96,8 @@ namespace App\Resources\Location {
      */
     #[Mutation]
     #[Logged]
-    public static function deleteLocation(#[InjectUser] AccountEntity $currentAccount, int $id): LocationEntity {
-      $location = self::location($currentAccount, $id);
-
-      GlobalProxy::$entityManager->remove($location);
-      GlobalProxy::$entityManager->flush($location);
-
-      return $location;
+    public function deleteLocation(#[InjectUser] AccountEntity $currentAccount, int $id): LocationEntity {
+      return $this->locationService->deleteLocation($currentAccount, $id);
     }
   }
 }

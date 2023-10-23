@@ -5,6 +5,7 @@
 namespace App\Resources\Weather {
 
   use App\Resources\Account\AccountEntity;
+  use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Weather\Enums\PressureUnits;
   use App\Resources\Weather\Enums\SpeedUnits;
   use App\Resources\Weather\Enums\TemperatureUnits;
@@ -15,21 +16,39 @@ namespace App\Resources\Weather {
 
 
 
-  class WeatherController {
+  readonly class WeatherController {
+    private WeatherService $weatherService;
+
+
+
+    /**
+     * @throws Exception
+     */
+    public function __construct() {
+      $this->weatherService = GlobalProxy::$container->get(WeatherService::class);
+    }
+
+
+
     /**
      * @throws Exception
      */
     #[Query]
     #[Logged]
-    // TODO: Handle output conversion
-    public static function weather(#[InjectUser] AccountEntity $currentAccount, int $locationId, ?TemperatureUnits $temperatureUnits, ?SpeedUnits $speedUnits, ?PressureUnits $pressureUnits): WeatherEntity {
-      $weather = WeatherService::getWeather($locationId);
-
-      //      $weather->convertTemperature($temperatureUnits ?? TemperatureUnits::CELSIUS);
-      //      $weather->convertSpeed($speedUnits ?? SpeedUnits::METERS_PER_SECOND);
-      //      $weather->convertPressure($pressureUnits ?? PressureUnits::HECTOPASCAL);
-
-      return $weather;
+    public function weather(
+      #[InjectUser] AccountEntity $currentAccount,
+      int $locationId,
+      ?TemperatureUnits $temperatureUnits,
+      ?SpeedUnits $speedUnits,
+      ?PressureUnits $pressureUnits
+    ): WeatherEntity {
+      return $this->weatherService->weather(
+        $currentAccount,
+        $locationId,
+        $temperatureUnits,
+        $speedUnits,
+        $pressureUnits
+      );
     }
   }
 }

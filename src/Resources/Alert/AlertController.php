@@ -9,8 +9,6 @@ namespace App\Resources\Alert {
   use App\Resources\Common\Exceptions\EntityNotFound;
   use App\Resources\Common\Exceptions\LimitExceeded;
   use App\Resources\Common\Utilities\GlobalProxy;
-  use App\Resources\Location\LocationController;
-  use App\Resources\Location\LocationEntity;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
   use Exception;
@@ -22,36 +20,33 @@ namespace App\Resources\Alert {
 
 
 
-  class AlertController {
-    /**
-     * @throws EntityNotFound|Exception
-     */
-    private static function getLocation(AccountEntity $currentAccount, int $locationId): LocationEntity {
-      $location_controller = GlobalProxy::$container->get(LocationController::class); // TODO: Use injected locationService
+  readonly class AlertController {
+    private AlertService $alertService;
 
-      return $location_controller->location($currentAccount, $locationId);
+
+
+    /**
+     * @throws Exception
+     */
+    public function __construct() {
+      $this->alertService = GlobalProxy::$container->get(AlertService::class);
     }
+
+
 
     /**
      * @return AlertEntity[]
      */
     #[Query]
     #[Logged]
-    public static function allAlerts(#[InjectUser] AccountEntity $currentAccount): array {
-      $locations = $currentAccount->getLocations();
-      $alerts = [];
-
-      foreach ($locations as $location) {
-        array_push($alerts, ...$location->getAlerts());
-      }
-
-      return $alerts;
+    public function allAlerts(#[InjectUser] AccountEntity $currentAccount): array {
+      return $this->alertService->allAlerts($currentAccount);
     }
 
     #[Query]
     #[Logged]
-    public static function allAlertsCount(#[InjectUser] AccountEntity $currentAccount): int {
-      return count(self::allAlerts($currentAccount));
+    public function allAlertsCount(#[InjectUser] AccountEntity $currentAccount): int {
+      return $this->alertService->allAlertsCount($currentAccount);
     }
 
     /**
@@ -60,10 +55,8 @@ namespace App\Resources\Alert {
      */
     #[Query]
     #[Logged]
-    public static function locationAlerts(#[InjectUser] AccountEntity $currentAccount, int $locationId): array {
-      $location = self::getLocation($currentAccount, $locationId);
-
-      return $location->getAlerts();
+    public function locationAlerts(#[InjectUser] AccountEntity $currentAccount, int $locationId): array {
+      return $this->alertService->locationAlerts($currentAccount, $locationId);
     }
 
     /**
@@ -71,8 +64,8 @@ namespace App\Resources\Alert {
      */
     #[Query]
     #[Logged]
-    public static function locationAlertsCount(#[InjectUser] AccountEntity $current_account, int $locationId): int {
-      return count(self::locationAlerts($current_account, $locationId));
+    public function locationAlertsCount(#[InjectUser] AccountEntity $current_account, int $locationId): int {
+      return $this->alertService->locationAlertsCount($current_account, $locationId);
     }
 
     /**
@@ -80,16 +73,8 @@ namespace App\Resources\Alert {
      */
     #[Query]
     #[Logged]
-    public static function alert(#[InjectUser] AccountEntity $currentAccount, int $id): AlertEntity {
-      $alerts = self::allAlerts($currentAccount);
-
-      foreach ($alerts as $alert) {
-        if ($alert->getId() === $id) {
-          return $alert;
-        }
-      }
-
-      throw new EntityNotFound("Alert");
+    public function alert(#[InjectUser] AccountEntity $currentAccount, int $id): AlertEntity {
+      return $this->alertService->alert($currentAccount, $id);
     }
 
     /**
@@ -100,8 +85,8 @@ namespace App\Resources\Alert {
      */
     #[Mutation]
     #[Logged]
-    public static function toggleAlert(#[InjectUser] AccountEntity $currentAccount, int $id, bool $isEnabled): AlertEntity {
-      return self::updateAlert($currentAccount, $id, $isEnabled, null, null, null, null, null);
+    public function toggleAlert(#[InjectUser] AccountEntity $currentAccount, int $id, bool $isEnabled): AlertEntity {
+      return $this->alertService->toggleAlert($currentAccount, $id, $isEnabled);
     }
 
     /**
@@ -114,22 +99,8 @@ namespace App\Resources\Alert {
      */
     #[Mutation]
     #[Logged]
-    public static function createAlert(#[InjectUser] AccountEntity $currentAccount, int $locationId, bool $isEnabled, Criteria $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message): AlertEntity {
-      // check whether user exceeds the limit
-      $alerts_count = self::allAlertsCount($currentAccount);
-
-      if ($alerts_count >= 32)
-        throw new LimitExceeded("Alert", 32);
-
-      $location = self::getLocation($currentAccount, $locationId);
-      $new_alert = new AlertEntity($isEnabled, $criteria, $rangeFrom, $rangeTo, $updateFrequency, $message);
-      //    $new_alert->convertRange($criteria, $units);
-      $location->addAlert($new_alert);
-
-      GlobalProxy::$entityManager->persist($new_alert);
-      GlobalProxy::$entityManager->flush($new_alert);
-
-      return $new_alert;
+    public function createAlert(#[InjectUser] AccountEntity $currentAccount, int $locationId, bool $isEnabled, Criteria $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message): AlertEntity {
+      return $this->alertService->createAlert($currentAccount, $locationId, $isEnabled, $criteria, $rangeFrom, $rangeTo, $updateFrequency, $message);
     }
 
     /**
@@ -141,39 +112,8 @@ namespace App\Resources\Alert {
      */
     #[Mutation]
     #[Logged]
-    public static function updateAlert(#[InjectUser] AccountEntity $currentAccount, int $id, ?bool $isEnabled, ?Criteria $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message): AlertEntity {
-      $alert = self::alert($currentAccount, $id);
-      $criteria = $criteria ?? $alert->getCriteria();
-
-      //    if (($rangeFrom !== null || $rangeTo !== null) && $units === null) {
-      //      throw new GraphQLException("If you are specifying range values, then you have to provide units.");
-      //    }
-
-      if ($isEnabled !== null)
-        $alert->setIsEnabled($isEnabled);
-
-      if ($criteria !== null)
-        $alert->setCriteria($criteria);
-
-      if ($rangeFrom !== null) {
-        $alert->setRangeFrom($rangeFrom);
-        //      $alert->convertRangeFrom($criteria, $units);
-      }
-
-      if ($rangeTo !== null) {
-        $alert->setRangeTo($rangeTo);
-        //      $alert->convertRangeTo($criteria, $units);
-      }
-
-      if ($updateFrequency !== null)
-        $alert->setUpdateFrequency($updateFrequency);
-
-      if ($message !== null)
-        $alert->setMessage($message);
-
-      GlobalProxy::$entityManager->flush($alert);
-
-      return $alert;
+    public function updateAlert(#[InjectUser] AccountEntity $currentAccount, int $id, ?bool $isEnabled, ?Criteria $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message): AlertEntity {
+      return $this->alertService->updateAlert($currentAccount, $id, $isEnabled, $criteria, $rangeFrom, $rangeTo, $updateFrequency, $message);
     }
 
     /**
@@ -183,13 +123,8 @@ namespace App\Resources\Alert {
      */
     #[Mutation]
     #[Logged]
-    public static function deleteAlert(#[InjectUser] AccountEntity $currentAccount, int $id): AlertEntity {
-      $alert = self::alert($currentAccount, $id);
-
-      GlobalProxy::$entityManager->remove($alert);
-      GlobalProxy::$entityManager->flush($alert);
-
-      return $alert;
+    public function deleteAlert(#[InjectUser] AccountEntity $currentAccount, int $id): AlertEntity {
+      return $this->alertService->deleteAlert($currentAccount, $id);
     }
   }
 }

@@ -5,56 +5,48 @@
 namespace App\Resources\Auth {
 
   use App\Resources\Account\AccountEntity;
-  use App\Resources\Account\Enums\AccountRole;
-  use App\Resources\Account\Exceptions\AccountAlreadyExist;
   use App\Resources\Account\Exceptions\AccountMarkedAsRemoved;
   use App\Resources\Account\Exceptions\EmailNotFound;
   use App\Resources\Account\InputTypes\CreateAccount;
+  use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
+  use App\Resources\Auth\Exceptions\BearerTokenMissing;
   use App\Resources\Auth\Exceptions\IncorrectPassword;
-  use App\Resources\Auth\Utilities\JWT;
+  use App\Resources\Auth\Exceptions\InvalidToken;
+  use App\Resources\Auth\Exceptions\TokenExpired;
   use App\Resources\Common\Utilities\GlobalProxy;
-  use App\Resources\Common\Utilities\Random;
-  use App\Resources\Email\EmailService;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NonUniqueResultException;
-  use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
   use Exception;
+  use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+  use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
-  class AuthController {
+  readonly class AuthController {
+    private AuthService $authService;
+
+
+
+    /**
+     * @throws Exception
+     */
+    public function __construct() {
+      $this->authService = GlobalProxy::$container->get(AuthService::class);
+    }
+
+
+
     /**
      * @throws IncorrectPassword
      * @throws EmailNotFound
      * @throws AccountMarkedAsRemoved
      */
     #[Mutation]
-    public static function login(string $email, string $password, bool $remember): string {
-      try {
-        /** @var $account AccountEntity */
-        $account = GlobalProxy::$entityManager->createQueryBuilder()
-          ->select("account")
-          ->from(AccountEntity::class, "account")
-          ->where("account.email = :email")
-          ->setParameter("email", $email)
-          ->getQuery()
-          ->getSingleResult();
-      } catch (Exception $exception) {
-        throw new EmailNotFound();
-      }
-
-      if ($account->getIsMarkedAsRemoved())
-        throw new AccountMarkedAsRemoved();
-
-      $do_passwords_match = password_verify($password, $account->getPasswordHash());
-
-      if (!$do_passwords_match)
-        throw new IncorrectPassword();
-
-      return JWT::createToken($account->getId(), $remember);
+    public function login(string $email, string $password, bool $remember): string {
+      return $this->authService->login($email, $password, $remember);
     }
 
 
@@ -65,26 +57,8 @@ namespace App\Resources\Auth {
      * @throws Exception
      */
     #[Mutation]
-    public static function register(CreateAccount $account): bool {
-      $emails_count = GlobalProxy::$entityManager->createQueryBuilder()
-        ->select("count(account.id)")
-        ->from(AccountEntity::class, "account")
-        ->where("account.email = :email")
-        ->setParameter("email", $account->email)
-        ->getQuery()
-        ->getSingleScalarResult();
-
-      if ($emails_count > 0)
-        throw new AccountAlreadyExist();
-
-      $random_password = Random::randomString(6, "abc123");
-
-      $new_account = new AccountEntity(AccountRole::USER, $account->name, $account->email, $random_password);
-
-      GlobalProxy::$entityManager->persist($new_account);
-      GlobalProxy::$entityManager->flush($new_account);
-
-      return EmailService::sendPassword($account->email, $random_password);
+    public function register(CreateAccount $account): bool {
+      return $this->authService->register($account);
     }
 
 
@@ -97,31 +71,22 @@ namespace App\Resources\Auth {
      * @throws AccountMarkedAsRemoved
      */
     #[Mutation]
-    public static function resetPassword(string $email): bool {
-      try {
-        /* @var AccountEntity $account */
-        $account = GlobalProxy::$entityManager->createQueryBuilder()
-          ->select("account")
-          ->from(AccountEntity::class, "account")
-          ->where("account.email = :email")
-          ->setParameter("email", $email)
-          ->getQuery()
-          ->getSingleResult();
+    public function resetPassword(string $email): bool {
+      return $this->authService->resetPassword($email);
+    }
 
-        if ($account->getIsMarkedAsRemoved())
-          throw new AccountMarkedAsRemoved();
 
-        $random_password = Random::randomString(6, "abc123");
 
-        $account->setPassword($random_password);
-
-        GlobalProxy::$entityManager->persist($account);
-        GlobalProxy::$entityManager->flush($account);
-
-        return EmailService::sendPassword($email, $random_password);
-      } catch (NoResultException) {
-        throw new EmailNotFound();
-      }
+    /**
+     * @throws InvalidToken
+     * @throws AuthorizationHeaderMissing
+     * @throws TokenExpired
+     * @throws BearerTokenMissing
+     */
+    #[Mutation]
+    #[Logged]
+    public function renewToken(#[InjectUser] AccountEntity $currentAccount, bool $remember): string {
+      return $this->authService->renewToken($currentAccount, $remember);
     }
   }
 }

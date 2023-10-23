@@ -4,6 +4,7 @@
 
 namespace App\Resources\Suggestion {
 
+  use App\Resources\Common\Utilities\Translation;
   use Exception;
   use RestClient;
   use RestClientException;
@@ -16,9 +17,12 @@ namespace App\Resources\Suggestion {
      * @throws RestClientException
      * @throws Exception
      */
-    public static function get_suggestions(string $language, string $query): array {
-      $api = self::get_rest_client();
-      $apiKey = self::get_api_key();
+    public function suggestions(string $query): array {
+      $language = Translation::getPreferredLanguage();
+
+      // rest api
+      $api = $this->getRestClient();
+      $apiKey = $_ENV["OPEN_CAGE_GEOCODING_API_KEY"];
 
       // "https://api.opencagedata.com/geocode/v1/json?key=2e20a10b90b64b8ab26b10257f49ef5f&no_annotations=1&language=$language&limit=5&q=$query";
       $result = $api->get("json", [
@@ -58,7 +62,9 @@ namespace App\Resources\Suggestion {
       return $suggestions;
     }
 
-    private static function get_rest_client(): RestClient {
+
+
+    private function getRestClient(): RestClient {
       $api = new RestClient([
         'base_url' => "https://api.opencagedata.com/geocode/v1/"
       ]);
@@ -68,10 +74,6 @@ namespace App\Resources\Suggestion {
       });
 
       return $api;
-    }
-
-    private static function get_api_key() {
-      return $_ENV["OPEN_CAGE_GEOCODING_API_KEY"];
     }
   }
 }

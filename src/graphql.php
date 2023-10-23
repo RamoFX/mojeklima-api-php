@@ -5,8 +5,10 @@
 namespace App {
 
   use App\Resources\Account\AccountController;
+  use App\Resources\Account\AccountService;
   use App\Resources\Account\Enums\AccountRole;
   use App\Resources\Alert\AlertController;
+  use App\Resources\Alert\AlertService;
   use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Auth\AuthController;
   use App\Resources\Auth\AuthService;
@@ -15,14 +17,18 @@ namespace App {
   use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Common\Utilities\Translation;
   use App\Resources\Location\LocationController;
+  use App\Resources\Location\LocationService;
   use App\Resources\Notification\NotificationController;
+  use App\Resources\Notification\NotificationService;
   use App\Resources\PushSubscription\PushSubscriptionController;
+  use App\Resources\PushSubscription\PushSubscriptionService;
   use App\Resources\Suggestion\SuggestionController;
+  use App\Resources\Suggestion\SuggestionService;
   use App\Resources\Weather\WeatherController;
+  use App\Resources\Weather\WeatherService;
   use Doctrine\DBAL\DriverManager;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\ORMSetup;
-  use Exception;
   use GraphQL\Error\DebugFlag;
   use GraphQL\GraphQL;
   use Predis\Client;
@@ -45,7 +51,7 @@ namespace App {
 
 
   // global exception handler
-  set_exception_handler(function(Exception $exception) use ($isDevMode) {
+  set_exception_handler(function(\Throwable $exception) use ($isDevMode) {
     header('Content-Type: application/json');
     $language = Translation::getPreferredLanguage();
     $messages = [
@@ -105,21 +111,40 @@ namespace App {
   $pool = new FilesystemAdapter();
   $cache = new Psr16Cache($pool);
   $context = new Context();
+
+
+
+  // dependency injection
   GlobalProxy::$container = new Container();
 
-  $controllers = [
+  $injectables = [
     new AuthController(),
+    new AuthService(),
+
     new AccountController(),
+    new AccountService(),
+
     new PushSubscriptionController(),
+    new PushSubscriptionService(),
+
     new LocationController(),
+    new LocationService(),
+
     new WeatherController(),
+    new WeatherService(),
+
     new AlertController(),
+    new AlertService(),
+
     new NotificationController(),
-    new SuggestionController()
+    new NotificationService(),
+
+    new SuggestionController(),
+    new SuggestionService(),
   ];
 
-  foreach ($controllers as $controller) {
-    GlobalProxy::$container->set(get_class($controller), $controller);
+  foreach ($injectables as $injectable) {
+    GlobalProxy::$container->set(get_class($injectable), $injectable);
   }
 
 

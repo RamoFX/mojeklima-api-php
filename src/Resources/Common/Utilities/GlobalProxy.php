@@ -13,7 +13,7 @@ namespace App\Resources\Common\Utilities {
   class GlobalProxy {
     public static Client $redis;
 
-    public static Container $container; // TODO: To be removed
+    public static Container $container;
 
     public static EntityManager $entityManager;
   }
