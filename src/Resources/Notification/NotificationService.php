@@ -288,7 +288,18 @@ namespace App\Resources\Notification {
 
 
 
-    public function deleteNotification(AccountEntity $currentAccount) {
+    /**
+     * @throws OptimisticLockException
+     * @throws EntityNotFound
+     * @throws ORMException
+     */
+    public function deleteNotification(AccountEntity $currentAccount, int $id): NotificationEntity {
+      $notification = self::notification($currentAccount, $id);
+
+      GlobalProxy::$entityManager->remove($notification);
+      GlobalProxy::$entityManager->flush($notification);
+
+      return $notification;
     }
   }
 }
