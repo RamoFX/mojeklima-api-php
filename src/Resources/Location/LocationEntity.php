@@ -6,7 +6,7 @@ namespace App\Resources\Location {
 
   use App\Resources\Account\AccountEntity;
   use App\Resources\Alert\AlertEntity;
-  use App\Resources\Common\Utilities\Translation;
+  use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Common\Utilities\Validator;
   use App\Resources\Weather\WeatherEntity;
   use App\Resources\Weather\WeatherService;
@@ -52,6 +52,8 @@ namespace App\Resources\Location {
     private Collection $alerts;
     private ?WeatherEntity $weather;
 
+
+
     /**
      * @throws GraphQLException
      */
@@ -65,10 +67,14 @@ namespace App\Resources\Location {
       $this->alerts = new ArrayCollection();
     }
 
+
+
     #[Field(outputType: "ID")]
     public function getId(): ?int {
       return $this->id;
     }
+
+
 
     #[Field]
     public function getCityName(): string {
@@ -84,6 +90,8 @@ namespace App\Resources\Location {
       return $this;
     }
 
+
+
     #[Field]
     public function getCountryName(): string {
       return $this->countryName;
@@ -97,6 +105,8 @@ namespace App\Resources\Location {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getLabel(): ?string {
@@ -113,6 +123,8 @@ namespace App\Resources\Location {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getLatitude(): float {
@@ -131,6 +143,8 @@ namespace App\Resources\Location {
       return $this;
     }
 
+
+
     #[Field]
     public function getLongitude(): float {
       return $this->longitude;
@@ -148,15 +162,21 @@ namespace App\Resources\Location {
       return $this;
     }
 
+
+
     #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
 
+
+
     #[Field]
     public function getUpdatedAt(): DateTimeImmutable {
       return $this->updatedAt;
     }
+
+
 
     #[Field]
     public function getAccount(): AccountEntity {
@@ -168,6 +188,8 @@ namespace App\Resources\Location {
 
       return $this;
     }
+
+
 
     /**
      * @return AlertEntity[]
@@ -184,17 +206,19 @@ namespace App\Resources\Location {
       return $this;
     }
 
+
+
     /**
      * @throws Exception
      */
     #[Field]
     public function getWeather(): ?WeatherEntity {
       if (!isset($this->weather)) {
-        $latitude = $this->getLatitude();
-        $longitude = $this->getLongitude();
-        $language = Translation::getPreferredLanguage();
+        $weatherService = GlobalProxy::$container->get(WeatherService::class);
+        $id = $this->getId();
+        $account = $this->getAccount();
 
-        return WeatherService::getWeather($this->getId());
+        return $weatherService->weather($account, $id, null, null, null);
       } else {
         return $this->weather;
       }
@@ -205,6 +229,8 @@ namespace App\Resources\Location {
 
       return $this;
     }
+
+
 
     #[ORM\PrePersist]
     public function onPrePersist(PrePersistEventArgs $args): void {

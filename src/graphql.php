@@ -98,6 +98,7 @@ namespace App {
   $cache = new Psr16Cache($pool);
   $context = new Context();
   $container = new Container();
+  GlobalProxy::$container = $container;
 
 
 

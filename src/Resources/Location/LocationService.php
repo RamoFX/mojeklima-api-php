@@ -34,9 +34,9 @@ namespace App\Resources\Location {
      * @throws EntityNotFound
      */
     public function location(AccountEntity $currentAccount, int $id): LocationEntity {
-      $allLocations = $this->locations($currentAccount);
+      $locations = $this->locations($currentAccount);
 
-      foreach ($allLocations as $location) {
+      foreach ($locations as $location) {
         if ($location->getId() === $id)
           return $location;
       }
@@ -52,13 +52,13 @@ namespace App\Resources\Location {
      * @throws GraphQLException
      */
     public function createLocation(AccountEntity $currentAccount, string $cityName, string $countryName, ?string $label, float $latitude, float $longitude): LocationEntity {
-      $new_location = new LocationEntity($cityName, $countryName, $label, $latitude, $longitude);
-      $currentAccount->addLocation($new_location);
+      $newLocation = new LocationEntity($cityName, $countryName, $label, $latitude, $longitude);
+      $currentAccount->addLocation($newLocation);
 
-      GlobalProxy::$entityManager->persist($new_location);
-      GlobalProxy::$entityManager->flush($new_location);
+      GlobalProxy::$entityManager->persist($newLocation);
+      GlobalProxy::$entityManager->flush($newLocation);
 
-      return $new_location;
+      return $newLocation;
     }
 
 
@@ -70,26 +70,26 @@ namespace App\Resources\Location {
      * @throws ORMException
      */
     public function updateLocation(AccountEntity $currentAccount, int $id, ?string $cityName, ?string $countryName, ?string $label, ?float $latitude, ?float $longitude): LocationEntity {
-      $outdated_location = self::location($currentAccount, $id);
+      $outdatedLocation = self::location($currentAccount, $id);
 
       if ($cityName !== null)
-        $outdated_location->setCityName($cityName);
+        $outdatedLocation->setCityName($cityName);
 
       if ($countryName !== null)
-        $outdated_location->setCountryName($countryName);
+        $outdatedLocation->setCountryName($countryName);
 
       if ($label !== null)
-        $outdated_location->setLabel($label);
+        $outdatedLocation->setLabel($label);
 
       if ($latitude !== null)
-        $outdated_location->setLatitude($latitude);
+        $outdatedLocation->setLatitude($latitude);
 
       if ($longitude !== null)
-        $outdated_location->setLongitude($longitude);
+        $outdatedLocation->setLongitude($longitude);
 
-      GlobalProxy::$entityManager->flush($outdated_location);
+      GlobalProxy::$entityManager->flush($outdatedLocation);
 
-      return $outdated_location;
+      return $outdatedLocation;
     }
 
 
