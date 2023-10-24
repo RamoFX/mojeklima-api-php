@@ -4,28 +4,14 @@
 
 namespace App {
 
-  use App\Resources\Account\AccountController;
-  use App\Resources\Account\AccountService;
   use App\Resources\Account\Enums\AccountRole;
-  use App\Resources\Alert\AlertController;
-  use App\Resources\Alert\AlertService;
   use App\Resources\Alert\Enums\Criteria;
-  use App\Resources\Auth\AuthController;
   use App\Resources\Auth\AuthService;
   use App\Resources\Common\Types\EnumType;
   use App\Resources\Common\Utilities\Debug;
   use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Common\Utilities\Translation;
-  use App\Resources\Location\LocationController;
-  use App\Resources\Location\LocationService;
-  use App\Resources\Notification\NotificationController;
-  use App\Resources\Notification\NotificationService;
-  use App\Resources\PushSubscription\PushSubscriptionController;
-  use App\Resources\PushSubscription\PushSubscriptionService;
-  use App\Resources\Suggestion\SuggestionController;
-  use App\Resources\Suggestion\SuggestionService;
-  use App\Resources\Weather\WeatherController;
-  use App\Resources\Weather\WeatherService;
+  use DI\Container;
   use Doctrine\DBAL\DriverManager;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\ORMSetup;
@@ -34,9 +20,9 @@ namespace App {
   use Predis\Client;
   use Symfony\Component\Cache\Adapter\FilesystemAdapter;
   use Symfony\Component\Cache\Psr16Cache;
-  use Symfony\Component\DependencyInjection\Container;
   use TheCodingMachine\GraphQLite\Context\Context;
   use TheCodingMachine\GraphQLite\SchemaFactory;
+  use Throwable;
 
 
 
@@ -51,7 +37,7 @@ namespace App {
 
 
   // global exception handler
-  set_exception_handler(function(\Throwable $exception) use ($isDevMode) {
+  set_exception_handler(function(Throwable $exception) use ($isDevMode) {
     header('Content-Type: application/json');
     $language = Translation::getPreferredLanguage();
     $messages = [
@@ -111,47 +97,13 @@ namespace App {
   $pool = new FilesystemAdapter();
   $cache = new Psr16Cache($pool);
   $context = new Context();
-
-
-
-  // dependency injection
-  GlobalProxy::$container = new Container();
-
-  $injectables = [
-    new AuthController(),
-    new AuthService(),
-
-    new AccountController(),
-    new AccountService(),
-
-    new PushSubscriptionController(),
-    new PushSubscriptionService(),
-
-    new LocationController(),
-    new LocationService(),
-
-    new WeatherController(),
-    new WeatherService(),
-
-    new AlertController(),
-    new AlertService(),
-
-    new NotificationController(),
-    new NotificationService(),
-
-    new SuggestionController(),
-    new SuggestionService(),
-  ];
-
-  foreach ($injectables as $injectable) {
-    GlobalProxy::$container->set(get_class($injectable), $injectable);
-  }
+  $container = new Container();
 
 
 
   // schema
-  $securityService = new AuthService();
-  $factory = new SchemaFactory($cache, GlobalProxy::$container);
+  $securityService = $container->get(AuthService::class);
+  $factory = new SchemaFactory($cache, $container);
 
   $factory->addControllerNamespace("App\\Resources\\")
     ->addTypeNamespace("App\\Resources\\")

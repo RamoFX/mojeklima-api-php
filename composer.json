@@ -16,7 +16,6 @@
     "ext-pdo": "*",
     "thecodingmachine/graphqlite": "^6.2",
     "symfony/cache": "^6.3",
-    "symfony/dependency-injection": "^6.3",
     "doctrine/orm": "^2.16",
     "doctrine/dbal": "^3.7",
     "firebase/php-jwt": "^6.9",
@@ -24,6 +23,7 @@
     "minishlink/web-push": "^8.0",
     "guzzlehttp/guzzle": "^7.8",
     "vlucas/phpdotenv": "^5.5",
-    "predis/predis": "^2.2"
+    "predis/predis": "^2.2",
+    "php-di/php-di": "^7.0"
   }
 }

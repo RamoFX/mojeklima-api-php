@@ -19,16 +19,9 @@ namespace App\Resources\Weather {
 
 
   class WeatherService {
-    private LocationService $locationService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->locationService = GlobalProxy::$container->get(LocationService::class);
-    }
+    public function __construct(
+      protected LocationService $locationService
+    ) {}
 
 
 

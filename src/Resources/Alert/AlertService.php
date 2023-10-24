@@ -12,22 +12,14 @@ namespace App\Resources\Alert {
   use App\Resources\Location\LocationService;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
-  use Exception;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
   class AlertService {
-    private LocationService $locationService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->locationService = GlobalProxy::$container->get(LocationService::class);
-    }
+    public function __construct(
+      protected LocationService $locationService
+    ) {}
 
 
 

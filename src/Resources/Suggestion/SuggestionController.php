@@ -4,8 +4,6 @@
 
 namespace App\Resources\Suggestion {
 
-  use App\Resources\Common\Utilities\GlobalProxy;
-  use Exception;
   use RestClientException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -13,16 +11,9 @@ namespace App\Resources\Suggestion {
 
 
   readonly class SuggestionController {
-    private SuggestionService $suggestionService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->suggestionService = GlobalProxy::$container->get(SuggestionService::class);
-    }
+    public function __construct(
+      protected SuggestionService $suggestionService
+    ) {}
 
 
 

@@ -7,14 +7,12 @@ namespace App\Resources\Account {
   use App\Resources\Account\Enums\AccountRole;
   use App\Resources\Account\Exceptions\EmailAlreadyInUse;
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Common\Utilities\GlobalProxy;
   use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NonUniqueResultException;
   use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
   use Doctrine\ORM\TransactionRequiredException;
-  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -25,16 +23,9 @@ namespace App\Resources\Account {
 
 
   readonly class AccountController {
-    private AccountService $accountService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->accountService = GlobalProxy::$container->get(AccountService::class);
-    }
+    public function __construct(
+      protected AccountService $accountService
+    ) {}
 
 
 

@@ -4,9 +4,9 @@
 
 namespace App\Resources\Common\Utilities {
 
+  use DI\Container;
   use Doctrine\ORM\EntityManager;
   use Predis\Client;
-  use Symfony\Component\DependencyInjection\Container;
 
 
 

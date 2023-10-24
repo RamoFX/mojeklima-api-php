@@ -6,10 +6,8 @@ namespace App\Resources\Location {
 
   use App\Resources\Account\AccountEntity;
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Common\Utilities\GlobalProxy;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
-  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -19,16 +17,9 @@ namespace App\Resources\Location {
 
 
   readonly class LocationController {
-    private LocationService $locationService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->locationService = GlobalProxy::$container->get(LocationService::class);
-    }
+    public function __construct(
+      protected LocationService $locationService
+    ) {}
 
 
 

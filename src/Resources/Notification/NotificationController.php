@@ -11,7 +11,6 @@ namespace App\Resources\Notification {
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
   use ErrorException;
-  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -22,16 +21,9 @@ namespace App\Resources\Notification {
 
 
   readonly class NotificationController {
-    private NotificationService $notificationService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->notificationService = GlobalProxy::$container->get(NotificationService::class);
-    }
+    public function __construct(
+      protected NotificationService $notificationService
+    ) {}
 
 
 

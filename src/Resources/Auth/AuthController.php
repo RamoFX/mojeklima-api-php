@@ -13,7 +13,6 @@ namespace App\Resources\Auth {
   use App\Resources\Auth\Exceptions\IncorrectPassword;
   use App\Resources\Auth\Exceptions\InvalidToken;
   use App\Resources\Auth\Exceptions\TokenExpired;
-  use App\Resources\Common\Utilities\GlobalProxy;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NonUniqueResultException;
   use Doctrine\ORM\OptimisticLockException;
@@ -26,16 +25,9 @@ namespace App\Resources\Auth {
 
 
   readonly class AuthController {
-    private AuthService $authService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->authService = GlobalProxy::$container->get(AuthService::class);
-    }
+    public function __construct(
+      protected AuthService $authService
+    ) {}
 
 
 

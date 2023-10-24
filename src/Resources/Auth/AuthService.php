@@ -33,16 +33,9 @@ namespace App\Resources\Auth {
 
 
   class AuthService implements AuthenticationServiceInterface, AuthorizationServiceInterface {
-    private EmailService $emailService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->emailService = GlobalProxy::$container->get(EmailService::class);
-    }
+    public function __construct(
+      protected EmailService $emailService
+    ) {}
 
 
 
@@ -194,7 +187,7 @@ namespace App\Resources\Auth {
      * @throws NoResultException
      * @throws Exception
      */
-    public function register(CreateAccount $account) {
+    public function register(CreateAccount $account): bool {
       $emails_count = GlobalProxy::$entityManager->createQueryBuilder()
         ->select("count(account.id)")
         ->from(AccountEntity::class, "account")
@@ -224,8 +217,9 @@ namespace App\Resources\Auth {
      * @throws ORMException
      * @throws AccountMarkedAsRemoved
      * @throws NonUniqueResultException
+     * @throws Exception
      */
-    public function resetPassword(string $email) {
+    public function resetPassword(string $email): bool {
       try {
         /* @var AccountEntity $account */
         $account = GlobalProxy::$entityManager->createQueryBuilder()

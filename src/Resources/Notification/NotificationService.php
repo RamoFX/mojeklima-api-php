@@ -7,7 +7,7 @@ namespace App\Resources\Notification {
   use App\Resources\Account\AccountEntity;
   use App\Resources\Account\AccountService;
   use App\Resources\Account\Enums\AccountRole;
-  use App\Resources\Alert\AlertController;
+  use App\Resources\Alert\AlertService;
   use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Common\Exceptions\EntityNotFound;
   use App\Resources\Common\Utilities\GlobalProxy;
@@ -16,7 +16,6 @@ namespace App\Resources\Notification {
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
   use ErrorException;
-  use Exception;
   use GuzzleHttp\RequestOptions;
   use Minishlink\WebPush\Subscription;
   use Minishlink\WebPush\WebPush;
@@ -26,18 +25,11 @@ namespace App\Resources\Notification {
 
 
   class NotificationService {
-    private AccountService $accountService;
-    private WeatherService $weatherService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->accountService = GlobalProxy::$container->get(AccountService::class);
-      $this->weatherService = GlobalProxy::$container->get(WeatherService::class);
-    }
+    public function __construct(
+      protected AccountService $accountService,
+      protected WeatherService $weatherService,
+      protected AlertService $alertService
+    ) {}
 
 
 
@@ -46,7 +38,7 @@ namespace App\Resources\Notification {
      * @return NotificationEntity[]
      */
     public function notifications(AccountEntity $currentAccount): array {
-      $alerts = AlertController::allAlerts($currentAccount);
+      $alerts = $this->alertService->allAlerts($currentAccount);
       $allNotifications = [];
 
       foreach ($alerts as $alert) {
@@ -129,7 +121,7 @@ namespace App\Resources\Notification {
      */
     public function notify(int $accountId, int $alertId): NotificationEntity {
       $account = $this->accountService->account($accountId);
-      $alert = AlertController::alert($account, $alertId);
+      $alert = $this->alertService->alert($account, $alertId);
       $notification = new NotificationEntity();
       $alert->addNotification($notification);
 

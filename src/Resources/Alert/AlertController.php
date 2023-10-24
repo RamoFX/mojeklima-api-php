@@ -8,7 +8,6 @@ namespace App\Resources\Alert {
   use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Common\Exceptions\EntityNotFound;
   use App\Resources\Common\Exceptions\LimitExceeded;
-  use App\Resources\Common\Utilities\GlobalProxy;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
   use Exception;
@@ -21,16 +20,9 @@ namespace App\Resources\Alert {
 
 
   readonly class AlertController {
-    private AlertService $alertService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->alertService = GlobalProxy::$container->get(AlertService::class);
-    }
+    public function __construct(
+      protected AlertService $alertService
+    ) {}
 
 
 

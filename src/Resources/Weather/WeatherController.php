@@ -5,7 +5,6 @@
 namespace App\Resources\Weather {
 
   use App\Resources\Account\AccountEntity;
-  use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Weather\Enums\PressureUnits;
   use App\Resources\Weather\Enums\SpeedUnits;
   use App\Resources\Weather\Enums\TemperatureUnits;
@@ -17,16 +16,9 @@ namespace App\Resources\Weather {
 
 
   readonly class WeatherController {
-    private WeatherService $weatherService;
-
-
-
-    /**
-     * @throws Exception
-     */
-    public function __construct() {
-      $this->weatherService = GlobalProxy::$container->get(WeatherService::class);
-    }
+    public function __construct(
+      protected WeatherService $weatherService
+    ) {}
 
 
 
