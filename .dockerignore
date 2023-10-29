@@ -7,3 +7,5 @@ docker.env
 .htaccess
 .run
 playground
+xdebug
+logs

@@ -8,3 +8,5 @@ upload.sh
 .vscode
 .run
 playground
+xdebug
+logs
