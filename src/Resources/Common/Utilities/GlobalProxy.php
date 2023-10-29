@@ -6,12 +6,12 @@ namespace App\Resources\Common\Utilities {
 
   use DI\Container;
   use Doctrine\ORM\EntityManager;
-  use Predis\Client;
+  use Redis;
 
 
 
   class GlobalProxy {
-    public static Client $redis;
+    public static Redis $redis;
 
     public static Container $container;
 

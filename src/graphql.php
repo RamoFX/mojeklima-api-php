@@ -10,6 +10,7 @@ namespace App {
   use App\Resources\Common\Types\EnumType;
   use App\Resources\Common\Utilities\Debug;
   use App\Resources\Common\Utilities\GlobalProxy;
+  use App\Resources\Common\Utilities\Timing;
   use App\Resources\Common\Utilities\Translation;
   use DI\Container;
   use Doctrine\DBAL\DriverManager;
@@ -17,9 +18,9 @@ namespace App {
   use Doctrine\ORM\ORMSetup;
   use GraphQL\Error\DebugFlag;
   use GraphQL\GraphQL;
-  use Predis\Client;
-  use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-  use Symfony\Component\Cache\Psr16Cache;
+  use MatthiasMullie\Scrapbook\Adapters\Redis as RedisStore;
+  use MatthiasMullie\Scrapbook\Psr16\SimpleCache;
+  use Redis as RedisClient;
   use TheCodingMachine\GraphQLite\Context\Context;
   use TheCodingMachine\GraphQLite\SchemaFactory;
   use Throwable;
@@ -84,18 +85,15 @@ namespace App {
 
 
 
-  // redis
-  GlobalProxy::$redis = new Client([
-    'scheme' => $_ENV["REDIS_SCHEME"],
-    'host' => $_ENV["REDIS_HOST"],
-    'port' => $_ENV["REDIS_PORT"]
-  ]);
+  // redis cache
+  $client = new RedisClient();
+  $client->connect($_ENV["REDIS_HOSTNAME"], $_ENV["REDIS_PORT"]);
+  $store = new RedisStore($client);
+  $cache = new SimpleCache($store);
 
 
 
   // schema preparation
-  $pool = new FilesystemAdapter();
-  $cache = new Psr16Cache($pool);
   $context = new Context();
   $container = new Container();
   GlobalProxy::$container = $container;

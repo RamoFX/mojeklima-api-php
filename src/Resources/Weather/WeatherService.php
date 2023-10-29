@@ -112,7 +112,7 @@ namespace App\Resources\Weather {
 
       // set cache
       $cacheValue = $weather->jsonSerialize();
-      GlobalProxy::$redis->set($cacheKey, $cacheValue, 'EX', $cacheExpiration);
+      GlobalProxy::$redis->set($cacheKey, $cacheValue, ['EX' => $cacheExpiration]);
 
       return $weather;
     }
