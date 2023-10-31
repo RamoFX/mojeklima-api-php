@@ -45,16 +45,14 @@ namespace App\Resources\Weather {
      */
     public static function getKey(string ...$components): string {
       if (count($components) !== 2) {
-        $language = Translation::getPreferredLanguage(); // TODO: This can be automated
-        // TODO: In order to automate sibling logic this can be done differently
-        $messages = [
+        // TODO: Own exception file?
+        $message = Translation::translate([
           "cs" => "Weather::getKey přijímá právě dva argumenty (zeměpisná šířka, zeměpisná délka)",
           "en" => "Weather::getKey accepts exactly two arguments (latitude, longitude)",
           "de" => "Weather::getKey akzeptiert genau zwei Argumente (Breitengrad, Längengrad)",
-        ];
-        $translatedMessage = Translation::translate($messages, $language); // TODO: This can be automated
+        ]);
 
-        throw new GraphQLException($translatedMessage);
+        throw new GraphQLException($message);
       }
 
       $latitude = $components[0];
@@ -79,17 +77,14 @@ namespace App\Resources\Weather {
       $encoded = json_encode($fields);
 
       if ($encoded === false) {
-        // TODO: make translation service?
-        $language = Translation::getPreferredLanguage(); // TODO: This can be automated
-        // TODO: In order to automate sibling logic this can be done differently
-        $messages = [
-          "cs" => "Nelze serializovat Počasí",
+        // TODO: Own exception file?
+        $message = Translation::translate([
+          "cs" => "Nelze serializovat počasí",
           "en" => "Cannot serialize Weather",
           "de" => "Weather kann nicht serialisiert werden",
-        ];
-        $translatedMessage = Translation::translate($messages, $language); // TODO: This can be automated
+        ]);
 
-        throw new GraphQLException($translatedMessage);
+        throw new GraphQLException($message);
       }
 
       return $encoded;

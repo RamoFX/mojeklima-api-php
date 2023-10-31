@@ -16,9 +16,9 @@ class AuthException extends GraphQLException {
    */
   public function __construct(string|array $message) {
     if (is_array($message)) {
-      parent::__construct(Translation::translate($message), 401);
-    } else {
-      parent::__construct($message, 401);
+      $message = Translation::translate($message);
     }
+
+    parent::__construct($message, 401);
   }
 }

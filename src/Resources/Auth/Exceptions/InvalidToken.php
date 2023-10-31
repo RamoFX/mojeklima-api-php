@@ -11,15 +11,13 @@ namespace App\Resources\Auth\Exceptions {
 
   class InvalidToken extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
-      $messages = [
+      $message = Translation::translate([
         "cs" => "Token je neplatný",
         "en" => "Invalid token",
         "de" => "Ungültiges Token",
-      ];
-      $translatedMessage = Translation::translate($messages, $language);
+      ]);
 
-      parent::__construct($translatedMessage, 401);
+      parent::__construct($message, 401);
     }
   }
 }

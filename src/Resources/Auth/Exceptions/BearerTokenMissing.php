@@ -11,15 +11,13 @@ namespace App\Resources\Auth\Exceptions {
 
   class BearerTokenMissing extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
-      $messages = [
+      $message = Translation::translate([
         "cs" => "Bearer token je povinný, ale chybí",
         "en" => "Bearer token is required but missing",
         "de" => "Bearer-Token ist erforderlich, fehlt aber",
-      ];
-      $translatedMessage = Translation::translate($messages, $language);
+      ]);
 
-      parent::__construct($translatedMessage, 401);
+      parent::__construct($message, 401);
     }
   }
 }

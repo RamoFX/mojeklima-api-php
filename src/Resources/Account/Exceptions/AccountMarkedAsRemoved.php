@@ -11,15 +11,13 @@ namespace App\Resources\Account\Exceptions {
 
   class AccountMarkedAsRemoved extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
-      $messages = [
+      $message = Translation::translate([
         "cs" => "Tento účet byl označen jako odstraněný",
         "en" => "This account was marked as removed",
         "de" => "This account was marked as removed",
-      ];
-      $translatedMessage = Translation::translate($messages, $language);
+      ]);
 
-      parent::__construct($translatedMessage, 409);
+      parent::__construct($message, 409);
     }
   }
 }

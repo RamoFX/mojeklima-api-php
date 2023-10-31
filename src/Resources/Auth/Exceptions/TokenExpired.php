@@ -11,15 +11,13 @@ namespace App\Resources\Auth\Exceptions {
 
   class TokenExpired extends GraphQLException {
     public function __construct() {
-      $language = Translation::getPreferredLanguage();
-      $messages = [
+      $message = Translation::translate([
         "cs" => "Token již vypršel",
         "en" => "The token has expired",
         "de" => "Das Token ist abgelaufen",
-      ];
-      $translatedMessage = Translation::translate($messages, $language);
+      ]);
 
-      parent::__construct($translatedMessage, 401);
+      parent::__construct($message, 401);
     }
   }
 }

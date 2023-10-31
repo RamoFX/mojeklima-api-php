@@ -51,15 +51,13 @@ namespace App\Resources\Common\Utilities {
           return round($value / 33.864, 2);
       }
 
-      $language = Translation::getPreferredLanguage();
-      $messages = [
+      $errorMessage = Translation::translate([
         "cs" => "Převod na jednotky $toUnits->value není podporován",
         "en" => "Conversion to $toUnits->value is not supported",
         "de" => "Die Konvertierung zu $toUnits->value wird nicht unterstützt",
-      ];
-      $translatedMessage = Translation::translate($messages, $language);
+      ]);
 
-      throw new Exception($translatedMessage);
+      throw new Exception($errorMessage);
     }
 
     /**
@@ -99,15 +97,13 @@ namespace App\Resources\Common\Utilities {
           return round($value * 33.864, 2);
       }
 
-      $language = Translation::getPreferredLanguage();
-      $messages = [
+      $errorMessage = Translation::translate([
         "cs" => "Převod na jednotky $fromUnits->value není podporován",
         "en" => "Conversion to $fromUnits->value is not supported",
         "de" => "Die Konvertierung zu $fromUnits->value wird nicht unterstützt",
-      ];
-      $translatedMessage = Translation::translate($messages, $language);
+      ]);
 
-      throw new Exception($translatedMessage);
+      throw new Exception($errorMessage);
     }
   }
 }

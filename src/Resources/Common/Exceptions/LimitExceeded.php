@@ -15,15 +15,13 @@ namespace App\Resources\Common\Exceptions {
      * @param float|int $limit
      */
     public function __construct(string $entityName, $limit) {
-      $language = Translation::getPreferredLanguage();
-      $messages = [
+      $message = Translation::translate([
         "cs" => "Limit vyčerpán, entita: \"$entityName\", limit: $limit",
         "en" => "Limit exceeded, entity: \"$entityName\", limit: $limit",
         "de" => "Grenzwert überschritten, Entität: \"$entityName\", Grenzwert: $limit",
-      ];
-      $translatedMessage = Translation::translate($messages, $language);
+      ]);
 
-      parent::__construct($translatedMessage, 404);
+      parent::__construct($message, 404);
     }
   }
 }

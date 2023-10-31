@@ -11,15 +11,13 @@ namespace App\Resources\Common\Exceptions {
 
   class EntityNotFound extends GraphQLException {
     public function __construct(string $entityName) {
-      $language = Translation::getPreferredLanguage();
-      $messages = [
+      $message = Translation::translate([
         "cs" => "Entita \"$entityName\" nebyla nalezena",
         "en" => "Entity \"$entityName\" wasn't found",
         "de" => "Entität \"$entityName\" nicht gefunden",
-      ];
-      $translatedMessage = Translation::translate($messages, $language);
+      ]);
 
-      parent::__construct($translatedMessage, 404);
+      parent::__construct($message, 404);
     }
   }
 }
