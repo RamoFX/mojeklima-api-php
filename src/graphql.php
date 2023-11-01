@@ -58,8 +58,27 @@ namespace App {
       ]
     ];
 
-      $output["trace"] = $exception->getTrace();
-    if ($isDev || $isDebug)
+    if ($isDev || $isDebug) {
+      $fullTrace = $exception->getTrace();
+      $output['trace'] = [];
+
+      foreach ($fullTrace as $currentTrace) {
+        $file = str_replace(PROJECT_ROOT_PATH, '', $currentTrace['file'] ?? '');
+        $line = $currentTrace['line'] ?? '';
+        $function = $currentTrace['function'] ?? '';
+        $type = $currentTrace['type'] ?? '';
+        $class = $currentTrace['class'] ?? '';
+        $args = implode(', ', $currentTrace['args'] ?? []);
+
+        $location = "$file:$line";
+        $member = "$class$type$function($args)";
+
+        $output['trace'][] = [
+          'location' => $location, // "location": "/src/graphql.php:74",
+          'member' => $member      // "member":   "\App\Resources\Common\Utilities\Debug::getAll(...)"
+        ];
+      }
+    }
 
     respond($output);
   });
