@@ -5,13 +5,19 @@
 namespace App\Resources\PushSubscription {
 
   use App\Resources\Account\AccountEntity;
-  use App\Resources\Common\Utilities\GlobalProxy;
+  use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
 
 
 
   class PushSubscriptionService {
+    public function __construct(
+      protected EntityManager $entityManager
+    ) {}
+
+
+
     /**
      * @throws OptimisticLockException
      * @throws ORMException
@@ -26,8 +32,8 @@ namespace App\Resources\PushSubscription {
           $push_subscription->setP256dh($p256dh);
           $push_subscription->setAuth($auth);
 
-          GlobalProxy::$entityManager->persist($push_subscription);
-          GlobalProxy::$entityManager->flush($push_subscription);
+          $this->entityManager->persist($push_subscription);
+          $this->entityManager->flush($push_subscription);
 
           return $push_subscription;
         }
@@ -38,8 +44,8 @@ namespace App\Resources\PushSubscription {
 
       $currentAccount->addPushSubscription($push_subscription);
 
-      GlobalProxy::$entityManager->persist($push_subscription);
-      GlobalProxy::$entityManager->flush($push_subscription);
+      $this->entityManager->persist($push_subscription);
+      $this->entityManager->flush($push_subscription);
 
       return $push_subscription;
     }
