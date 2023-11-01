@@ -2,14 +2,13 @@
 
 
 
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/Setup/paths.php';
+require_once PROJECT_ROOT_PATH . '/vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
 
 
 // environment
-if (!isset($_ENV['APP_MODE'])) {
-  $dotenv = Dotenv::createImmutable(__DIR__ . "/../");
-  $dotenv->load();
-}
+$dotenv = Dotenv::createImmutable(PROJECT_ROOT_PATH);
+$dotenv->load();
