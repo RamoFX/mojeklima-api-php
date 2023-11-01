@@ -4,23 +4,13 @@
 
 namespace App {
 
-  use App\Resources\Account\Enums\AccountRole;
-  use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Auth\AuthService;
-  use App\Resources\Common\Types\EnumType;
+  use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Debug;
-  use App\Resources\Common\Utilities\GlobalProxy;
-  use App\Resources\Common\Utilities\Timing;
   use App\Resources\Common\Utilities\Translation;
-  use DI\Container;
-  use Doctrine\DBAL\DriverManager;
-  use Doctrine\ORM\EntityManager;
-  use Doctrine\ORM\ORMSetup;
   use GraphQL\Error\DebugFlag;
   use GraphQL\GraphQL;
-  use MatthiasMullie\Scrapbook\Adapters\Redis as RedisStore;
-  use MatthiasMullie\Scrapbook\Psr16\SimpleCache;
-  use Redis as RedisClient;
+  use Psr\SimpleCache\CacheInterface;
   use TheCodingMachine\GraphQLite\Context\Context;
   use TheCodingMachine\GraphQLite\SchemaFactory;
   use Throwable;
@@ -28,9 +18,19 @@ namespace App {
 
 
   // helpers
-  $isDevMode = $_ENV["APP_MODE"] === "development";
+  $container = require SETUP_PATH . '/container.php';
+  $config = $container->get(ConfigManager::class);
+  $isDev = $config->get('is.dev');
+  $isProd = $config->get('is.prod');
+  $isDebug = $config->get('is.debug');
 
   function respond($output): void {
+    global $isDebug;
+
+    if ($isDebug) {
+      $output["debug"] = Debug::getAll();
+    }
+
     header('Content-Type: application/json');
     echo json_encode($output, JSON_INVALID_UTF8_IGNORE);
   }
@@ -38,81 +38,65 @@ namespace App {
 
 
   // global exception handler
-  set_exception_handler(function(Throwable $exception) use ($isDevMode) {
+  set_exception_handler(function(Throwable $exception) {
+    global $isProd, $isDev, $isDebug;
+
     header('Content-Type: application/json');
-    $language = Translation::getPreferredLanguage();
-    $messages = [
+    $internalErrorMessage = Translation::translate([
       "cs" => "Vnitřní chyba serveru",
       "en" => "Internal server error",
       "de" => "Interner Serverfehler",
-    ];
-    $translated_message = Translation::translate($messages, $language);
+    ]);
 
     $output = [
       "errors" => [
         [
-          "message" => $isDevMode
-            ? $exception->getMessage()
-            : $translated_message
+          "message" => $isProd
+            ? $internalErrorMessage
+            : $exception->getMessage()
         ]
       ]
     ];
 
-    if ($isDevMode)
       $output["trace"] = $exception->getTrace();
+    if ($isDev || $isDebug)
 
     respond($output);
   });
 
 
 
-  // orm
-  $connectionParameters = [
-    "dbname" => $_ENV["DB_DATABASE"],
-    "user" => $_ENV["DB_USERNAME"],
-    "password" => $_ENV["DB_PASSWORD"],
-    "host" => $_ENV["DB_HOSTNAME"],
-    "driver" => "pdo_mysql",
-    'charset' => 'utf8'
-  ];
+  // headers
+  $allowOrigin = $config->get('security.origin');
 
-  EnumType::addEnumType(AccountRole::class);
-  EnumType::addEnumType(Criteria::class);
+  header("Access-Control-Allow-Origin: $allowOrigin");
+  header("Vary: Origin");
+  header('Access-Control-Allow-Methods: POST, OPTIONS');
+  header('Access-Control-Allow-Headers: Authorization,Content-Type,Preferred-Language,baggage,sentry-trace');
 
-  $configuration = ORMSetup::createAttributeMetadataConfiguration([__DIR__ . "/../Core/Entities"], $isDevMode);
-  $connection = DriverManager::getConnection($connectionParameters, $configuration);
-  GlobalProxy::$entityManager = new EntityManager($connection, $configuration);
-
-
-
-  // redis cache
-  $client = new RedisClient();
-  $client->connect($_ENV["REDIS_HOSTNAME"], $_ENV["REDIS_PORT"]);
-  $store = new RedisStore($client);
-  $cache = new SimpleCache($store);
-
-
-
-  // schema preparation
-  $context = new Context();
-  $container = new Container();
-  GlobalProxy::$container = $container;
+  if (strtolower($_SERVER['REQUEST_METHOD']) === 'options') {
+    exit();
+  }
 
 
 
   // schema
-  $securityService = $container->get(AuthService::class);
+  $cache = $container->get(CacheInterface::class);
   $factory = new SchemaFactory($cache, $container);
+  $controllerNamespace = $config->get('namespace.controller');
+  $typeNamespace = $config->get('namespace.type');
+  $authService = $container->get(AuthService::class);
 
-  $factory->addControllerNamespace("App\\Resources\\")
-    ->addTypeNamespace("App\\Resources\\")
-    ->setAuthenticationService($securityService)
-    ->setAuthorizationService($securityService);
+  $factory
+    ->addControllerNamespace($controllerNamespace)
+    ->addTypeNamespace($typeNamespace)
+    ->setAuthenticationService($authService)
+    ->setAuthorizationService($authService);
 
-  if ($isDevMode) {
-    $factory->devMode();
-  } else {
+  if ($isProd) {
     $factory->prodMode();
+  } else {
+    $factory->devMode();
   }
 
   $schema = $factory->createSchema();
@@ -127,36 +111,13 @@ namespace App {
 
 
 
-  // cors
-  $allowOrigin = $_ENV["SECURITY_CLIENT_ORIGIN"];
-
-  if ($allowOrigin) {
-    header("Access-Control-Allow-Origin: $allowOrigin");
-    header("Vary: Origin");
-  }
-
-  header('Access-Control-Allow-Methods: POST, OPTIONS');
-  header('Access-Control-Allow-Headers: Authorization,Content-Type,Preferred-Language,baggage,sentry-trace');
-
-  if (strtolower($_SERVER['REQUEST_METHOD']) === 'options') {
-    exit();
-  }
-
-
-
   // processing
-  $flags = $isDevMode
+  $flags = $isDev
     ? DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE
     : DebugFlag::NONE;
+  $context = new Context();
   $result = GraphQL::executeQuery($schema, $query, null, $context, $variables);
   $output = $result->toArray($flags);
-
-
-
-  // add debug info
-  if ($isDevMode) {
-    $output["_debug"] = Debug::getAll();
-  }
 
 
 
