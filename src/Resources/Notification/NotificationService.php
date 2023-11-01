@@ -10,8 +10,9 @@ namespace App\Resources\Notification {
   use App\Resources\Alert\AlertService;
   use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Common\Utilities\GlobalProxy;
+  use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Weather\WeatherService;
+  use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
@@ -26,6 +27,8 @@ namespace App\Resources\Notification {
 
   class NotificationService {
     public function __construct(
+      protected EntityManager $entityManager,
+      protected ConfigManager $config,
       protected AccountService $accountService,
       protected WeatherService $weatherService,
       protected AlertService $alertService
@@ -103,8 +106,8 @@ namespace App\Resources\Notification {
           $notification->setSeen(true);
           $seenCount += 1;
 
-          GlobalProxy::$entityManager->persist($notification);
-          GlobalProxy::$entityManager->flush($notification);
+          $this->entityManager->persist($notification);
+          $this->entityManager->flush($notification);
         }
       }
 
@@ -125,8 +128,8 @@ namespace App\Resources\Notification {
       $notification = new NotificationEntity();
       $alert->addNotification($notification);
 
-      GlobalProxy::$entityManager->persist($notification);
-      GlobalProxy::$entityManager->flush($notification);
+      $this->entityManager->persist($notification);
+      $this->entityManager->flush($notification);
 
       // prepare notification data
       $location = $alert->getLocation();
@@ -136,11 +139,16 @@ namespace App\Resources\Notification {
 
       // send push notification
       // initialize
+      $subject = $this->config->get('app.origin');
+      $publicKey = $this->config->get('keys.push.public');
+      $privateKey = $this->config->get('keys.push.private');
+      $appName = $this->config->get('keys.push.private');
+
       $auth = [
         "VAPID" => [
-          "subject" => "https://mojeklima.ramofx.dev/",
-          "publicKey" => $_ENV['PUSH_NOTIFICATIONS_PUBLIC_KEY'],
-          "privateKey" => $_ENV['PUSH_NOTIFICATIONS_PRIVATE_KEY']
+          "subject" => $subject,
+          "publicKey" => $publicKey,
+          "privateKey" => $privateKey
         ]
       ];
 
@@ -150,14 +158,14 @@ namespace App\Resources\Notification {
 
       $timeout = 120;
 
-      $network_client_options = [
+      $networkClientCptions = [
         RequestOptions::VERIFY => false // bypass server's certificate issues
       ];
 
-      $web_push = new WebPush($auth, $options, $timeout, $network_client_options);
+      $webPush = new WebPush($auth, $options, $timeout, $networkClientCptions);
 
       // prepare sending
-      $title = "$cityName, $countryName | MojeKlima";
+      $title = "$cityName, $countryName | $appName";
       $data = [
         "notificationId" => $notification->getId()
       ];
@@ -169,22 +177,22 @@ namespace App\Resources\Notification {
       ]);
 
       // send to each user agent associated with user
-      $push_subscriptions = $account->getPushSubscriptions();
+      $pushSubscriptions = $account->getPushSubscriptions();
 
-      foreach ($push_subscriptions as $push_subscription) {
+      foreach ($pushSubscriptions as $pushSubscription) {
         // prepare sending
         $subscription = Subscription::create([
           "contentEncoding" => "aesgcm",
-          "endpoint" => $push_subscription->getEndpoint(),
-          "authToken" => $push_subscription->getAuth(),
+          "endpoint" => $pushSubscription->getEndpoint(),
+          "authToken" => $pushSubscription->getAuth(),
           "keys" => [
-            "auth" => $push_subscription->getAuth(),
-            "p256dh" => $push_subscription->getP256dh()
+            "auth" => $pushSubscription->getAuth(),
+            "p256dh" => $pushSubscription->getP256dh()
           ]
         ]);
 
         // send
-        $web_push->sendOneNotification($subscription, $body);
+        $webPush->sendOneNotification($subscription, $body);
         // $result = $webPush->sendOneNotification($subscription, $body);
         //
         // // result
@@ -296,8 +304,8 @@ namespace App\Resources\Notification {
     public function deleteNotification(AccountEntity $currentAccount, int $id): NotificationEntity {
       $notification = self::notification($currentAccount, $id);
 
-      GlobalProxy::$entityManager->remove($notification);
-      GlobalProxy::$entityManager->flush($notification);
+      $this->entityManager->remove($notification);
+      $this->entityManager->flush($notification);
 
       return $notification;
     }
