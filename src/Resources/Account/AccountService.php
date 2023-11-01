@@ -7,7 +7,8 @@ namespace App\Resources\Account {
   use App\Resources\Account\Enums\AccountRole;
   use App\Resources\Account\Exceptions\EmailAlreadyInUse;
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Common\Utilities\GlobalProxy;
+  use Doctrine\ORM\EntityManager;
+  use Doctrine\ORM\EntityRepository;
   use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NonUniqueResultException;
@@ -20,12 +21,27 @@ namespace App\Resources\Account {
 
 
   class AccountService {
+    protected EntityRepository $repository;
+
+
+
+    /**
+     * @throws NotSupported
+     */
+    public function __construct(
+      protected EntityManager $entityManager
+    ) {
+      $this->repository = $entityManager->getRepository(AccountEntity::class);
+    }
+
+
+
     /**
      * @throws EntityNotFound
      */
     public function account(int $id) {
       try {
-        return GlobalProxy::$entityManager->find(AccountEntity::class, $id);
+        return $this->repository->find(AccountEntity::class, $id);
       } catch (Exception) {
         throw new EntityNotFound("Account");
       }
@@ -35,10 +51,9 @@ namespace App\Resources\Account {
 
     /**
      * @return AccountEntity[]
-     * @throws NotSupported
      */
     public function accounts(): array {
-      return GlobalProxy::$entityManager->getRepository(AccountEntity::class)->findAll();
+      return $this->repository->findAll();
     }
 
 
@@ -58,14 +73,14 @@ namespace App\Resources\Account {
      * @throws TransactionRequiredException
      */
     public function changeRole(int $id, AccountRole $role): AccountEntity {
-      $account = GlobalProxy::$entityManager->find(AccountEntity::class, $id);
+      $account = $this->repository->find(AccountEntity::class, $id);
 
       if ($account === null)
         throw new EntityNotFound("Account");
 
       $account->setRole($role);
 
-      GlobalProxy::$entityManager->flush($account);
+      $this->entityManager->flush($account);
 
       return $account;
     }
@@ -80,8 +95,8 @@ namespace App\Resources\Account {
     public function updateName(AccountEntity $currentAccount, string $name): AccountEntity {
       $currentAccount->setName($name);
 
-      GlobalProxy::$entityManager->persist($currentAccount);
-      GlobalProxy::$entityManager->flush($currentAccount);
+      $this->entityManager->persist($currentAccount);
+      $this->entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
@@ -106,7 +121,7 @@ namespace App\Resources\Account {
      */
     public function updateEmail(AccountEntity $currentAccount, string $email): AccountEntity {
       // check whether email is already in use
-      $emails_count = GlobalProxy::$entityManager->createQueryBuilder()
+      $emailsCount = $this->entityManager->createQueryBuilder()
         ->select("count(account.id)")
         ->from(AccountEntity::class, "account")
         ->where("account.email = :email")
@@ -114,13 +129,13 @@ namespace App\Resources\Account {
         ->getQuery()
         ->getSingleScalarResult();
 
-      if ($emails_count > 0)
+      if ($emailsCount > 0)
         throw new EmailAlreadyInUse();
 
       $currentAccount->setEmail($email);
 
-      GlobalProxy::$entityManager->persist($currentAccount);
-      GlobalProxy::$entityManager->flush($currentAccount);
+      $this->entityManager->persist($currentAccount);
+      $this->entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
@@ -134,8 +149,8 @@ namespace App\Resources\Account {
     public function updatePassword(AccountEntity $currentAccount, string $password): AccountEntity {
       $currentAccount->setPassword($password);
 
-      GlobalProxy::$entityManager->persist($currentAccount);
-      GlobalProxy::$entityManager->flush($currentAccount);
+      $this->entityManager->persist($currentAccount);
+      $this->entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
@@ -149,8 +164,8 @@ namespace App\Resources\Account {
     public function markAccountRemoved(AccountEntity $currentAccount): AccountEntity {
       $currentAccount->setIsMarkedAsRemoved(true);
 
-      GlobalProxy::$entityManager->persist($currentAccount);
-      GlobalProxy::$entityManager->flush($currentAccount);
+      $this->entityManager->persist($currentAccount);
+      $this->entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
@@ -162,8 +177,8 @@ namespace App\Resources\Account {
      * @throws ORMException
      */
     public function permanentlyDeleteAccount(AccountEntity $currentAccount): AccountEntity {
-      GlobalProxy::$entityManager->remove($currentAccount);
-      GlobalProxy::$entityManager->flush($currentAccount);
+      $this->entityManager->remove($currentAccount);
+      $this->entityManager->flush($currentAccount);
 
       return $currentAccount;
     }
