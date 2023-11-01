@@ -6,14 +6,33 @@ namespace App\Resources\Location {
 
   use App\Resources\Account\AccountEntity;
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Common\Utilities\GlobalProxy;
+  use Doctrine\ORM\EntityManager;
+  use Doctrine\ORM\EntityRepository;
+  use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
+  use Doctrine\ORM\NonUniqueResultException;
+  use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
   class LocationService {
+    protected EntityRepository $repository;
+
+
+
+    /**
+     * @throws NotSupported
+     */
+    public function __construct(
+      protected EntityManager $entityManager
+    ) {
+      $this->repository = $entityManager->getRepository(LocationEntity::class);
+    }
+
+
+
     /**
      * @param AccountEntity $currentAccount
      * @return LocationEntity[]
@@ -24,8 +43,17 @@ namespace App\Resources\Location {
 
 
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function locationsCount(AccountEntity $currentAccount): int {
-      return count($this->locations($currentAccount));
+      return $this->repository->createQueryBuilder('l')
+        ->select('COUNT(l.id)')
+        ->where('l.account = :account')
+        ->setParameter('account', $currentAccount)
+        ->getQuery()
+        ->getSingleScalarResult();
     }
 
 
@@ -34,14 +62,13 @@ namespace App\Resources\Location {
      * @throws EntityNotFound
      */
     public function location(AccountEntity $currentAccount, int $id): LocationEntity {
-      $locations = $this->locations($currentAccount);
+      $location = $this->repository->findOneBy(['account' => $currentAccount, 'id' => $id]);
 
-      foreach ($locations as $location) {
-        if ($location->getId() === $id)
-          return $location;
+      if (!$location) {
+        throw new EntityNotFound("Location");
       }
 
-      throw new EntityNotFound("Location");
+      return $location;
     }
 
 
@@ -51,12 +78,13 @@ namespace App\Resources\Location {
      * @throws ORMException
      * @throws GraphQLException
      */
+    // TODO: Avoid user from changing the city and country name
     public function createLocation(AccountEntity $currentAccount, string $cityName, string $countryName, ?string $label, float $latitude, float $longitude): LocationEntity {
       $newLocation = new LocationEntity($cityName, $countryName, $label, $latitude, $longitude);
       $currentAccount->addLocation($newLocation);
 
-      GlobalProxy::$entityManager->persist($newLocation);
-      GlobalProxy::$entityManager->flush($newLocation);
+      $this->entityManager->persist($newLocation);
+      $this->entityManager->flush($newLocation);
 
       return $newLocation;
     }
@@ -69,6 +97,7 @@ namespace App\Resources\Location {
      * @throws GraphQLException
      * @throws ORMException
      */
+    // TODO: Avoid user from changing the city and country name
     public function updateLocation(AccountEntity $currentAccount, int $id, ?string $cityName, ?string $countryName, ?string $label, ?float $latitude, ?float $longitude): LocationEntity {
       $outdatedLocation = self::location($currentAccount, $id);
 
@@ -87,7 +116,7 @@ namespace App\Resources\Location {
       if ($longitude !== null)
         $outdatedLocation->setLongitude($longitude);
 
-      GlobalProxy::$entityManager->flush($outdatedLocation);
+      $this->entityManager->flush($outdatedLocation);
 
       return $outdatedLocation;
     }
@@ -102,8 +131,8 @@ namespace App\Resources\Location {
     public function deleteLocation(AccountEntity $currentAccount, int $id): LocationEntity {
       $location = self::location($currentAccount, $id);
 
-      GlobalProxy::$entityManager->remove($location);
-      GlobalProxy::$entityManager->flush($location);
+      $this->entityManager->remove($location);
+      $this->entityManager->flush($location);
 
       return $location;
     }
