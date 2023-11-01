@@ -58,10 +58,15 @@ namespace App\Resources\Account {
 
 
 
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function accountsCount(): int {
-      // TODO: Implement
-
-      return 0;
+      return $this->repository->createQueryBuilder('a')
+        ->select('COUNT(a.id)')
+        ->getQuery()
+        ->getSingleScalarResult();
     }
 
 
