@@ -4,6 +4,7 @@
 
 namespace App\Resources\Suggestion {
 
+  use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Translation;
   use Exception;
   use RestClient;
@@ -12,6 +13,12 @@ namespace App\Resources\Suggestion {
 
 
   class SuggestionService {
+    public function __construct(
+      protected ConfigManager $config
+    ) {}
+
+
+
     /**
      * @return SuggestionEntity[]
      * @throws RestClientException
@@ -22,7 +29,7 @@ namespace App\Resources\Suggestion {
 
       // rest api
       $api = $this->getRestClient();
-      $apiKey = $_ENV["OPEN_CAGE_GEOCODING_API_KEY"];
+      $apiKey = $this->config->get('key.openCageGeocoding');
 
       // "https://api.opencagedata.com/geocode/v1/json?key=2e20a10b90b64b8ab26b10257f49ef5f&no_annotations=1&language=$language&limit=5&q=$query";
       $result = $api->get("json", [
