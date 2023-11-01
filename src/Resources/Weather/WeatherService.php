@@ -5,13 +5,15 @@
 namespace App\Resources\Weather {
 
   use App\Resources\Account\AccountEntity;
-  use App\Resources\Common\Utilities\GlobalProxy;
+  use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Translation;
   use App\Resources\Location\LocationService;
   use App\Resources\Weather\Enums\PressureUnits;
   use App\Resources\Weather\Enums\SpeedUnits;
   use App\Resources\Weather\Enums\TemperatureUnits;
   use Exception;
+  use Psr\SimpleCache\CacheInterface;
+  use Psr\SimpleCache\InvalidArgumentException;
   use RestClient;
   use RestClientException;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
@@ -20,6 +22,8 @@ namespace App\Resources\Weather {
 
   class WeatherService {
     public function __construct(
+      protected ConfigManager $config,
+      protected CacheInterface $cache,
       protected LocationService $locationService
     ) {}
 
@@ -43,6 +47,7 @@ namespace App\Resources\Weather {
      * @throws RestClientException
      * @throws Exception
      * @throws GraphQLException
+     * @throws InvalidArgumentException
      */
     public function weather(
       AccountEntity $currentAccount,
@@ -67,7 +72,7 @@ namespace App\Resources\Weather {
       // check cache
       $cacheKey = WeatherEntity::getKey(strval($latitude), strval($longitude));
       $cacheExpiration = WeatherEntity::getExpiration();
-      $cachedValue = GlobalProxy::$redis->get($cacheKey);
+      $cachedValue = $this->cache->get($cacheKey);
 
       if ($cachedValue) {
         $weather = WeatherEntity::jsonDeserialize($cachedValue);
@@ -78,7 +83,7 @@ namespace App\Resources\Weather {
 
       // api call
       $api = self::getRestClient();
-      $apiKey = $_ENV["OPEN_WEATHER_API_KEY"];
+      $apiKey = $this->config->get('keys.api.openWeather');
 
       $result = $api->get("weather", [
         'appid' => $apiKey,
@@ -112,7 +117,7 @@ namespace App\Resources\Weather {
 
       // set cache
       $cacheValue = $weather->jsonSerialize();
-      GlobalProxy::$redis->set($cacheKey, $cacheValue, ['EX' => $cacheExpiration]);
+      $this->cache->set($cacheKey, $cacheValue, ['EX' => $cacheExpiration]);
 
       return $weather;
     }
