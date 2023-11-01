@@ -8,8 +8,10 @@ namespace App\Resources\Alert {
   use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Common\Exceptions\EntityNotFound;
   use App\Resources\Common\Exceptions\LimitExceeded;
-  use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Location\LocationService;
+  use Doctrine\ORM\EntityManager;
+  use Doctrine\ORM\EntityRepository;
+  use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
@@ -17,9 +19,19 @@ namespace App\Resources\Alert {
 
 
   class AlertService {
+    protected EntityRepository $repository;
+
+
+
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
+      protected EntityManager $entityManager,
       protected LocationService $locationService
-    ) {}
+    ) {
+      $this->repository = $entityManager->getRepository(AlertEntity::class);
+    }
 
 
 
@@ -113,8 +125,8 @@ namespace App\Resources\Alert {
       //    $new_alert->convertRange($criteria, $units);
       $location->addAlert($new_alert);
 
-      GlobalProxy::$entityManager->persist($new_alert);
-      GlobalProxy::$entityManager->flush($new_alert);
+      $this->entityManager->persist($new_alert);
+      $this->entityManager->flush($new_alert);
 
       return $new_alert;
     }
@@ -157,7 +169,7 @@ namespace App\Resources\Alert {
       if ($message !== null)
         $alert->setMessage($message);
 
-      GlobalProxy::$entityManager->flush($alert);
+      $this->entityManager->flush($alert);
 
       return $alert;
     }
@@ -172,8 +184,8 @@ namespace App\Resources\Alert {
     public function deleteAlert(AccountEntity $currentAccount, int $id): AlertEntity {
       $alert = $this->alert($currentAccount, $id);
 
-      GlobalProxy::$entityManager->remove($alert);
-      GlobalProxy::$entityManager->flush($alert);
+      $this->entityManager->remove($alert);
+      $this->entityManager->flush($alert);
 
       return $alert;
     }
