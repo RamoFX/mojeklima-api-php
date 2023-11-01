@@ -10,16 +10,19 @@ namespace App\Resources\Auth {
   use App\Resources\Account\Exceptions\AccountMarkedAsRemoved;
   use App\Resources\Account\Exceptions\EmailNotFound;
   use App\Resources\Account\InputTypes\CreateAccount;
+  use App\Resources\Alert\AlertEntity;
   use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
   use App\Resources\Auth\Exceptions\BearerTokenMissing;
   use App\Resources\Auth\Exceptions\IncorrectPassword;
   use App\Resources\Auth\Exceptions\InvalidToken;
   use App\Resources\Auth\Exceptions\TokenExpired;
   use App\Resources\Auth\Utilities\JWT;
-  use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Common\Utilities\Headers;
   use App\Resources\Common\Utilities\Random;
   use App\Resources\Email\EmailService;
+  use Doctrine\ORM\EntityManager;
+  use Doctrine\ORM\EntityRepository;
+  use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NonUniqueResultException;
   use Doctrine\ORM\NoResultException;
@@ -33,9 +36,19 @@ namespace App\Resources\Auth {
 
 
   class AuthService implements AuthenticationServiceInterface, AuthorizationServiceInterface {
+    protected EntityRepository $repository;
+
+
+
+    /**
+     * @throws NotSupported
+     */
     public function __construct(
+      protected EntityManager $entityManager,
       protected EmailService $emailService
-    ) {}
+    ) {
+      $this->repository = $entityManager->getRepository(AlertEntity::class);
+    }
 
 
 
@@ -73,7 +86,7 @@ namespace App\Resources\Auth {
       $headerToken = self::getBearerToken();
       $tokenDecoded = JWT::decodeToken($headerToken);
 
-      return GlobalProxy::$entityManager->find(AccountEntity::class, $tokenDecoded["id"]);
+      return $this->entityManager->find(AccountEntity::class, $tokenDecoded["id"]);
     }
 
 
@@ -154,7 +167,7 @@ namespace App\Resources\Auth {
     public function login(string $email, string $password, bool $remember): string {
       try {
         /** @var $account AccountEntity */
-        $account = GlobalProxy::$entityManager->createQueryBuilder()
+        $account = $this->entityManager->createQueryBuilder()
           ->select("account")
           ->from(AccountEntity::class, "account")
           ->where("account.email = :email")
@@ -188,7 +201,7 @@ namespace App\Resources\Auth {
      * @throws Exception
      */
     public function register(CreateAccount $account): bool {
-      $emails_count = GlobalProxy::$entityManager->createQueryBuilder()
+      $emails_count = $this->entityManager->createQueryBuilder()
         ->select("count(account.id)")
         ->from(AccountEntity::class, "account")
         ->where("account.email = :email")
@@ -203,8 +216,8 @@ namespace App\Resources\Auth {
 
       $new_account = new AccountEntity(AccountRole::USER, $account->name, $account->email, $random_password);
 
-      GlobalProxy::$entityManager->persist($new_account);
-      GlobalProxy::$entityManager->flush($new_account);
+      $this->entityManager->persist($new_account);
+      $this->entityManager->flush($new_account);
 
       return $this->emailService->sendPassword($account->email, $random_password);
     }
@@ -222,7 +235,7 @@ namespace App\Resources\Auth {
     public function resetPassword(string $email): bool {
       try {
         /* @var AccountEntity $account */
-        $account = GlobalProxy::$entityManager->createQueryBuilder()
+        $account = $this->entityManager->createQueryBuilder()
           ->select("account")
           ->from(AccountEntity::class, "account")
           ->where("account.email = :email")
@@ -237,8 +250,8 @@ namespace App\Resources\Auth {
 
         $account->setPassword($random_password);
 
-        GlobalProxy::$entityManager->persist($account);
-        GlobalProxy::$entityManager->flush($account);
+        $this->entityManager->persist($account);
+        $this->entityManager->flush($account);
 
         return $this->emailService->sendPassword($email, $random_password);
       } catch (NoResultException) {
