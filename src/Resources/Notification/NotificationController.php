@@ -11,6 +11,7 @@ namespace App\Resources\Notification {
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
   use ErrorException;
+  use RestClientException;
   use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
@@ -88,6 +89,7 @@ namespace App\Resources\Notification {
      * @throws ORMException
      * @throws EntityNotFound
      * @throws NotSupported
+     * @throws RestClientException
      * @throws ErrorException
      */
     #[Mutation]
@@ -106,12 +108,7 @@ namespace App\Resources\Notification {
     #[Mutation]
     #[Logged]
     public function deleteNotification(#[InjectUser] AccountEntity $currentAccount, int $id): NotificationEntity {
-      $notification = self::notification($currentAccount, $id);
-
-      GlobalProxy::$entityManager->remove($notification);
-      GlobalProxy::$entityManager->flush($notification);
-
-      return $notification;
+      return $this->notificationService->deleteNotification($currentAccount, $id);
     }
   }
 }
