@@ -6,7 +6,6 @@ namespace App\Resources\Location {
 
   use App\Resources\Account\AccountEntity;
   use App\Resources\Alert\AlertEntity;
-  use App\Resources\Common\Utilities\GlobalProxy;
   use App\Resources\Common\Utilities\Validator;
   use App\Resources\Weather\WeatherEntity;
   use App\Resources\Weather\WeatherService;
@@ -214,7 +213,8 @@ namespace App\Resources\Location {
     #[Field]
     public function getWeather(): ?WeatherEntity {
       if (!isset($this->weather)) {
-        $weatherService = GlobalProxy::$container->get(WeatherService::class);
+        $container = require SETUP_PATH . "/container.php";
+        $weatherService = $container->get(WeatherService::class);
         $id = $this->getId();
         $account = $this->getAccount();
 
