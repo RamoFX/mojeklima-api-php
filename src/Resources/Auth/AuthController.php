@@ -4,23 +4,17 @@
 
 namespace App\Resources\Auth {
 
-  use App\Resources\Account\AccountEntity;
   use App\Resources\Account\Exceptions\AccountMarkedAsRemoved;
   use App\Resources\Account\Exceptions\EmailNotFound;
-  use App\Resources\Account\InputTypes\CreateAccount;
-  use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
-  use App\Resources\Auth\Exceptions\BearerTokenMissing;
+  use App\Resources\Account\Exceptions\EmailNotVerified;
   use App\Resources\Auth\Exceptions\IncorrectPassword;
   use App\Resources\Auth\Exceptions\InvalidToken;
   use App\Resources\Auth\Exceptions\TokenExpired;
-  use Doctrine\ORM\Exception\ORMException;
-  use Doctrine\ORM\NonUniqueResultException;
-  use Doctrine\ORM\OptimisticLockException;
-  use Exception;
-  use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+  use App\Resources\Auth\InputTypes\LoginInput;
+  use App\Resources\Auth\InputTypes\TokenOutput;
+  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
-  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
@@ -32,53 +26,41 @@ namespace App\Resources\Auth {
 
 
     /**
+     * @throws AccountMarkedAsRemoved
+     * @throws EmailNotFound
      * @throws IncorrectPassword
-     * @throws EmailNotFound
-     * @throws AccountMarkedAsRemoved
+     * @throws InvalidToken
+     * @throws TokenExpired
+     * @throws EmailNotVerified
+     * @throws InvalidArgumentException
      */
     #[Mutation]
-    public function login(string $email, string $password, bool $remember): string {
-      return $this->authService->login($email, $password, $remember);
+    public function login(LoginInput $login): TokenOutput {
+      return $this->authService->login($login);
     }
 
 
 
     /**
-     * @throws GraphQLException
-     * @throws ORMException
-     * @throws Exception
+     * @throws InvalidArgumentException
      */
     #[Mutation]
-    public function register(CreateAccount $account): bool {
-      return $this->authService->register($account);
-    }
-
-
-
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws NonUniqueResultException
-     * @throws EmailNotFound
-     * @throws AccountMarkedAsRemoved
-     */
-    #[Mutation]
-    public function resetPassword(string $email): bool {
-      return $this->authService->resetPassword($email);
+    #[Logged]
+    public function logout(): string {
+      return $this->authService->logout();
     }
 
 
 
     /**
      * @throws InvalidToken
-     * @throws AuthorizationHeaderMissing
      * @throws TokenExpired
-     * @throws BearerTokenMissing
+     * @throws InvalidArgumentException
      */
     #[Mutation]
     #[Logged]
-    public function renewToken(#[InjectUser] AccountEntity $currentAccount, bool $remember): string {
-      return $this->authService->renewToken($currentAccount, $remember);
+    public function renewToken(): TokenOutput {
+      return $this->authService->renewToken();
     }
   }
 }
