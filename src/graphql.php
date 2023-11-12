@@ -22,13 +22,12 @@ namespace App {
   $config = $container->get(ConfigManager::class);
   $isDev = $config->get('is.dev');
   $isProd = $config->get('is.prod');
-  $isDebug = $config->get('is.debug');
 
   function respond($output): void {
-    global $isDebug;
+    global $isDev;
 
-    if ($isDebug) {
-      $output["debug"] = Debug::getAll();
+    if ($isDev) {
+      $output['debug'] = Debug::getAll();
     }
 
     header('Content-Type: application/json');

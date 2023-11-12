@@ -8,13 +8,11 @@ namespace App\Setup {
     'app' => [
       'name' => $_ENV['APP_NAME'],
       'mode' => $_ENV['APP_MODE'],
-      'debug' => $_ENV['APP_DEBUG'],
       'origin' => $_ENV['APP_ORIGIN']
     ],
     'is' => [
       'dev' => $_ENV['APP_MODE'] === 'development',
-      'prod' => $_ENV['APP_MODE'] === 'production',
-      'debug' => $_ENV['APP_DEBUG'] === 'true'
+      'prod' => $_ENV['APP_MODE'] === 'production'
     ],
     'doctrine' => [
       'connection' => [
