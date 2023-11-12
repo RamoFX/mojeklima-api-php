@@ -56,11 +56,7 @@ namespace App\Setup {
       $client->connect(
         $config->get('redis.hostname'),
         $config->get('redis.port'),
-        0,
-        null,
-        0,
-        0,
-        [
+        context: [
           'auth' => [
             $config->get('redis.password')
           ]
