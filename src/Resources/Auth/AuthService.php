@@ -17,6 +17,7 @@ namespace App\Resources\Auth {
   use App\Resources\Auth\Exceptions\InvalidToken;
   use App\Resources\Auth\Exceptions\TokenExpired;
   use App\Resources\Auth\Utilities\JWT;
+  use App\Resources\Common\Utilities\Headers;
   use DateTimeImmutable;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;
@@ -33,7 +34,6 @@ namespace App\Resources\Auth {
 
   class AuthService implements AuthenticationServiceInterface, AuthorizationServiceInterface {
     protected EntityRepository $repository;
-    protected const BEARER = 'Bearer ';
     protected const AUTH_JWT_ACCOUNT_ID_KEY = 'accountId';
     protected const CACHE_SUBJECT = 'allowedAuthenticationToken';
 
@@ -54,37 +54,6 @@ namespace App\Resources\Auth {
 
 
     /**
-     * @throws BearerTokenMissing
-     * @throws AuthorizationHeaderMissing
-     */
-    protected function getBearerToken(): ?string {
-      $authorization = $_SERVER['HTTP_AUTHORIZATION'] ?? null;
-
-      if ($authorization === null)
-        throw new AuthorizationHeaderMissing();
-
-      if (!str_starts_with($authorization, self::BEARER))
-        throw new BearerTokenMissing();
-
-      $token = trim(
-        substr($authorization, strlen(self::BEARER))
-      );
-
-      if (strlen($token) === 0)
-        throw new BearerTokenMissing();
-
-      return $token;
-    }
-
-
-
-    protected function getUserAgent(): ?string {
-      return $_SERVER['HTTP_USER_AGENT'] ?? null;
-    }
-
-
-
-    /**
      * @throws AuthorizationHeaderMissing
      * @throws BearerTokenMissing
      * @throws InvalidArgumentException
@@ -92,10 +61,10 @@ namespace App\Resources\Auth {
      * @throws TokenExpired
      */
     public function isLogged(): bool {
-      $token = $this->getBearerToken();
+      $token = Headers::getBearerToken();
       $payload = $this->jwt->decode($token);
       $accountId = (int) $payload[self::AUTH_JWT_ACCOUNT_ID_KEY];
-      $userAgent = $this->getUserAgent();
+      $userAgent = Headers::getUserAgent();
       $cacheKey = $this->createAuthenticationTokenCacheKey($accountId, $userAgent);
       $allowedToken = $this->cache->get($cacheKey, '');
 
@@ -106,7 +75,7 @@ namespace App\Resources\Auth {
 
     public function getUser(): AccountEntity|null {
       try {
-        $token = $this->getBearerToken();
+        $token = Headers::getBearerToken();
         $payload = $this->jwt->decode($token);
 
         return $this->repository->findOneBy([
@@ -184,10 +153,10 @@ namespace App\Resources\Auth {
      */
     public function logout(): bool {
       try {
-        $token = $this->getBearerToken();
+        $token = Headers::getBearerToken();
         $payload = $this->jwt->decode($token);
         $accountId = (int) $payload[self::AUTH_JWT_ACCOUNT_ID_KEY];
-        $userAgent = $this->getUserAgent();
+        $userAgent = Headers::getUserAgent();
         $cacheKey = $this->createAuthenticationTokenCacheKey($accountId, $userAgent);
 
         return $this->cache->delete($cacheKey);
@@ -227,7 +196,7 @@ namespace App\Resources\Auth {
       $tokenOutput->nextRenewalAt = new DateTimeImmutable("@$nextRenewalAt");
 
       // cache
-      $userAgent = $this->getUserAgent();
+      $userAgent = Headers::getUserAgent();
       $cacheKey = $this->createAuthenticationTokenCacheKey($id, $userAgent);
       $now = new DateTimeImmutable();
       $expiresIn = $expiresAt - $now->getTimestamp();
