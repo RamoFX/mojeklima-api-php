@@ -35,8 +35,7 @@ namespace App\Resources\Account {
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", options: ["unsigned" => true])]
     private ?int $id = null;
-    #[ORM\Column(name: "is_removed", type: "boolean")]
-    private bool $isMarkedAsRemoved;
+
     #[ORM\Column(type: AccountRole::class)]
     private AccountRole $role;
     #[ORM\Column(length: 127)]
@@ -78,7 +77,6 @@ namespace App\Resources\Account {
      */
     public function __construct(AccountRole $role, string $name, string $email, string $password) {
       $this->setRole($role);
-      $this->setIsMarkedAsRemoved(false);
       $this->setName($name);
       $this->setEmail($email);
       $this->setEmailVerified(false);
@@ -86,6 +84,7 @@ namespace App\Resources\Account {
       $this->setTemperatureUnits(TemperatureUnits::CELSIUS);
       $this->setSpeedUnits(SpeedUnits::METERS_PER_SECOND);
       $this->setPressureUnits(PressureUnits::HECTOPASCAL);
+      $this->setIsMarkedAsRemoved(false);
       $this->locations = new ArrayCollection();
       $this->pushSubscriptions = new ArrayCollection();
     }
