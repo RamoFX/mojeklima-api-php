@@ -25,6 +25,12 @@ namespace App\Resources\Common\Utilities {
 
 
 
+    public static function get(string $name, mixed $default = null) {
+      return self::$data[$name] ?? $default;
+    }
+
+
+
     public static function getAll(): array {
       return self::$data;
     }
