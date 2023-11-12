@@ -7,139 +7,149 @@ namespace App {
   use App\Resources\Auth\AuthService;
   use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Debug;
+  use App\Resources\Common\Utilities\Translation;
   use DI\Container;
   use GraphQL\Error\DebugFlag;
   use GraphQL\GraphQL;
   use Psr\SimpleCache\CacheInterface;
+  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Context\Context;
+  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
   use TheCodingMachine\GraphQLite\SchemaFactory;
+  use Throwable;
 
 
 
-  // helpers
-  /** @var $container Container */
-  $container = require SETUP_PATH . '/container.php';
-  /** @var $config ConfigManager */
-  $config = $container->get(ConfigManager::class);
-  $isDev = $config->get('is.dev');
-  $isProd = $config->get('is.prod');
-
-  function respond($output): void {
+  try {
     global $isDev;
 
-    if ($isDev) {
-      $output['debug'] = Debug::getAll();
+    // helpers
+    /** @var $container Container */
+    $container = require SETUP_PATH . '/container.php';
+    /** @var $config ConfigManager */
+    $config = $container->get(ConfigManager::class);
+    $isDev = $config->get('is.dev');
+    $isProd = $config->get('is.prod');
+
+    function respond($output): void {
+      global $isDev;
+
+      if ($isDev) {
+        $output['debug'] = Debug::getAll();
+      }
+
+      header('Content-Type: application/json');
+      echo json_encode($output, JSON_INVALID_UTF8_IGNORE);
     }
 
-    header('Content-Type: application/json');
-    echo json_encode($output, JSON_INVALID_UTF8_IGNORE);
-  }
+
+
+    // headers
+    $allowOrigin = $config->get('security.origin');
+
+    header("Access-Control-Allow-Origin: $allowOrigin");
+    header('Vary: Origin');
+    header('Access-Control-Allow-Methods: POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Authorization,Content-Type,Preferred-Language,baggage,sentry-trace');
+
+    if (strtolower($_SERVER['REQUEST_METHOD']) === 'options') {
+      exit();
+    }
 
 
 
-  // global exception handler
-  set_exception_handler(function(Throwable $exception) {
-    global $isProd, $isDev, $isDebug;
+    // schema
+    $cache = $container->get(CacheInterface::class);
+    $factory = new SchemaFactory($cache, $container);
+    $controllerNamespace = $config->get('namespace.controller');
+    $typeNamespace = $config->get('namespace.type');
+    $authService = $container->get(AuthService::class);
 
-    header('Content-Type: application/json');
-    $internalErrorMessage = Translation::translate([
-      "cs" => "Vnitřní chyba serveru",
-      "en" => "Internal server error",
-      "de" => "Interner Serverfehler",
-    ]);
+    $factory
+      ->addControllerNamespace($controllerNamespace)
+      ->addTypeNamespace($typeNamespace)
+      ->setAuthenticationService($authService)
+      ->setAuthorizationService($authService);
 
-    $output = [
-      "errors" => [
-        [
-          "message" => $isProd
-            ? $internalErrorMessage
-            : $exception->getMessage()
-        ]
-      ]
+    if ($isProd) {
+      $factory->prodMode();
+    } else {
+      $factory->devMode();
+    }
+
+    $schema = $factory->createSchema();
+
+
+
+    // request data
+    $rawInput = file_get_contents('php://input');
+    $input = json_decode($rawInput, true);
+    $query = $input['query'] ?? null;
+    $variables = $input['variables'] ?? null;
+
+
+
+    // processing
+    $flags = $isDev
+      ? DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE
+      : DebugFlag::NONE;
+    $context = new Context();
+    $result = GraphQL::executeQuery($schema, $query, null, $context, $variables);
+    $output = $result->toArray($flags);
+
+
+
+    // response
+    respond($output);
+  } catch (Throwable|InvalidArgumentException $exception) {
+    $message = $exception instanceof GraphQLException && $exception->isClientSafe()
+      ? $exception->getMessage()
+      : Translation::translate([
+        'cs' => 'Vnitřní chyba serveru',
+        'en' => 'Internal server error',
+        'de' => 'Interner Serverfehler'
+      ]);
+
+    $error = [
+      'message' => $message
     ];
 
-    if ($isDev || $isDebug) {
-      $fullTrace = $exception->getTrace();
-      $output['trace'] = [];
+    // TODO: refactor - create a detailed representation on an error like the one below and:
+    //  a) in dev - output
+    //  b) in prod - log
+    if ($isDev ?? false) {
+      $originalTrace = $exception->getTrace();
+      $customTrace = [];
 
-      foreach ($fullTrace as $currentTrace) {
-        $file = str_replace(PROJECT_ROOT_PATH, '', $currentTrace['file'] ?? '');
-        $line = $currentTrace['line'] ?? '';
-        $function = $currentTrace['function'] ?? '';
-        $type = $currentTrace['type'] ?? '';
-        $class = $currentTrace['class'] ?? '';
-        $args = implode(', ', $currentTrace['args'] ?? []);
+      foreach ($originalTrace as $trace) {
+        $file = str_replace(PROJECT_ROOT_PATH, '', $trace['file'] ?? '');
+        $line = $trace['line'] ?? '';
+        $function = $trace['function'] ?? '';
+        $type = $trace['type'] ?? '';
+        $class = $trace['class'] ?? '';
+        $args = implode(', ', $trace['args'] ?? []);
 
-        $location = "$file:$line";
+        $location = implode(':', [ $file, $line ]);
         $member = "$class$type$function($args)";
 
-        $output['trace'][] = [
-          'location' => $location, // "location": "/src/graphql.php:74",
+        $customTrace[] = [
+          'location' => $location, // "location": "/src/graphql.php:158",
           'member' => $member      // "member":   "\App\Resources\Common\Utilities\Debug::getAll(...)"
         ];
       }
+
+      $error['extensions'] = [
+        'debugMessage' => $exception->getMessage(),
+        'file' => str_replace(PROJECT_ROOT_PATH, '', $exception->getFile() ?? ''),
+        'line' => $exception->getLine(),
+        'trace' => $customTrace
+      ];
     }
 
-    respond($output);
-  });
-
-
-
-  // headers
-  $allowOrigin = $config->get('security.origin');
-
-  header("Access-Control-Allow-Origin: $allowOrigin");
-  header('Vary: Origin');
-  header('Access-Control-Allow-Methods: POST, OPTIONS');
-  header('Access-Control-Allow-Headers: Authorization,Content-Type,Preferred-Language,baggage,sentry-trace');
-
-  if (strtolower($_SERVER['REQUEST_METHOD']) === 'options') {
-    exit();
+    respond([
+      'errors' => [
+        $error
+      ]
+    ]);
   }
-
-
-
-  // schema
-  $cache = $container->get(CacheInterface::class);
-  $factory = new SchemaFactory($cache, $container);
-  $controllerNamespace = $config->get('namespace.controller');
-  $typeNamespace = $config->get('namespace.type');
-  $authService = $container->get(AuthService::class);
-
-  $factory
-    ->addControllerNamespace($controllerNamespace)
-    ->addTypeNamespace($typeNamespace)
-    ->setAuthenticationService($authService)
-    ->setAuthorizationService($authService);
-
-  if ($isProd) {
-    $factory->prodMode();
-  } else {
-    $factory->devMode();
-  }
-
-  $schema = $factory->createSchema();
-
-
-
-  // request data
-  $rawInput = file_get_contents('php://input');
-  $input = json_decode($rawInput, true);
-  $query = $input['query'] ?? null;
-  $variables = $input['variables'] ?? null;
-
-
-
-  // processing
-  $flags = $isDev
-    ? DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE
-    : DebugFlag::NONE;
-  $context = new Context();
-  $result = GraphQL::executeQuery($schema, $query, null, $context, $variables);
-  $output = $result->toArray($flags);
-
-
-
-  // response
-  respond($output);
 }
