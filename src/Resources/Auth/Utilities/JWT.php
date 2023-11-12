@@ -4,11 +4,9 @@
 
 namespace App\Resources\Auth\Utilities {
 
-  use App\Resources\Auth\AuthService;
-  use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
-  use App\Resources\Auth\Exceptions\BearerTokenMissing;
   use App\Resources\Auth\Exceptions\InvalidToken;
   use App\Resources\Auth\Exceptions\TokenExpired;
+  use App\Resources\Common\Utilities\ConfigManager;
   use DateTimeImmutable;
   use Exception;
   use Firebase\JWT\ExpiredException;
@@ -18,48 +16,31 @@ namespace App\Resources\Auth\Utilities {
 
 
   class JWT {
-    private static string $alg = "HS512";
+    private const ALG = "HS512";
 
 
 
-    // TODO: Where is refresh token?
+    public function __construct(
+      protected ConfigManager $config
+    ) {}
 
 
 
-    public static function createToken(int $id, bool $remember): string {
+    public function create(mixed $payload, string $humanReadableDuration = '15 minutes'): string {
       $date = new DateTimeImmutable();
-      $expireAt = $date->modify('+1 hour')->getTimestamp(); // TODO: Too long
+      $expireAt = $date->modify("+$humanReadableDuration");
 
       $payload = [
         'iat' => $date->getTimestamp(),
-        'exp' => $expireAt,
-        'id' => $id
+        'exp' => $expireAt->getTimestamp(),
+        ...$payload
       ];
 
-      if ($remember)
-        unset($payload["exp"]); // TODO: Bad
-
-      return JWTCore::encode($payload, $_ENV["SECURITY_SECRET"], self::$alg);
-    }
-
-
-
-    /**
-     * @throws InvalidToken
-     * @throws AuthorizationHeaderMissing
-     * @throws TokenExpired
-     * @throws BearerTokenMissing
-     */
-    public static function renewToken(int $id, bool $remember): string {
-      $token = AuthService::getBearerToken();
-      $payload = self::decodeToken($token);
-      $canExpire = in_array("exp", array_keys($payload));
-
-      if ($canExpire || !$remember)
-        return self::createToken($id, $remember);
-
-      else
-        return $token;
+      return JWTCore::encode(
+        $payload,
+        $this->config->get('security.secret'),
+        self::ALG
+      );
     }
 
 
@@ -68,14 +49,18 @@ namespace App\Resources\Auth\Utilities {
      * @throws InvalidToken
      * @throws TokenExpired
      */
-    public static function decodeToken(string $token): array {
+    public function decode(string $token): array {
       try {
-        $stdClass = JWTCore::decode($token, new Key($_ENV["SECURITY_SECRET"], self::$alg));
+        $key = new Key(
+          $this->config->get('security.secret'),
+          self::ALG
+        );
+        $stdClass = JWTCore::decode($token, $key);
 
         return json_decode(json_encode($stdClass), true);
       } catch (ExpiredException) {
         throw new TokenExpired();
-      } catch (Exception) {
+      } catch (Exception $e) {
         throw new InvalidToken();
       }
     }
