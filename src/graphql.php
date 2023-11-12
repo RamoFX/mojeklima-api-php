@@ -8,6 +8,7 @@ namespace App {
   use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Debug;
   use App\Resources\Common\Utilities\Translation;
+  use App\Resources\Limit\Middleware\RateLimitFieldMiddleware;
   use DI\Container;
   use GraphQL\Error\DebugFlag;
   use GraphQL\GraphQL;
@@ -69,7 +70,8 @@ namespace App {
       ->addControllerNamespace($controllerNamespace)
       ->addTypeNamespace($typeNamespace)
       ->setAuthenticationService($authService)
-      ->setAuthorizationService($authService);
+      ->setAuthorizationService($authService)
+      ->addFieldMiddleware(new RateLimitFieldMiddleware());
 
     if ($isProd) {
       $factory->prodMode();
