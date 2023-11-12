@@ -45,7 +45,11 @@ namespace App\Resources\Account {
     private ?string $avatarUrl;
     #[ORM\Column(length: 255)]
     private string $email;
-    #[ORM\Column(name: "password_hash", length: 60, options: ["fixed" => true])]
+
+    #[ORM\Column(name: "email_verified", type: "boolean")]
+    private bool $emailVerified;
+
+    #[ORM\Column(name: "password_hash", length: 60, options: [ "fixed" => true ])]
     private string $passwordHash;
 
     #[ORM\Column(name: "temperature_units", type: TemperatureUnits::class)]
@@ -77,6 +81,7 @@ namespace App\Resources\Account {
       $this->setIsMarkedAsRemoved(false);
       $this->setName($name);
       $this->setEmail($email);
+      $this->setEmailVerified(false);
       $this->setPassword($password);
       $this->setTemperatureUnits(TemperatureUnits::CELSIUS);
       $this->setSpeedUnits(SpeedUnits::METERS_PER_SECOND);
@@ -158,6 +163,21 @@ namespace App\Resources\Account {
 
       return $this;
     }
+
+
+
+    #[Field]
+    public function getEmailVerified(): bool {
+      return $this->emailVerified;
+    }
+
+    public function setEmailVerified(bool $emailVerified): AccountEntity {
+      $this->emailVerified = $emailVerified;
+
+      return $this;
+    }
+
+
 
     public function getPasswordHash(): string {
       return $this->passwordHash;
