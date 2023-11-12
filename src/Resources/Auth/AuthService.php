@@ -18,6 +18,7 @@ namespace App\Resources\Auth {
   use App\Resources\Auth\Exceptions\TokenExpired;
   use App\Resources\Auth\Utilities\JWT;
   use App\Resources\Common\Utilities\Headers;
+  use App\Resources\Permission\Enums\Permission;
   use DateTimeImmutable;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;
@@ -88,10 +89,10 @@ namespace App\Resources\Auth {
 
 
 
-    public function isAllowed(string $right, $subject = null): bool {
+    public function isAllowed(string|Permission $right, $subject = null): bool {
       return match ($right) {
-        'ACCOUNT_MANAGEMENT' => $this->isAdminAccount() || $this->isSystemAccount(),
-        'PUSH_NOTIFICATIONS' => $this->isSystemAccount(),
+        Permission::ACCOUNT_MANAGEMENT => $this->isAdminAccount() || $this->isSystemAccount(),
+        Permission::PUSH_NOTIFICATIONS => $this->isSystemAccount(),
         default => false
       };
     }

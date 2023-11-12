@@ -8,6 +8,7 @@ namespace App\Resources\Notification {
   use App\Resources\Notification\DTO\DeleteNotificationInput;
   use App\Resources\Notification\DTO\NotificationInput;
   use App\Resources\Notification\DTO\NotifyInput;
+  use App\Resources\Permission\Enums\Permission;
   use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
@@ -86,7 +87,7 @@ namespace App\Resources\Notification {
      */
     #[Mutation]
     #[Logged]
-    #[Right("PUSH_NOTIFICATIONS")]
+    #[Right(Permission::PUSH_NOTIFICATIONS->value)]
     public function notify(NotifyInput $notify): NotificationEntity {
       return $this->notificationService->notify($notify);
     }
@@ -108,7 +109,7 @@ namespace App\Resources\Notification {
      */
     #[Mutation]
     #[Logged]
-    #[Right("PUSH_NOTIFICATIONS")]
+    #[Right(Permission::PUSH_NOTIFICATIONS->value)]
     public function checkForNotifications(): int {
       return $this->notificationService->checkForNotifications();
     }
