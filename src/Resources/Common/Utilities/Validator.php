@@ -9,10 +9,10 @@ namespace App\Resources\Common\Utilities {
 
 
   class Validator {
-    public static function multiple(...$validator_results) {
-      $last_key = array_key_last($validator_results);
+    public static function multiple(...$validatorResults) {
+      $lastKey = array_key_last($validatorResults);
 
-      return $validator_results[$last_key];
+      return $validatorResults[$lastKey];
     }
 
 
