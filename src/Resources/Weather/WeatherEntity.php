@@ -7,12 +7,7 @@ namespace App\Resources\Weather {
   use App\Resources\Cache\Cacheable;
   use App\Resources\Common\JsonDeserializable;
   use App\Resources\Common\Utilities\Translation;
-  use App\Resources\Common\Utilities\UnitsConverter;
   use App\Resources\Location\LocationEntity;
-  use App\Resources\Weather\Enums\PressureUnits;
-  use App\Resources\Weather\Enums\SpeedUnits;
-  use App\Resources\Weather\Enums\TemperatureUnits;
-  use Exception;
   use JsonSerializable;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -88,63 +83,6 @@ namespace App\Resources\Weather {
       }
 
       return $encoded;
-    }
-
-
-
-    /**
-     * @throws GraphQLException
-     * @throws Exception
-     */
-    public function convertTemperature(TemperatureUnits $toUnits): void {
-      $this->setTemperature(
-        UnitsConverter::fromMetric(
-          $this->getTemperature(),
-          $toUnits
-        )
-      );
-
-      $this->setFeelsLike(
-        UnitsConverter::fromMetric(
-          $this->getFeelsLike(),
-          $toUnits
-        )
-      );
-    }
-
-    /**
-     * @throws GraphQLException
-     * @throws Exception
-     */
-    public function convertSpeed(SpeedUnits $toUnits): void {
-      $this->setWindSpeed(
-        UnitsConverter::fromMetric(
-          $this->getWindSpeed(),
-          $toUnits
-        )
-      );
-
-      if ($this->getWindGust() !== null) {
-        $this->setWindGust(
-          UnitsConverter::fromMetric(
-            $this->getWindGust(),
-            $toUnits
-          )
-        );
-      }
-    }
-
-    /**
-     * @throws GraphQLException
-     * @throws Exception
-     */
-    public function convertPressure(PressureUnits $toUnits): void {
-      $this->setPressure(
-        UnitsConverter::fromMetric(
-          $this->getPressure(),
-          $toUnits
-        )
-      );
     }
 
 

@@ -24,7 +24,6 @@ namespace App\Resources\Weather {
     public function __construct(
       protected ConfigManager $config,
       protected CacheInterface $cache,
-      protected LocationService $locationService
     ) {}
 
 
@@ -39,6 +38,8 @@ namespace App\Resources\Weather {
       });
 
       return $api;
+      protected LocationService $locationService,
+      protected WeatherConverterService $weatherConverter
     }
 
 
