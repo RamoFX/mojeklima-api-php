@@ -18,44 +18,60 @@ namespace App\Resources\Email {
 
 
 
-    public function sendPassword(string $email, string $password): bool {
+    public function sendPasswordResetVerification(string $email, string $token): bool {
       $appName = $this->config->get('app.name');
       $replyToEmail = $this->config->get('email.replyTo');
-
+      $origin = $this->config->get('app.origin');
+      $verificationLink = "$origin/reset-password?token=$token";
       $message = Translation::translate([
-        "cs" => self::lines(
-          "Vážený uživateli,",
-          "Moc Vám děkujeme za využití našich služeb! Níže naleznete Vaše heslo k účtu, které z bezpečnostních důvodů doporučujeme změnit v nastavení účtu:",
-          $password,
-          "V případě jakýchkoliv otázek nebo případných potíží neváhejte nás kontaktovat prostřednictvím emailu $replyToEmail.",
-          "S přáním hezkého dne",
-          "",
-          $appName
-        ),
-        "en" => self::lines(
-          "Dear user,",
-          "Thank you very much for using our services! Below you will find your account password, which for security reasons we recommend changing in the account settings:",
-          $password,
-          "In case of any questions or possible problems, do not hesitate to contact us via email $replyToEmail.",
-          "Wishing you a nice day",
-          "",
-          $appName
-        ),
-        "de" => self::lines(
-          "Lieber Nutzer,",
-          "Vielen Dank, dass Sie unsere Dienste nutzen! Nachfolgend finden Sie Ihr Kontopasswort, das wir aus Sicherheitsgründen in den Kontoeinstellungen zu ändern empfehlen:",
-          $password,
-          "Bei Fragen oder möglichen Problemen zögern Sie nicht, uns per E-Mail $replyToEmail zu kontaktieren.",
-          "Einen schönen Tag noch",
-          "",
-          $appName
-        )
+        'cs' => <<<END
+          Vážený uživateli,
+          
+          Obdrželi jsme žádost o obnovení hesla pro váš účet na webu $appName. Pro pokračování v obnově hesla, klikněte prosím na následující odkaz:
+          
+          $verificationLink
+          
+          Pokud jste nepožádali o obnovení hesla, prosím, ignorujte tento email.
+          
+          Pokud budete mít další problémy, prosím, kontaktujte naši podporu na emailové adrese: $replyToEmail.
+          
+          Děkujeme,
+          Tým $appName
+          END,
+        'en' => <<<END
+          Dear user,
+          
+          We have received a request to reset the password for your account on the $appName website. To proceed with password recovery, please click on the following link:
+          
+          $verificationLink
+          
+          If you have not requested a password reset, please ignore this email.
+          
+          If you have any further problems, please contact our support at $replyToEmail.
+          
+          Thank you,
+          $appName Team
+          END,
+        'de' => <<<END
+          Sehr geehrter Benutzer,
+          
+          Wir haben eine Anfrage zum Zurücksetzen des Passworts für Ihr Konto auf der $appName-Website erhalten. Um mit der Wiederherstellung des Passworts fortzufahren, klicken Sie bitte auf den folgenden Link:
+          
+          $verificationLink
+          
+          Wenn Sie kein Zurücksetzen des Passworts angefordert haben, ignorieren Sie bitte diese E-Mail.
+          
+          Sollten Sie weitere Probleme haben, wenden Sie sich bitte an unseren Support unter $replyToEmail.
+          
+          Vielen Dank,
+          $appName-Team
+          END
       ]);
 
       $subject = Translation::translate([
-        "cs" => "Přístupové heslo",
-        "en" => "Access password",
-        "de" => "Passwort",
+        'cs' => 'Obnova hesla',
+        'en' => 'Password reset',
+        'de' => 'Wiederherstellung von Passwörtern'
       ]);
 
       return $this->sendEmail($email, $subject, $message);
@@ -63,17 +79,111 @@ namespace App\Resources\Email {
 
 
 
-    // TODO: Abandon
-    public function sendNotification(string $email, string $locationName, string $alertMessage): bool {
+    public function sendEmailVerification(string $email, string $token): bool {
       $appName = $this->config->get('app.name');
-      // TODO: Send content from users is dangerous, rather just tell that alert was triggered
-      $message = self::lines(
-        $alertMessage,
-        "",
-        $appName
-      );
+      $replyToEmail = $this->config->get('email.replyTo');
+      $origin = $this->config->get('app.origin');
+      $verificationLink = "$origin/verify-email?token=$token";
+      $message = Translation::translate([
+        'cs' => <<<END
+          Vážený uživateli,
+          
+          Děkujeme za vytvoření účtu na webu $appName. Pro dokončení registračního procesu, klikněte prosím na následující odkaz pro ověření vaší emailové adresy:
+          
+          $verificationLink
+          
+          Pokud jste se na webu $appName neregistrovali, tento email můžete ignorovat.
+          
+          Pokud máte jakékoli potíže, kontaktujte prosím naši podporu na emailové adrese: $replyToEmail.
+          
+          Děkujeme,
+          Tým $appName
+          END,
+        'en' => <<<END
+          Dear User,
+          
+          Thank you for creating an account with $appName. To complete the registration process, please click on the link below to verify your email address:
+          
+          $verificationLink
+          
+          If you did not sign up for an account on $appName, please ignore this email.
+          
+          If you continue to have issues, please contact our support team at: $replyToEmail.
+          
+          Thank you,
+          $appName Team
+          END,
+        'de' => <<<END
+          Sehr geehrter Benutzer,
+          
+          Vielen Dank, dass Sie ein Konto bei $appName erstellt haben. Um den Registrierungsprozess abzuschließen, klicken Sie bitte auf den folgenden Link, um Ihre E-Mail-Adresse zu bestätigen:
+          
+          $verificationLink
+          
+          Wenn Sie sich nicht auf $appName registriert haben, ignorieren Sie bitte diese E-Mail.
+          
+          Wenn Sie weiterhin Probleme haben, kontaktieren Sie bitte unser Support-Team unter: $replyToEmail.
+          
+          Vielen Dank,
+          $appName Team
+          END
+      ]);
 
-      return $this->sendEmail($email, $locationName, $message);
+      $subject = Translation::translate([
+        'cs' => 'Ověření e-mailu',
+        'en' => 'Email verification',
+        'de' => 'E-Mail-Verifizierung'
+      ]);
+
+      return $this->sendEmail($email, $subject, $message);
+    }
+
+
+
+    public function sendAccountMarkedAsRemovedNotification(string $email): bool {
+      $appName = $this->config->get('app.name');
+      $replyToEmail = $this->config->get('email.replyTo');
+      // TODO: Finish messages
+      $message = Translation::translate([
+        'cs' => <<<END
+          Vážený uživateli,
+          
+          ...
+          
+          Pokud máte jakékoli potíže, kontaktujte prosím naši podporu na emailové adrese: $replyToEmail.
+          
+          Děkujeme,
+          Tým $appName
+          END,
+        'en' => <<<END
+          Dear User,
+          
+          ...
+          
+          If you continue to have issues, please contact our support team at: $replyToEmail.
+          
+          Thank you,
+          $appName Team
+          END,
+        'de' => <<<END
+          Sehr geehrter Benutzer,
+          
+          ...
+          
+          Wenn Sie weiterhin Probleme haben, kontaktieren Sie bitte unser Support-Team unter: $replyToEmail.
+          
+          Vielen Dank,
+          $appName Team
+          END
+      ]);
+
+      $subject = Translation::translate([
+        "cs" => 'Odstranění účtu',
+        "en" => 'Account removal',
+        "de" => 'Entfernen des Kontos'
+      ]);
+
+      return $this->sendEmail($email, $subject, $message);
     }
 
 
@@ -83,7 +193,6 @@ namespace App\Resources\Email {
       $senderEmail = $this->config->get('email.sender');
       $replyToEmail = $this->config->get('email.replyTo');
       $api = self::getRestClient();
-
       $body = [
         "sender" => [
           "name" => $appName,
@@ -115,8 +224,7 @@ namespace App\Resources\Email {
 
 
     private function getRestClient(): RestClient {
-      $apiKey = $this->config->get('keys.api.brevo');;
-
+      $apiKey = $this->config->get('keys.api.brevo');
       $api = new RestClient([
         'base_url' => "https://api.brevo.com/v3/",
         "headers" => [
@@ -130,12 +238,6 @@ namespace App\Resources\Email {
       });
 
       return $api;
-    }
-
-
-
-    private function lines(string ...$lines): string {
-      return join("\n", $lines);
     }
   }
 }
