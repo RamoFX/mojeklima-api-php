@@ -5,9 +5,9 @@
 namespace App\Resources\Notification {
 
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Notification\InputTypes\DeleteNotificationInput;
-  use App\Resources\Notification\InputTypes\NotificationInput;
-  use App\Resources\Notification\InputTypes\NotifyInput;
+  use App\Resources\Notification\DTO\DeleteNotificationInput;
+  use App\Resources\Notification\DTO\NotificationInput;
+  use App\Resources\Notification\DTO\NotifyInput;
   use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;

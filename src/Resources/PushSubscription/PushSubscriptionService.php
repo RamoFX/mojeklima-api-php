@@ -9,7 +9,7 @@ namespace App\Resources\PushSubscription {
   use App\Resources\Auth\Exceptions\InvalidToken;
   use App\Resources\Auth\Exceptions\TokenExpired;
   use App\Resources\Common\CommonService;
-  use App\Resources\PushSubscription\InputTypes\SubscribeForPushNotificationsInput;
+  use App\Resources\PushSubscription\DTO\SubscribeForPushNotificationsInput;
   use DI\DependencyException;
   use DI\NotFoundException;
   use Doctrine\ORM\EntityManager;

@@ -4,6 +4,15 @@
 
 namespace App\Resources\Account {
 
+  use App\Resources\Account\DTO\AccountInput;
+  use App\Resources\Account\DTO\BeginEmailVerificationInput;
+  use App\Resources\Account\DTO\BeginPasswordResetInput;
+  use App\Resources\Account\DTO\ChangeRoleInput;
+  use App\Resources\Account\DTO\CompleteEmailVerificationInput;
+  use App\Resources\Account\DTO\CompletePasswordResetInput;
+  use App\Resources\Account\DTO\CreateAccountInput;
+  use App\Resources\Account\DTO\UpdateAccountInput;
+  use App\Resources\Account\DTO\UploadAvatarInput;
   use App\Resources\Account\Enums\AccountRole;
   use App\Resources\Account\Exceptions\AccountAlreadyExist;
   use App\Resources\Account\Exceptions\AccountMarkedAsRemoved;
@@ -11,15 +20,6 @@ namespace App\Resources\Account {
   use App\Resources\Account\Exceptions\EmailAlreadyVerified;
   use App\Resources\Account\Exceptions\EmailNotFound;
   use App\Resources\Account\Exceptions\MustBeMarkedAsRemovedFirst;
-  use App\Resources\Account\InputTypes\AccountInput;
-  use App\Resources\Account\InputTypes\BeginEmailVerificationInput;
-  use App\Resources\Account\InputTypes\BeginPasswordResetInput;
-  use App\Resources\Account\InputTypes\ChangeRoleInput;
-  use App\Resources\Account\InputTypes\CompleteEmailVerificationInput;
-  use App\Resources\Account\InputTypes\CompletePasswordResetInput;
-  use App\Resources\Account\InputTypes\CreateAccountInput;
-  use App\Resources\Account\InputTypes\UpdateAccountInput;
-  use App\Resources\Account\InputTypes\UploadAvatarInput;
   use App\Resources\Auth\AuthService;
   use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
   use App\Resources\Auth\Exceptions\BearerTokenMissing;

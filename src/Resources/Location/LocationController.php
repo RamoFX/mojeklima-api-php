@@ -5,10 +5,10 @@
 namespace App\Resources\Location {
 
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Location\InputTypes\CreateLocationInput;
-  use App\Resources\Location\InputTypes\DeleteLocationInput;
-  use App\Resources\Location\InputTypes\LocationInput;
-  use App\Resources\Location\InputTypes\UpdateLocationInput;
+  use App\Resources\Location\DTO\CreateLocationInput;
+  use App\Resources\Location\DTO\DeleteLocationInput;
+  use App\Resources\Location\DTO\LocationInput;
+  use App\Resources\Location\DTO\UpdateLocationInput;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NonUniqueResultException;
   use Doctrine\ORM\NoResultException;

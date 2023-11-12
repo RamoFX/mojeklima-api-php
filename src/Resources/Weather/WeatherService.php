@@ -8,9 +8,9 @@ namespace App\Resources\Weather {
   use App\Resources\Common\Enums\ConversionDirection;
   use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Translation;
-  use App\Resources\Location\InputTypes\LocationInput;
+  use App\Resources\Location\DTO\LocationInput;
   use App\Resources\Location\LocationService;
-  use App\Resources\Weather\InputTypes\WeatherInput;
+  use App\Resources\Weather\DTO\WeatherInput;
   use Exception;
   use Psr\SimpleCache\CacheInterface;
   use Psr\SimpleCache\InvalidArgumentException;

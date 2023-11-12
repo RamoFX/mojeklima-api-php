@@ -5,17 +5,17 @@
 namespace App\Resources\Notification {
 
   use App\Resources\Account\AccountService;
-  use App\Resources\Account\InputTypes\AccountInput;
+  use App\Resources\Account\DTO\AccountInput;
   use App\Resources\Alert\AlertService;
+  use App\Resources\Alert\DTO\AlertInput;
   use App\Resources\Alert\Enums\Criteria;
-  use App\Resources\Alert\InputTypes\AlertInput;
   use App\Resources\Common\CommonService;
   use App\Resources\Common\Exceptions\EntityNotFound;
   use App\Resources\Common\Utilities\ConfigManager;
-  use App\Resources\Notification\InputTypes\DeleteNotificationInput;
-  use App\Resources\Notification\InputTypes\NotificationInput;
-  use App\Resources\Notification\InputTypes\NotifyInput;
-  use App\Resources\Weather\InputTypes\WeatherInput;
+  use App\Resources\Notification\DTO\DeleteNotificationInput;
+  use App\Resources\Notification\DTO\NotificationInput;
+  use App\Resources\Notification\DTO\NotifyInput;
+  use App\Resources\Weather\DTO\WeatherInput;
   use App\Resources\Weather\WeatherService;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;

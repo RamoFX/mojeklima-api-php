@@ -4,7 +4,7 @@
 
 namespace App\Resources\Suggestion {
 
-  use App\Resources\Suggestion\InputTypes\SuggestionInput;
+  use App\Resources\Suggestion\DTO\SuggestionInput;
   use RestClientException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Query;

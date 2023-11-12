@@ -4,7 +4,7 @@
 
 namespace App\Resources\PushSubscription {
 
-  use App\Resources\PushSubscription\InputTypes\SubscribeForPushNotificationsInput;
+  use App\Resources\PushSubscription\DTO\SubscribeForPushNotificationsInput;
   use Doctrine\ORM\Exception\ORMException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;

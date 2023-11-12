@@ -4,7 +4,7 @@
 
 namespace App\Resources\Weather {
 
-  use App\Resources\Weather\InputTypes\WeatherInput;
+  use App\Resources\Weather\DTO\WeatherInput;
   use Exception;
   use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;

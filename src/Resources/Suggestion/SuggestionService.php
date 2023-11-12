@@ -6,7 +6,7 @@ namespace App\Resources\Suggestion {
 
   use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Translation;
-  use App\Resources\Suggestion\InputTypes\SuggestionInput;
+  use App\Resources\Suggestion\DTO\SuggestionInput;
   use Exception;
   use RestClient;
   use RestClientException;

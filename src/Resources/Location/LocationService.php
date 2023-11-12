@@ -10,10 +10,10 @@ namespace App\Resources\Location {
   use App\Resources\Auth\Exceptions\TokenExpired;
   use App\Resources\Common\CommonService;
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Location\InputTypes\CreateLocationInput;
-  use App\Resources\Location\InputTypes\DeleteLocationInput;
-  use App\Resources\Location\InputTypes\LocationInput;
-  use App\Resources\Location\InputTypes\UpdateLocationInput;
+  use App\Resources\Location\DTO\CreateLocationInput;
+  use App\Resources\Location\DTO\DeleteLocationInput;
+  use App\Resources\Location\DTO\LocationInput;
+  use App\Resources\Location\DTO\UpdateLocationInput;
   use DI\DependencyException;
   use DI\NotFoundException;
   use Doctrine\ORM\EntityManager;

@@ -4,13 +4,13 @@
 
 namespace App\Resources\Alert {
 
-  use App\Resources\Alert\InputTypes\AlertInput;
-  use App\Resources\Alert\InputTypes\CreateAlertInput;
-  use App\Resources\Alert\InputTypes\DeleteAlertInput;
-  use App\Resources\Alert\InputTypes\LocationAlertsCountInput;
-  use App\Resources\Alert\InputTypes\LocationAlertsInput;
-  use App\Resources\Alert\InputTypes\ToggleAlertInput;
-  use App\Resources\Alert\InputTypes\UpdateAlertInput;
+  use App\Resources\Alert\DTO\AlertInput;
+  use App\Resources\Alert\DTO\CreateAlertInput;
+  use App\Resources\Alert\DTO\DeleteAlertInput;
+  use App\Resources\Alert\DTO\LocationAlertsCountInput;
+  use App\Resources\Alert\DTO\LocationAlertsInput;
+  use App\Resources\Alert\DTO\ToggleAlertInput;
+  use App\Resources\Alert\DTO\UpdateAlertInput;
   use App\Resources\Common\Exceptions\EntityNotFound;
   use App\Resources\Limit\Exceptions\EntityLimitExceeded;
   use Doctrine\ORM\Exception\ORMException;
