@@ -5,9 +5,10 @@
 namespace App\Resources\Common\Types;
 
 use BackedEnum;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
+use Exception;
 
 
 
@@ -16,11 +17,15 @@ class EnumType extends Type {
   private string $class;
 
   /**
-   * @throws Exception
+   * @throws DBALException
    */
   public static function addEnumType(string $class): void {
-    self::addType($class, self::class);
-    self::getType($class)->class = $class;
+    try {
+      self::getType($class);
+    } catch (Exception) {
+      self::addType($class, self::class);
+      self::getType($class)->class = $class;
+    }
   }
 
   public function getName(): string {
@@ -45,3 +50,4 @@ class EnumType extends Type {
     return null === $value ? null : $class::from($value);
   }
 }
+
