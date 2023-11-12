@@ -10,14 +10,11 @@ namespace App\Resources\Account\InputTypes {
 
 
   #[Input]
-  class UpdateAccount {
+  class BeginPasswordResetInput {
     #[Field]
-    public ?string $name;
+    public string $email;
 
     #[Field]
-    public ?string $email;
-
-    #[Field]
-    public ?string $password;
+    public string $newPassword;
   }
 }

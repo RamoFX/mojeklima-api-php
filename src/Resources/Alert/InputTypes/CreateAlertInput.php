@@ -11,7 +11,10 @@ namespace App\Resources\Alert\InputTypes {
 
 
   #[Input]
-  class CreateAlert {
+  class CreateAlertInput {
+    #[Field]
+    public int $locationId;
+
     #[Field]
     public bool $isEnabled;
 

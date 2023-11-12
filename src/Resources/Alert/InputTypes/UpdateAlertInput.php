@@ -11,7 +11,10 @@ namespace App\Resources\Alert\InputTypes {
 
 
   #[Input]
-  class UpdateAlert {
+  class UpdateAlertInput {
+    #[Field]
+    public int $id;
+
     #[Field]
     public ?bool $isEnabled;
 

@@ -2,7 +2,7 @@
 
 
 
-namespace App\Resources\Common\InputTypes {
+namespace App\Resources\Alert\InputTypes {
 
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Input;
@@ -10,11 +10,8 @@ namespace App\Resources\Common\InputTypes {
 
 
   #[Input]
-  class Pagination {
+  class AlertInput {
     #[Field]
-    public int $currentPage;
-
-    #[Field]
-    public int $perPage;
+    public int $id;
   }
 }

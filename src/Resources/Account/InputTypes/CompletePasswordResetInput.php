@@ -10,11 +10,8 @@ namespace App\Resources\Account\InputTypes {
 
 
   #[Input]
-  class CreateAccount {
+  class CompletePasswordResetInput {
     #[Field]
-    public string $name;
-
-    #[Field]
-    public string $email;
+    public string $token;
   }
 }
