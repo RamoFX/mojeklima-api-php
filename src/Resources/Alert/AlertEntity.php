@@ -5,20 +5,15 @@
 namespace App\Resources\Alert {
 
   use App\Resources\Alert\Enums\Criteria;
-  use App\Resources\Common\Utilities\UnitsConverter;
   use App\Resources\Common\Utilities\Validator;
   use App\Resources\Location\LocationEntity;
   use App\Resources\Notification\NotificationEntity;
-  use App\Resources\Weather\Enums\PressureUnits;
-  use App\Resources\Weather\Enums\SpeedUnits;
-  use App\Resources\Weather\Enums\TemperatureUnits;
   use DateTimeImmutable;
   use Doctrine\Common\Collections\ArrayCollection;
   use Doctrine\Common\Collections\Collection;
   use Doctrine\ORM\Event\PrePersistEventArgs;
   use Doctrine\ORM\Event\PreUpdateEventArgs;
   use Doctrine\ORM\Mapping as ORM;
-  use Exception;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
@@ -68,39 +63,7 @@ namespace App\Resources\Alert {
       $this->notifications = new ArrayCollection();
     }
 
-    /**
-     * @throws Exception
-     */
-    public function convertRangeFrom(TemperatureUnits|SpeedUnits|PressureUnits $units): void {
-      // TODO: Handle input conversion
-      // TODO: make conversion service?
 
-      //      if ($units instanceof TemperatureUnits) {
-      //      } else if ($units instanceof SpeedUnits) {
-      //      } else if ($units instanceof PressureUnits) {
-      //      }
-
-      $this->setRangeFrom(
-        UnitsConverter::toMetric($this->getRangeFrom(), $units)
-      );
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function convertRangeTo(TemperatureUnits|SpeedUnits|PressureUnits $units): void {
-      $this->setRangeTo(
-        UnitsConverter::toMetric($this->getRangeTo(), $units)
-      );
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function convertRange(TemperatureUnits|SpeedUnits|PressureUnits $units): void {
-      $this->convertRangeFrom($units);
-      $this->convertRangeTo($units);
-    }
 
     #[Field(outputType: "ID")]
     public function getId(): ?int {
