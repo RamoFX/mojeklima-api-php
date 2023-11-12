@@ -5,6 +5,9 @@
 namespace App\Setup {
 
   use App\Resources\Account\Enums\AccountRole;
+  use App\Resources\Account\Enums\PressureUnits;
+  use App\Resources\Account\Enums\SpeedUnits;
+  use App\Resources\Account\Enums\TemperatureUnits;
   use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Common\Types\EnumType;
   use App\Resources\Common\Utilities\ConfigManager;
