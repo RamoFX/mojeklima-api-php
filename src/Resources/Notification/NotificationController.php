@@ -4,14 +4,17 @@
 
 namespace App\Resources\Notification {
 
-  use App\Resources\Account\AccountEntity;
   use App\Resources\Common\Exceptions\EntityNotFound;
+  use App\Resources\Notification\InputTypes\DeleteNotificationInput;
+  use App\Resources\Notification\InputTypes\NotificationInput;
+  use App\Resources\Notification\InputTypes\NotifyInput;
   use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\OptimisticLockException;
   use ErrorException;
+  use Exception;
+  use Psr\SimpleCache\InvalidArgumentException;
   use RestClientException;
-  use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -29,11 +32,12 @@ namespace App\Resources\Notification {
 
     /**
      * @return NotificationEntity[]
+     * @throws Exception
      */
     #[Query]
     #[Logged]
-    public function notifications(#[InjectUser] AccountEntity $currentAccount): array {
-      return $this->notificationService->notifications($currentAccount);
+    public function notifications(): array {
+      return $this->notificationService->notifications();
     }
 
 
@@ -43,16 +47,19 @@ namespace App\Resources\Notification {
      */
     #[Query]
     #[Logged]
-    public function notification(#[InjectUser] AccountEntity $currentAccount, int $id): NotificationEntity {
-      return $this->notificationService->notification($currentAccount, $id);
+    public function notification(NotificationInput $notification): NotificationEntity {
+      return $this->notificationService->notification($notification);
     }
 
 
 
+    /**
+     * @throws Exception
+     */
     #[Query]
     #[Logged]
-    public function hasUnseen(#[InjectUser] AccountEntity $currentAccount): bool {
-      return $this->notificationService->hasUnseen($currentAccount);
+    public function hasUnseen(): bool {
+      return $this->notificationService->hasUnseen();
     }
 
 
@@ -60,11 +67,13 @@ namespace App\Resources\Notification {
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws Exception
+     * @throws Exception
      */
     #[Mutation]
     #[Logged]
-    public function seenAll(#[InjectUser] AccountEntity $currentAccount): int {
-      return $this->notificationService->seenAll($currentAccount);
+    public function seenAll(): int {
+      return $this->notificationService->seenAll();
     }
 
 
@@ -78,11 +87,16 @@ namespace App\Resources\Notification {
     #[Mutation]
     #[Logged]
     #[Right("PUSH_NOTIFICATIONS")]
-    public function notify(int $accountId, int $alertId): NotificationEntity {
-      return $this->notificationService->notify($accountId, $alertId);
+    public function notify(NotifyInput $notify): NotificationEntity {
+      return $this->notificationService->notify($notify);
     }
 
     /**
+     * @TODO Rework error handling - catch errors
+     *   and provide custom ones - it is not clear
+     *   why for example in this method we should
+     *   handle InvalidArgumentException
+     *   - there are no arguments!
      * @throws OptimisticLockException
      * @throws GraphQLException
      * @throws ORMException
@@ -90,6 +104,7 @@ namespace App\Resources\Notification {
      * @throws NotSupported
      * @throws RestClientException
      * @throws ErrorException
+     * @throws InvalidArgumentException
      */
     #[Mutation]
     #[Logged]
@@ -106,8 +121,8 @@ namespace App\Resources\Notification {
      */
     #[Mutation]
     #[Logged]
-    public function deleteNotification(#[InjectUser] AccountEntity $currentAccount, int $id): NotificationEntity {
-      return $this->notificationService->deleteNotification($currentAccount, $id);
+    public function deleteNotification(DeleteNotificationInput $deleteNotification): NotificationEntity {
+      return $this->notificationService->deleteNotification($deleteNotification);
     }
   }
 }

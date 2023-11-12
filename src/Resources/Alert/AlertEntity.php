@@ -50,6 +50,8 @@ namespace App\Resources\Alert {
     #[ORM\OneToMany(mappedBy: "alert", targetEntity: "\App\Resources\Notification\NotificationEntity", cascade: ["persist"], orphanRemoval: true)]
     private Collection $notifications;
 
+
+
     /**
      * @throws GraphQLException
      */
@@ -70,6 +72,8 @@ namespace App\Resources\Alert {
       return $this->id;
     }
 
+
+
     #[Field]
     public function getIsEnabled(): bool {
       return $this->isEnabled;
@@ -80,6 +84,8 @@ namespace App\Resources\Alert {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getCriteria(): Criteria {
@@ -92,6 +98,8 @@ namespace App\Resources\Alert {
       return $this;
     }
 
+
+
     #[Field]
     public function getRangeFrom(): float {
       return $this->rangeFrom;
@@ -103,6 +111,8 @@ namespace App\Resources\Alert {
       return $this;
     }
 
+
+
     #[Field]
     public function getRangeTo(): float {
       return $this->rangeTo;
@@ -113,6 +123,8 @@ namespace App\Resources\Alert {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getUpdateFrequency(): int {
@@ -131,6 +143,8 @@ namespace App\Resources\Alert {
       return $this;
     }
 
+
+
     #[Field]
     public function getMessage(): string {
       return $this->message;
@@ -145,15 +159,21 @@ namespace App\Resources\Alert {
       return $this;
     }
 
+
+
     #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
 
+
+
     #[Field]
     public function getUpdatedAt(): DateTimeImmutable {
       return $this->updatedAt;
     }
+
+
 
     #[Field]
     public function getLocation(): LocationEntity {
@@ -165,6 +185,8 @@ namespace App\Resources\Alert {
 
       return $this;
     }
+
+
 
     /**
      * @return NotificationEntity[]
@@ -180,6 +202,8 @@ namespace App\Resources\Alert {
 
       return $this;
     }
+
+
 
     #[ORM\PrePersist]
     public function onPrePersist(PrePersistEventArgs $args): void {

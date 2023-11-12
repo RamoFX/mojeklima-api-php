@@ -4,6 +4,7 @@
 
 namespace App\Resources\Suggestion {
 
+  use App\Resources\Suggestion\InputTypes\SuggestionInput;
   use RestClientException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -23,8 +24,8 @@ namespace App\Resources\Suggestion {
      */
     #[Query]
     #[Logged]
-    public function suggestions(string $query): array {
-      return $this->suggestionService->suggestions($query);
+    public function suggestions(SuggestionInput $suggestion): array {
+      return $this->suggestionService->suggestions($suggestion);
     }
   }
 }

@@ -27,21 +27,24 @@ namespace App\Resources\Account {
 
 
   #[Entity]
-  #[Table(name: "accounts", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[Table(name: "accounts", options: [ 'collate' => 'utf8_czech_ci', 'charset' => 'utf8' ])]
   #[HasLifecycleCallbacks]
   #[Type(name: "Account")]
   class AccountEntity {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
+    #[ORM\Column(type: "integer", options: [ "unsigned" => true ])]
     private ?int $id = null;
 
     #[ORM\Column(type: AccountRole::class)]
     private AccountRole $role;
+
     #[ORM\Column(length: 127)]
     private string $name;
-    #[ORM\Column(name: "avatar_url", length: 511, nullable: true)]
-    private ?string $avatarUrl;
+
+    #[ORM\Column(name: "avatar_url", length: 511)]
+    private string $avatarUrl;
+
     #[ORM\Column(length: 255)]
     private string $email;
 
@@ -65,12 +68,17 @@ namespace App\Resources\Account {
 
     #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
+
     #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
-    #[ORM\OneToMany(mappedBy: "account", targetEntity: "\App\Resources\Location\LocationEntity", cascade: ["persist"], orphanRemoval: true)]
+
+    #[ORM\OneToMany(mappedBy: "account", targetEntity: "\App\Resources\Location\LocationEntity", cascade: [ "persist" ], orphanRemoval: true)]
     private Collection $locations;
-    #[ORM\OneToMany(mappedBy: "account", targetEntity: "\App\Resources\PushSubscription\PushSubscriptionEntity", cascade: ["persist"], orphanRemoval: true)]
+
+    #[ORM\OneToMany(mappedBy: "account", targetEntity: "\App\Resources\PushSubscription\PushSubscriptionEntity", cascade: [ "persist" ], orphanRemoval: true)]
     private Collection $pushSubscriptions;
+
+
 
     /**
      * @throws GraphQLException
@@ -78,6 +86,7 @@ namespace App\Resources\Account {
     public function __construct(AccountRole $role, string $name, string $email, string $password) {
       $this->setRole($role);
       $this->setName($name);
+      $this->setAvatarUrl('');
       $this->setEmail($email);
       $this->setEmailVerified(false);
       $this->setPassword($password);
@@ -89,10 +98,14 @@ namespace App\Resources\Account {
       $this->pushSubscriptions = new ArrayCollection();
     }
 
+
+
     #[Field(outputType: "ID")]
     public function getId(): ?int {
       return $this->id;
     }
+
+
 
     #[Field]
     public function getIsMarkedAsRemoved(): bool {
@@ -105,6 +118,8 @@ namespace App\Resources\Account {
       return $this;
     }
 
+
+
     #[Field]
     public function getRole(): AccountRole {
       return $this->role;
@@ -115,6 +130,8 @@ namespace App\Resources\Account {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getName(): string {
@@ -129,6 +146,8 @@ namespace App\Resources\Account {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getAvatarUrl(): ?string {
@@ -145,6 +164,8 @@ namespace App\Resources\Account {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getEmail(): string {
@@ -239,6 +260,8 @@ namespace App\Resources\Account {
       return $this->updatedAt;
     }
 
+
+
     /**
      * @return LocationEntity[]
      */
@@ -254,6 +277,8 @@ namespace App\Resources\Account {
       return $this;
     }
 
+
+
     /**
      * @return PushSubscriptionEntity[]
      */
@@ -268,6 +293,8 @@ namespace App\Resources\Account {
 
       return $this;
     }
+
+
 
     #[ORM\PrePersist]
     public function onPrePersist(PrePersistEventArgs $args): void {

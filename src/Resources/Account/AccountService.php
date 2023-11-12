@@ -5,8 +5,32 @@
 namespace App\Resources\Account {
 
   use App\Resources\Account\Enums\AccountRole;
+  use App\Resources\Account\Exceptions\AccountAlreadyExist;
+  use App\Resources\Account\Exceptions\AccountMarkedAsRemoved;
   use App\Resources\Account\Exceptions\EmailAlreadyInUse;
+  use App\Resources\Account\Exceptions\EmailAlreadyVerified;
+  use App\Resources\Account\Exceptions\EmailNotFound;
+  use App\Resources\Account\Exceptions\MustBeMarkedAsRemovedFirst;
+  use App\Resources\Account\InputTypes\AccountInput;
+  use App\Resources\Account\InputTypes\BeginEmailVerificationInput;
+  use App\Resources\Account\InputTypes\BeginPasswordResetInput;
+  use App\Resources\Account\InputTypes\ChangeRoleInput;
+  use App\Resources\Account\InputTypes\CompleteEmailVerificationInput;
+  use App\Resources\Account\InputTypes\CompletePasswordResetInput;
+  use App\Resources\Account\InputTypes\CreateAccountInput;
+  use App\Resources\Account\InputTypes\UpdateAccountInput;
+  use App\Resources\Account\InputTypes\UploadAvatarInput;
+  use App\Resources\Auth\AuthService;
+  use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
+  use App\Resources\Auth\Exceptions\BearerTokenMissing;
+  use App\Resources\Auth\Exceptions\InvalidToken;
+  use App\Resources\Auth\Exceptions\TokenExpired;
+  use App\Resources\Auth\Utilities\JWT;
+  use App\Resources\Common\CommonService;
   use App\Resources\Common\Exceptions\EntityNotFound;
+  use App\Resources\Email\EmailService;
+  use DI\DependencyException;
+  use DI\NotFoundException;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;
   use Doctrine\ORM\Exception\NotSupported;
@@ -16,22 +40,42 @@ namespace App\Resources\Account {
   use Doctrine\ORM\OptimisticLockException;
   use Doctrine\ORM\TransactionRequiredException;
   use Exception;
+  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
-  class AccountService {
+  class AccountService extends CommonService {
     protected EntityRepository $repository;
 
 
 
     /**
      * @throws NotSupported
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TransactionRequiredException
+     * @throws AuthorizationHeaderMissing
+     * @throws BearerTokenMissing
+     * @throws InvalidToken
+     * @throws TokenExpired
+     * @throws DependencyException
+     * @throws NotFoundException
      */
     public function __construct(
-      protected EntityManager $entityManager
+      protected EntityManager $entityManager,
+      protected EmailService $emailService,
+      protected JWT $jwt,
+      protected AuthService $authService
     ) {
+      parent::__construct();
       $this->repository = $entityManager->getRepository(AccountEntity::class);
+    }
+
+
+
+    public function me(): AccountEntity {
+      return $this->currentAccount;
     }
 
 
@@ -39,11 +83,11 @@ namespace App\Resources\Account {
     /**
      * @throws EntityNotFound
      */
-    public function account(int $id) {
+    public function account(AccountInput $account) {
       try {
-        return $this->repository->find(AccountEntity::class, $id);
+        return $this->repository->find(AccountEntity::class, $account->id);
       } catch (Exception) {
-        throw new EntityNotFound("Account");
+        throw new EntityNotFound('Account');
       }
     }
 
@@ -54,6 +98,20 @@ namespace App\Resources\Account {
      */
     public function accounts(): array {
       return $this->repository->findAll();
+    }
+
+
+
+    /**
+     * @return AccountEntity[]
+     */
+    public function userAccounts(): array {
+      return $this->repository->createQueryBuilder('a')
+        ->select('a')
+        ->where('a.role != :systemRole')
+        ->setParameter('systemRole', AccountRole::SYSTEM)
+        ->getQuery()
+        ->getResult();
     }
 
 
@@ -77,13 +135,13 @@ namespace App\Resources\Account {
      * @throws ORMException
      * @throws TransactionRequiredException
      */
-    public function changeRole(int $id, AccountRole $role): AccountEntity {
-      $account = $this->repository->find(AccountEntity::class, $id);
+    public function changeRole(ChangeRoleInput $changeRole): AccountEntity {
+      $account = $this->repository->find(AccountEntity::class, $changeRole->id);
 
       if ($account === null)
-        throw new EntityNotFound("Account");
+        throw new EntityNotFound('Account');
 
-      $account->setRole($role);
+      $account->setRole($changeRole->role);
 
       $this->entityManager->flush($account);
 
@@ -96,22 +154,36 @@ namespace App\Resources\Account {
      * @throws OptimisticLockException
      * @throws ORMException
      * @throws GraphQLException
+     * @throws NonUniqueResultException
+     * @throws AccountAlreadyExist
+     * @throws NoResultException
+     * @throws Exception
      */
-    public function updateName(AccountEntity $currentAccount, string $name): AccountEntity {
-      $currentAccount->setName($name);
+    public function createAccount(CreateAccountInput $createAccount): AccountEntity {
+      // check if account already exists
+      $emailsCount = $this->repository->createQueryBuilder('a')
+        ->select('COUNT(a.id)')
+        ->where('a.email = :email')
+        ->setParameter('email', $createAccount->email)
+        ->getQuery()
+        ->getSingleScalarResult();
 
-      $this->entityManager->persist($currentAccount);
-      $this->entityManager->flush($currentAccount);
+      if ($emailsCount > 0)
+        throw new AccountAlreadyExist();
 
-      return $currentAccount;
-    }
+      $newAccount = new AccountEntity(
+        AccountRole::USER,
+        $createAccount->name,
+        $createAccount->email,
+        $createAccount->password
+      );
 
+      // TODO: start email verification
 
+      $this->entityManager->persist($newAccount);
+      $this->entityManager->flush($newAccount);
 
-    public function updateAvatar(AccountEntity $currentAccount): AccountEntity {
-      // TODO: Implement
-
-      return $currentAccount;
+      return $newAccount;
     }
 
 
@@ -119,30 +191,171 @@ namespace App\Resources\Account {
     /**
      * @throws OptimisticLockException
      * @throws ORMException
-     * @throws EmailAlreadyInUse
      * @throws GraphQLException
-     * @throws NonUniqueResultException
-     * @throws NoResultException
      */
-    public function updateEmail(AccountEntity $currentAccount, string $email): AccountEntity {
-      // check whether email is already in use
-      $emailsCount = $this->entityManager->createQueryBuilder()
-        ->select("count(account.id)")
-        ->from(AccountEntity::class, "account")
-        ->where("account.email = :email")
-        ->setParameter("email", $email)
+    public function updateAccount(UpdateAccountInput $updateAccount): AccountEntity {
+      // perform checks before making any updates to the account
+      // is email already in use?
+      $emailsCount = $this->repository->createQueryBuilder('a')
+        ->select('COUNT(a.id)')
+        ->from(AccountEntity::class, 'a')
+        ->where('a.email = :email')
+        ->setParameter('email', $updateAccount->email)
         ->getQuery()
         ->getSingleScalarResult();
 
       if ($emailsCount > 0)
         throw new EmailAlreadyInUse();
 
-      $currentAccount->setEmail($email);
+      if ($updateAccount->name !== null)
+        $this->currentAccount->setName($updateAccount->name);
 
-      $this->entityManager->persist($currentAccount);
-      $this->entityManager->flush($currentAccount);
+      if ($updateAccount->email !== null) {
+        $this->currentAccount->setEmail($updateAccount->email);
+        $this->currentAccount->setEmailVerified(false);
+      }
 
-      return $currentAccount;
+      if ($updateAccount->password !== null)
+        $this->currentAccount->setPassword($updateAccount->password);
+
+      $this->entityManager->flush($this->currentAccount);
+
+      return $this->currentAccount;
+    }
+
+
+
+    /**
+     * @throws EmailNotFound
+     * @throws EmailAlreadyVerified
+     */
+    public function beginEmailVerification(BeginEmailVerificationInput $beginEmailVerification): bool {
+      try {
+        /* @var AccountEntity $account */
+        $account = $this->repository->createQueryBuilder('a')
+          ->select('a')
+          ->where('a.email = :email')
+          ->setParameter('email', $beginEmailVerification->email)
+          ->getQuery()
+          ->getSingleResult();
+      } catch (Exception) {
+        throw new EmailNotFound();
+      }
+
+      if ($account->getEmailVerified())
+        throw new EmailAlreadyVerified();
+
+      $token = $this->jwt->create([ 'email' => $beginEmailVerification->email ], '1 hour');
+
+      return $this->emailService->sendEmailVerification($beginEmailVerification->email, $token);
+    }
+
+
+
+    /**
+     * @throws EmailAlreadyVerified
+     * @throws InvalidToken
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TokenExpired
+     * @throws EmailNotFound
+     */
+    public function completeEmailVerification(CompleteEmailVerificationInput $completeEmailVerification): bool {
+      $payload = $this->jwt->decode($completeEmailVerification->token);
+
+      try {
+        /** @var $account AccountEntity */
+        $account = $this->repository->createQueryBuilder('a')
+          ->select('a')
+          ->where('a.email = :email')
+          ->setParameter('email', $payload['email'])
+          ->getQuery()
+          ->getSingleResult();
+      } catch (Exception) {
+        throw new EmailNotFound();
+      }
+
+      if ($account->getEmailVerified())
+        throw new EmailAlreadyVerified();
+
+      $account->setEmailVerified(true);
+      $this->entityManager->flush($account);
+
+      return true;
+    }
+
+
+
+    /**
+     * @throws EmailNotFound
+     * @throws AccountMarkedAsRemoved
+     * @throws Exception
+     */
+    public function beginPasswordReset(BeginPasswordResetInput $resetPassword): bool {
+      try {
+        /* @var AccountEntity $account */
+        $account = $this->repository->createQueryBuilder('a')
+          ->select('a')
+          ->where('a.email = :email')
+          ->setParameter('email', $resetPassword->email)
+          ->getQuery()
+          ->getSingleResult();
+      } catch (Exception) {
+        throw new EmailNotFound();
+      }
+
+      // TODO: Maybe check this more often?
+      if ($account->getIsMarkedAsRemoved())
+        throw new AccountMarkedAsRemoved();
+
+      $payload = [
+        'email' => $resetPassword->email,
+        'newPassword' => $resetPassword->newPassword
+      ];
+      $token = $this->jwt->create($payload, '1 hour');
+
+      return $this->emailService->sendPasswordResetVerification($resetPassword->email, $token);
+    }
+
+
+
+    /**
+     * @throws InvalidToken
+     * @throws TokenExpired
+     * @throws EmailNotFound
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function completePasswordReset(CompletePasswordResetInput $completePasswordReset): bool {
+      $payload = $this->jwt->decode($completePasswordReset->token);
+      $email = $payload['email'];
+      $newPassword = $payload['newPassword'];
+
+      try {
+        /* @var AccountEntity $account */
+        $account = $this->repository->createQueryBuilder('a')
+          ->select('a')
+          ->where('a.email = :email')
+          ->setParameter('email', $email)
+          ->getQuery()
+          ->getSingleResult();
+      } catch (Exception) {
+        throw new EmailNotFound();
+      }
+
+      $account->setPassword($newPassword);
+
+      $this->entityManager->flush($this->currentAccount);
+
+      return true;
+    }
+
+
+
+    public function uploadAvatar(UploadAvatarInput $uploadAvatar): AccountEntity {
+      // TODO: Implement
+
+      return $this->currentAccount;
     }
 
 
@@ -150,14 +363,16 @@ namespace App\Resources\Account {
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws InvalidArgumentException
      */
-    public function updatePassword(AccountEntity $currentAccount, string $password): AccountEntity {
-      $currentAccount->setPassword($password);
+    public function markAccountRemoved(): AccountEntity {
+      $this->currentAccount->setIsMarkedAsRemoved(true);
+      $this->authService->logout();
+      $this->emailService->sendAccountMarkedAsRemovedNotification($this->currentAccount->getEmail());
 
-      $this->entityManager->persist($currentAccount);
-      $this->entityManager->flush($currentAccount);
+      $this->entityManager->flush($this->currentAccount);
 
-      return $currentAccount;
+      return $this->currentAccount;
     }
 
 
@@ -165,27 +380,16 @@ namespace App\Resources\Account {
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws MustBeMarkedAsRemovedFirst
      */
-    public function markAccountRemoved(AccountEntity $currentAccount): AccountEntity {
-      $currentAccount->setIsMarkedAsRemoved(true);
+    public function permanentlyDeleteAccount(): AccountEntity {
+      if (!$this->currentAccount->getIsMarkedAsRemoved())
+        throw new MustBeMarkedAsRemovedFirst();
 
-      $this->entityManager->persist($currentAccount);
-      $this->entityManager->flush($currentAccount);
+      $this->entityManager->remove($this->currentAccount);
+      $this->entityManager->flush($this->currentAccount);
 
-      return $currentAccount;
-    }
-
-
-
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     */
-    public function permanentlyDeleteAccount(AccountEntity $currentAccount): AccountEntity {
-      $this->entityManager->remove($currentAccount);
-      $this->entityManager->flush($currentAccount);
-
-      return $currentAccount;
+      return $this->currentAccount;
     }
   }
 }

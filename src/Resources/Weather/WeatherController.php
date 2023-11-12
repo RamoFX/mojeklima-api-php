@@ -4,12 +4,9 @@
 
 namespace App\Resources\Weather {
 
-  use App\Resources\Account\AccountEntity;
-  use App\Resources\Weather\Enums\PressureUnits;
-  use App\Resources\Weather\Enums\SpeedUnits;
-  use App\Resources\Weather\Enums\TemperatureUnits;
+  use App\Resources\Weather\InputTypes\WeatherInput;
   use Exception;
-  use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Query;
 
@@ -24,23 +21,12 @@ namespace App\Resources\Weather {
 
     /**
      * @throws Exception
+     * @throws InvalidArgumentException
      */
     #[Query]
     #[Logged]
-    public function weather(
-      #[InjectUser] AccountEntity $currentAccount,
-      int $locationId,
-      ?TemperatureUnits $temperatureUnits,
-      ?SpeedUnits $speedUnits,
-      ?PressureUnits $pressureUnits
-    ): WeatherEntity {
-      return $this->weatherService->weather(
-        $currentAccount,
-        $locationId,
-        $temperatureUnits,
-        $speedUnits,
-        $pressureUnits
-      );
+    public function weather(WeatherInput $weather): WeatherEntity {
+      return $this->weatherService->weather($weather);
     }
   }
 }

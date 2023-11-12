@@ -4,9 +4,8 @@
 
 namespace App\Resources\PushSubscription {
 
-  use App\Resources\Account\AccountEntity;
+  use App\Resources\PushSubscription\InputTypes\SubscribeForPushNotificationsInput;
   use Doctrine\ORM\Exception\ORMException;
-  use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
 
@@ -24,8 +23,8 @@ namespace App\Resources\PushSubscription {
      */
     #[Mutation]
     #[Logged]
-    public function subscribeForPushNotifications(#[InjectUser] AccountEntity $currentAccount, string $userAgent, string $endpoint, string $p256dh, string $auth): PushSubscriptionEntity {
-      return $this->pushSubscriptionService->subscribeForPushNotifications($currentAccount, $userAgent, $endpoint, $p256dh, $auth);
+    public function subscribeForPushNotifications(SubscribeForPushNotificationsInput $subscribeForPushNotifications): PushSubscriptionEntity {
+      return $this->pushSubscriptionService->subscribeForPushNotifications($subscribeForPushNotifications);
     }
   }
 }

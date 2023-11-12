@@ -4,11 +4,15 @@
 
 namespace App\Resources\Location {
 
-  use App\Resources\Account\AccountEntity;
   use App\Resources\Common\Exceptions\EntityNotFound;
+  use App\Resources\Location\InputTypes\CreateLocationInput;
+  use App\Resources\Location\InputTypes\DeleteLocationInput;
+  use App\Resources\Location\InputTypes\LocationInput;
+  use App\Resources\Location\InputTypes\UpdateLocationInput;
   use Doctrine\ORM\Exception\ORMException;
+  use Doctrine\ORM\NonUniqueResultException;
+  use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
-  use TheCodingMachine\GraphQLite\Annotations\InjectUser;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -28,27 +32,35 @@ namespace App\Resources\Location {
      */
     #[Query]
     #[Logged]
-    public function locations(#[InjectUser] AccountEntity $currentAccount): array {
-      return $this->locationService->locations($currentAccount);
-    }
-
-
-
-    #[Query]
-    #[Logged]
-    public function locationsCount(#[InjectUser] AccountEntity $currentAccount): int {
-      return $this->locationService->locationsCount($currentAccount);
+    public function locations(): array {
+      return $this->locationService->locations();
     }
 
 
 
     /**
-     * @throws EntityNotFound
+     * @throws NonUniqueResultException
+     * @throws NoResultException
      */
     #[Query]
     #[Logged]
-    public function location(#[InjectUser] AccountEntity $currentAccount, int $id): LocationEntity {
-      return $this->locationService->location($currentAccount, $id);
+    public function locationsCount(): int {
+      return $this->locationService->locationsCount();
+    }
+
+
+
+    /**
+     * @param LocationInput $location
+     * @return LocationEntity
+     * @throws EntityNotFound
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    #[Query]
+    #[Logged]
+    public function location(LocationInput $location): LocationEntity {
+      return $this->locationService->location($location);
     }
 
 
@@ -60,8 +72,8 @@ namespace App\Resources\Location {
      */
     #[Mutation]
     #[Logged]
-    public function createLocation(#[InjectUser] AccountEntity $currentAccount, string $cityName, string $countryName, ?string $label, float $latitude, float $longitude): LocationEntity {
-      return $this->locationService->createLocation($currentAccount, $cityName, $countryName, $label, $latitude, $longitude);
+    public function createLocation(CreateLocationInput $createLocation): LocationEntity {
+      return $this->locationService->createLocation($createLocation);
     }
 
 
@@ -74,21 +86,20 @@ namespace App\Resources\Location {
      */
     #[Mutation]
     #[Logged]
-    public function updateLocation(#[InjectUser] AccountEntity $currentAccount, int $id, ?string $cityName, ?string $countryName, ?string $label, ?float $latitude, ?float $longitude): LocationEntity {
-      return $this->locationService->updateLocation($currentAccount, $id, $cityName, $countryName, $label, $latitude, $longitude);
+    public function updateLocation(UpdateLocationInput $updateLocation): LocationEntity {
+      return $this->locationService->updateLocation($updateLocation);
     }
 
 
 
     /**
      * @throws OptimisticLockException
-     * @throws EntityNotFound
      * @throws ORMException
      */
     #[Mutation]
     #[Logged]
-    public function deleteLocation(#[InjectUser] AccountEntity $currentAccount, int $id): LocationEntity {
-      return $this->locationService->deleteLocation($currentAccount, $id);
+    public function deleteLocation(DeleteLocationInput $deleteLocation): LocationEntity {
+      return $this->locationService->deleteLocation($deleteLocation);
     }
   }
 }

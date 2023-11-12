@@ -14,23 +14,22 @@ namespace App\Resources\Notification {
 
 
   #[ORM\Entity]
-  #[ORM\Table(name: "notifications", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[ORM\Table(name: "notifications", options: [ "collate" => "utf8_czech_ci", "charset" => "utf8" ])]
   #[ORM\HasLifecycleCallbacks]
   #[Type(name: "Notification")]
   class NotificationEntity {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
+    #[ORM\Column(type: "integer", options: [ "unsigned" => true ])]
     private ?int $id = null;
-    #[ORM\Column(type: "boolean", options: ["default" => false])]
+    #[ORM\Column(type: "boolean", options: [ "default" => false ])]
     private bool $seen = false;
     #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
-    #[ORM\ManyToOne(targetEntity: "\App\Resources\Alert\AlertEntity", cascade: ["persist"], inversedBy: "pushNotifications")]
+    #[ORM\ManyToOne(targetEntity: "\App\Resources\Alert\AlertEntity", cascade: [ "persist" ], inversedBy: "pushNotifications")]
     private AlertEntity $alert;
 
-    public function __construct() {
-    }
+    public function __construct() {}
 
     #[Field(outputType: "ID")]
     public function getId(): ?int {
@@ -65,7 +64,7 @@ namespace App\Resources\Notification {
     }
 
     #[ORM\PrePersist]
-    public function onPrePersist(PrePersistEventArgs $args) {
+    public function onPrePersist(PrePersistEventArgs $args): void {
       $this->createdAt = new DateTimeImmutable();
     }
   }

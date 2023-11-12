@@ -6,6 +6,7 @@ namespace App\Resources\Suggestion {
 
   use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Translation;
+  use App\Resources\Suggestion\InputTypes\SuggestionInput;
   use Exception;
   use RestClient;
   use RestClientException;
@@ -24,7 +25,7 @@ namespace App\Resources\Suggestion {
      * @throws RestClientException
      * @throws Exception
      */
-    public function suggestions(string $query): array {
+    public function suggestions(SuggestionInput $suggestion): array {
       $language = Translation::getPreferredLanguage();
 
       // rest api
@@ -37,7 +38,7 @@ namespace App\Resources\Suggestion {
         'no_annotations' => 1,
         'limit' => 5,
         'language' => $language,
-        'q' => $query
+        'q' => $suggestion->query
       ]);
 
       if ($result->error)
@@ -51,10 +52,10 @@ namespace App\Resources\Suggestion {
         return $suggestions;
 
       foreach ($data['results'] as $result) {
-        $latitude = $result["geometry"]["lat"];
-        $longitude = $result["geometry"]["lng"];
-        $cityName = $result["components"]["city"];
-        $countryName = $result["components"]["country"];
+        $latitude = $result['geometry']['lat'];
+        $longitude = $result['geometry']['lng'];
+        $cityName = $result['components']['city'];
+        $countryName = $result['components']['country'];
 
         $suggestion = new SuggestionEntity(
           $latitude,

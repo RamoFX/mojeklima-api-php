@@ -4,16 +4,29 @@
 
 namespace App\Resources\Account {
 
-  use App\Resources\Account\Enums\AccountRole;
-  use App\Resources\Account\Exceptions\EmailAlreadyInUse;
+  use App\Resources\Account\Exceptions\AccountAlreadyExist;
+  use App\Resources\Account\Exceptions\AccountMarkedAsRemoved;
+  use App\Resources\Account\Exceptions\EmailAlreadyVerified;
+  use App\Resources\Account\Exceptions\EmailNotFound;
+  use App\Resources\Account\Exceptions\MustBeMarkedAsRemovedFirst;
+  use App\Resources\Account\InputTypes\AccountInput;
+  use App\Resources\Account\InputTypes\BeginEmailVerificationInput;
+  use App\Resources\Account\InputTypes\BeginPasswordResetInput;
+  use App\Resources\Account\InputTypes\ChangeRoleInput;
+  use App\Resources\Account\InputTypes\CompleteEmailVerificationInput;
+  use App\Resources\Account\InputTypes\CompletePasswordResetInput;
+  use App\Resources\Account\InputTypes\CreateAccountInput;
+  use App\Resources\Account\InputTypes\UpdateAccountInput;
+  use App\Resources\Account\InputTypes\UploadAvatarInput;
+  use App\Resources\Auth\Exceptions\InvalidToken;
+  use App\Resources\Auth\Exceptions\TokenExpired;
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NonUniqueResultException;
   use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
   use Doctrine\ORM\TransactionRequiredException;
-  use TheCodingMachine\GraphQLite\Annotations\InjectUser;
+  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -31,10 +44,8 @@ namespace App\Resources\Account {
 
     #[Query]
     #[Logged]
-    public function me(
-      #[InjectUser] AccountEntity $currentAccount
-    ): AccountEntity {
-      return $currentAccount;
+    public function me(): AccountEntity {
+      return $this->accountService->me();
     }
 
 
@@ -45,17 +56,14 @@ namespace App\Resources\Account {
     #[Query]
     #[Logged]
     #[Right("ACCOUNT_MANAGEMENT")]
-    public function account(
-      int $id
-    ): AccountEntity {
-      return $this->accountService->account($id);
+    public function account(AccountInput $account): AccountEntity {
+      return $this->accountService->account($account);
     }
 
 
 
     /**
      * @return AccountEntity[]
-     * @throws NotSupported
      */
     #[Query]
     #[Logged]
@@ -66,6 +74,22 @@ namespace App\Resources\Account {
 
 
 
+    /**
+     * @return AccountEntity[]
+     */
+    #[Query]
+    #[Logged]
+    #[Right("ACCOUNT_MANAGEMENT")]
+    public function userAccounts(): array {
+      return $this->accountService->userAccounts();
+    }
+
+
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     #[Query]
     #[Logged]
     #[Right("ACCOUNT_MANAGEMENT")]
@@ -84,11 +108,8 @@ namespace App\Resources\Account {
     #[Mutation]
     #[Logged]
     #[Right("ACCOUNT_MANAGEMENT")]
-    public function changeRole(
-      int $id,
-      AccountRole $role
-    ): AccountEntity {
-      return $this->accountService->changeRole($id, $role);
+    public function changeRole(ChangeRoleInput $changeRole): AccountEntity {
+      return $this->accountService->changeRole($changeRole);
     }
 
 
@@ -97,43 +118,13 @@ namespace App\Resources\Account {
      * @throws OptimisticLockException
      * @throws ORMException
      * @throws GraphQLException
-     */
-    #[Mutation]
-    #[Logged]
-    public function updateName(
-      #[InjectUser] AccountEntity $currentAccount,
-      string $name
-    ): AccountEntity {
-      return $this->accountService->updateName($currentAccount, $name);
-    }
-
-
-
-    #[Mutation]
-    #[Logged]
-    public function updateAvatar(
-      #[InjectUser] AccountEntity $currentAccount
-    ): AccountEntity {
-      return $this->accountService->updateAvatar($currentAccount);
-    }
-
-
-
-    /**
-     * @throws OptimisticLockException
-     * @throws EmailAlreadyInUse
-     * @throws GraphQLException
-     * @throws ORMException
      * @throws NonUniqueResultException
      * @throws NoResultException
+     * @throws AccountAlreadyExist
      */
     #[Mutation]
-    #[Logged]
-    public function updateEmail(
-      #[InjectUser] AccountEntity $currentAccount,
-      string $email
-    ): AccountEntity {
-      return $this->accountService->updateEmail($currentAccount, $email);
+    public function createAccount(CreateAccountInput $createAccount): AccountEntity {
+      return $this->accountService->createAccount($createAccount);
     }
 
 
@@ -141,14 +132,69 @@ namespace App\Resources\Account {
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws GraphQLException
      */
     #[Mutation]
     #[Logged]
-    public function updatePassword(
-      #[InjectUser] AccountEntity $currentAccount,
-      string $password
-    ): AccountEntity {
-      return $this->accountService->updatePassword($currentAccount, $password);
+    public function updateAccount(UpdateAccountInput $updateAccount): AccountEntity {
+      return $this->accountService->updateAccount($updateAccount);
+    }
+
+
+
+    /**
+     * @throws EmailNotFound
+     * @throws EmailAlreadyVerified
+     */
+    #[Mutation]
+    public function beginEmailVerification(BeginEmailVerificationInput $beginEmailVerification): bool {
+      return $this->accountService->beginEmailVerification($beginEmailVerification);
+    }
+
+
+
+    /**
+     * @throws EmailAlreadyVerified
+     * @throws EmailNotFound
+     * @throws InvalidToken
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws TokenExpired
+     */
+    #[Mutation]
+    public function completeEmailVerification(CompleteEmailVerificationInput $completeEmailVerification): bool {
+      return $this->accountService->completeEmailVerification($completeEmailVerification);
+    }
+
+
+
+    /**
+     * @throws EmailNotFound
+     * @throws AccountMarkedAsRemoved
+     */
+    #[Mutation]
+    public function beginPasswordReset(BeginPasswordResetInput $beginPasswordReset): bool {
+      return $this->accountService->beginPasswordReset($beginPasswordReset);
+    }
+
+
+
+    /**
+     * @throws InvalidToken
+     * @throws EmailNotFound
+     * @throws TokenExpired
+     */
+    #[Mutation]
+    public function completePasswordReset(CompletePasswordResetInput $completePasswordReset): bool {
+      return $this->accountService->completePasswordReset($completePasswordReset);
+    }
+
+
+
+    #[Mutation]
+    #[Logged]
+    public function uploadAvatar(UploadAvatarInput $uploadAvatar): AccountEntity {
+      return $this->accountService->uploadAvatar($uploadAvatar);
     }
 
 
@@ -156,13 +202,12 @@ namespace App\Resources\Account {
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws InvalidArgumentException
      */
     #[Mutation]
     #[Logged]
-    public function markAccountRemoved(
-      #[InjectUser] AccountEntity $currentAccount
-    ): AccountEntity {
-      return $this->accountService->markAccountRemoved($currentAccount);
+    public function markAccountRemoved(): AccountEntity {
+      return $this->accountService->markAccountRemoved();
     }
 
 
@@ -170,14 +215,13 @@ namespace App\Resources\Account {
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws MustBeMarkedAsRemovedFirst
      */
     #[Mutation]
     #[Logged]
     #[Right('ACCOUNT_MANAGEMENT')]
-    public function permanentlyDeleteAccount(
-      #[InjectUser] AccountEntity $currentAccount
-    ): AccountEntity {
-      return $this->accountService->permanentlyDeleteAccount($currentAccount);
+    public function permanentlyDeleteAccount(): AccountEntity {
+      return $this->accountService->permanentlyDeleteAccount();
     }
   }
 }

@@ -53,7 +53,7 @@ namespace App\Resources\Weather {
       $latitude = $components[0];
       $longitude = $components[1];
 
-      return "Weather:$latitude,$longitude";
+      return "Weather#$latitude,$longitude";
     }
 
     public static function getExpiration(): int {

@@ -4,131 +4,273 @@
 
 namespace App\Resources\Alert {
 
-  use App\Resources\Account\AccountEntity;
-  use App\Resources\Alert\Enums\Criteria;
+  use App\Resources\Alert\Enums\RangeField;
+  use App\Resources\Alert\InputTypes\AlertInput;
+  use App\Resources\Alert\InputTypes\CreateAlertInput;
+  use App\Resources\Alert\InputTypes\DeleteAlertInput;
+  use App\Resources\Alert\InputTypes\LocationAlertsCountInput;
+  use App\Resources\Alert\InputTypes\LocationAlertsInput;
+  use App\Resources\Alert\InputTypes\ToggleAlertInput;
+  use App\Resources\Alert\InputTypes\UpdateAlertInput;
+  use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
+  use App\Resources\Auth\Exceptions\BearerTokenMissing;
+  use App\Resources\Auth\Exceptions\InvalidToken;
+  use App\Resources\Auth\Exceptions\TokenExpired;
+  use App\Resources\Common\CommonService;
+  use App\Resources\Common\Enums\ConversionDirection;
   use App\Resources\Common\Exceptions\EntityNotFound;
-  use App\Resources\Common\Exceptions\LimitExceeded;
+  use App\Resources\Limit\Exceptions\EntityLimitExceeded;
+  use App\Resources\Location\LocationEntity;
   use App\Resources\Location\LocationService;
+  use DI\DependencyException;
+  use DI\NotFoundException;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;
   use Doctrine\ORM\Exception\NotSupported;
   use Doctrine\ORM\Exception\ORMException;
+  use Doctrine\ORM\NonUniqueResultException;
+  use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
+  use Doctrine\ORM\TransactionRequiredException;
+  use Exception;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
-  class AlertService {
+  class AlertService extends CommonService {
     protected EntityRepository $repository;
+    protected const ALERTS_LIMIT = 32; // TODO: This should be stored in the database
 
 
 
     /**
      * @throws NotSupported
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws AuthorizationHeaderMissing
+     * @throws BearerTokenMissing
+     * @throws InvalidToken
+     * @throws TokenExpired
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws TransactionRequiredException
      */
     public function __construct(
       protected EntityManager $entityManager,
-      protected LocationService $locationService
+      protected LocationService $locationService,
+      protected AlertConverterService $alertConverter
     ) {
+      parent::__construct();
       $this->repository = $entityManager->getRepository(AlertEntity::class);
     }
 
 
 
     /**
-     * @param AccountEntity $currentAccount
      * @return AlertEntity[]
+     * @throws Exception
      */
-    public function allAlerts(AccountEntity $currentAccount): array {
-      $locations = $currentAccount->getLocations();
-      $alerts = [];
+    public function alerts(): array {
+      $alerts = $this->repository->createQueryBuilder('al')
+        ->select('al')
+        ->join('al.location', 'l')
+        ->join('l.account', 'ac')
+        ->where('ac.id = :accountId')
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->getQuery()
+        ->getResult();
 
-      foreach ($locations as $location) {
-        array_push($alerts, ...$location->getAlerts());
+      return $this->alertConverter->convertMultipleRanges($alerts, ConversionDirection::FROM_METRIC);
+    }
+
+
+
+    /**
+     * @return AlertEntity[]
+     * @throws Exception
+     */
+    public function enabledAlerts(): array {
+      $alerts = $this->repository->createQueryBuilder('a')
+        ->select('al')
+        ->join('al.location', 'l')
+        ->join('l.account', 'ac')
+        ->where('al.isEnabled = true')
+        ->andWhere('ac.id = :accountId')
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->getQuery()
+        ->getResult();
+
+      return $this->alertConverter->convertMultipleRanges($alerts, ConversionDirection::FROM_METRIC);
+    }
+
+
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function alertsCount(): int {
+      return $this->repository->createQueryBuilder('al')
+        ->select('COUNT(al.id)')
+        ->join('al.location', 'l')
+        ->join('l.account', 'ac')
+        ->where('ac.id = :accountId')
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->getQuery()
+        ->getSingleScalarResult();
+    }
+
+
+
+    /**
+     * @return AlertEntity[]
+     * @throws Exception
+     */
+    public function locationAlerts(LocationAlertsInput $locationAlerts): array {
+      $alerts = $this->repository->createQueryBuilder('al')
+        ->select('al')
+        ->join('al.location', 'l')
+        ->join('l.account', 'ac')
+        ->where('l.id = :locationId')
+        ->andWhere('ac.id = :accountId')
+        ->setParameter('locationId', $locationAlerts->locationId)
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->getQuery()
+        ->getResult();
+
+      return $this->alertConverter->convertMultipleRanges($alerts, ConversionDirection::FROM_METRIC);
+    }
+
+
+
+    /**
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     */
+    public function locationAlertsCount(LocationAlertsCountInput $locationAlertsCount): int {
+      return $this->repository->createQueryBuilder('al')
+        ->select('COUNT(a.id)')
+        ->join('al.location', 'l')
+        ->join('l.account', 'ac')
+        ->where('l.id = :locationId')
+        ->andWhere('ac.id = :accountId')
+        ->setParameter('locationId', $locationAlertsCount->locationId)
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->getQuery()
+        ->getSingleScalarResult();
+    }
+
+
+
+    /**
+     * @throws EntityNotFound
+     */
+    public function alert(AlertInput $alert): AlertEntity {
+      try {
+        $alert = $this->repository->createQueryBuilder('al')
+          ->select('al')
+          ->join('al.location', 'l')
+          ->join('l.account', 'ac')
+          ->where('ac.id = :accountId')
+          ->andWhere('al.id = :alertId')
+          ->setParameter('accountId', $this->currentAccount->getId())
+          ->setParameter('alertId', $alert->id)
+          ->getQuery()
+          ->getSingleResult();
+
+        return $this->alertConverter->convertRange($alert, ConversionDirection::FROM_METRIC);
+      } catch (Exception) {
+        throw new EntityNotFound('Alert');
+      }
+    }
+
+
+
+    /**
+     * @throws EntityNotFound
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws GraphQLException
+     * @throws Exception
+     */
+    public function toggleAlert(ToggleAlertInput $toggleAlert): AlertEntity {
+      try {
+        /** @var $alert AlertEntity */
+        $alert = $this->repository->createQueryBuilder('al')
+          ->select('al')
+          ->join('al.location', 'l')
+          ->join('l.account', 'ac')
+          ->where('ac.id = :accountId')
+          ->andWhere('al.id = :alertId')
+          ->setParameter('accountId', $this->currentAccount->getId())
+          ->setParameter('alertId', $toggleAlert->id)
+          ->getQuery()
+          ->getSingleResult();
+      } catch (Exception) {
+        throw new EntityNotFound('Alert');
       }
 
-      return $alerts;
-    }
+      $alert->setIsEnabled(
+        $toggleAlert->isEnabled
+      );
 
+      $this->entityManager->persist($alert);
+      $this->entityManager->flush($alert);
 
-
-    public function allAlertsCount(AccountEntity $currentAccount): int {
-      return count($this->allAlerts($currentAccount));
-    }
-
-
-
-    /**
-     * @throws EntityNotFound
-     */
-    public function locationAlerts(AccountEntity $currentAccount, int $locationId) {
-      $location = $this->locationService->location($currentAccount, $locationId);
-
-      return $location->getAlerts();
+      return $this->alertConverter->convertRange($alert, ConversionDirection::FROM_METRIC);
     }
 
 
 
     /**
-     * @throws EntityNotFound
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws GraphQLException
+     * @throws EntityLimitExceeded
+     * @throws Exception
      */
-    public function locationAlertsCount(AccountEntity $current_account, int $locationId): int {
-      return count($this->locationAlerts($current_account, $locationId));
-    }
+    public function createAlert(CreateAlertInput $createAlert): AlertEntity {
+      $alertsCount = $this->repository->createQueryBuilder('al')
+        ->select('COUNT(a.id)')
+        ->join('al.location', 'l')
+        ->join('l.account', 'ac')
+        ->where('ac.id = :accountId')
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->getQuery()
+        ->getSingleScalarResult();
 
+      if ($alertsCount >= self::ALERTS_LIMIT)
+        throw new EntityLimitExceeded("Alert", self::ALERTS_LIMIT);
 
-
-    /**
-     * @throws EntityNotFound
-     */
-    public function alert(AccountEntity $currentAccount, int $id): AlertEntity {
-      $alerts = $this->allAlerts($currentAccount);
-
-      foreach ($alerts as $alert) {
-        if ($alert->getId() === $id) {
-          return $alert;
-        }
+      try {
+        /** @var $location LocationEntity */
+        $location = $this->repository->createQueryBuilder('l')
+          ->select('l')
+          ->where('l.id = :locationId')
+          ->setParameter('locationId', $createAlert->locationId)
+          ->getQuery()
+          ->getSingleResult();
+      } catch (NoResultException) {
+        throw new EntityNotFound('Alert');
       }
 
-      throw new EntityNotFound("Alert");
-    }
+      $newAlert = new AlertEntity(
+        $createAlert->isEnabled,
+        $createAlert->criteria,
+        $createAlert->rangeFrom,
+        $createAlert->rangeTo,
+        $createAlert->updateFrequency,
+        $createAlert->message
+      );
 
+      $this->alertConverter->convertRange($newAlert, ConversionDirection::TO_METRIC);
 
+      $location->addAlert($newAlert);
 
-    /**
-     * @throws EntityNotFound
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws GraphQLException
-     */
-    public function toggleAlert(AccountEntity $currentAccount, int $id, bool $isEnabled): AlertEntity {
-      return $this->updateAlert($currentAccount, $id, $isEnabled, null, null, null, null, null);
-    }
+      $this->entityManager->persist($newAlert);
+      $this->entityManager->flush($newAlert);
 
-
-
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws GraphQLException
-     * @throws LimitExceeded
-     */
-    public function createAlert(AccountEntity $currentAccount, int $locationId, bool $isEnabled, Criteria $criteria, float $rangeFrom, float $rangeTo, int $updateFrequency, string $message): AlertEntity {
-      // check whether user exceeds the limit
-      $alerts_count = $this->allAlertsCount($currentAccount);
-
-      if ($alerts_count >= 32)
-        throw new LimitExceeded("Alert", 32);
-
-      $location = $this->locationService->location($currentAccount, $locationId);
-      $new_alert = new AlertEntity($isEnabled, $criteria, $rangeFrom, $rangeTo, $updateFrequency, $message);
-      //    $new_alert->convertRange($criteria, $units);
-      $location->addAlert($new_alert);
-
-      $this->entityManager->persist($new_alert);
-      $this->entityManager->flush($new_alert);
-
-      return $new_alert;
+      return $this->alertConverter->convertRange($newAlert, ConversionDirection::FROM_METRIC);
     }
 
 
@@ -138,56 +280,83 @@ namespace App\Resources\Alert {
      * @throws EntityNotFound
      * @throws ORMException
      * @throws GraphQLException
+     * @throws Exception
      */
-    public function updateAlert(AccountEntity $currentAccount, int $id, ?bool $isEnabled, ?Criteria $criteria, ?float $rangeFrom, ?float $rangeTo, ?int $updateFrequency, ?string $message): AlertEntity {
-      $alert = $this->alert($currentAccount, $id);
-      $criteria = $criteria ?? $alert->getCriteria();
+    public function updateAlert(UpdateAlertInput $updateAlert): AlertEntity {
+      try {
+        /** @var $alert AlertEntity */
+        $alert = $this->repository->createQueryBuilder('al')
+          ->select('al')
+          ->join('al.location', 'l')
+          ->join('l.account', 'ac')
+          ->where('ac.id = :accountId')
+          ->andWhere('al.id = :alertId')
+          ->setParameter('accountId', $this->currentAccount->getId())
+          ->setParameter('alertId', $updateAlert->id)
+          ->getQuery()
+          ->getSingleResult();
+      } catch (NoResultException) {
+        throw new EntityNotFound('Alert');
+      }
 
-      //    if (($rangeFrom !== null || $rangeTo !== null) && $units === null) {
-      //      throw new GraphQLException("If you are specifying range values, then you have to provide units.");
-      //    }
+      $criteria = $updateAlert->criteria ?? $alert->getCriteria();
 
-      if ($isEnabled !== null)
-        $alert->setIsEnabled($isEnabled);
+      if ($updateAlert->isEnabled !== null)
+        $alert->setIsEnabled($updateAlert->isEnabled);
 
       if ($criteria !== null)
         $alert->setCriteria($criteria);
 
-      if ($rangeFrom !== null) {
-        $alert->setRangeFrom($rangeFrom);
-        //      $alert->convertRangeFrom($criteria, $units);
+      if ($updateAlert->rangeFrom !== null) {
+        $alert->setRangeFrom($updateAlert->rangeFrom);
+        $this->alertConverter->convertRangeField($alert, ConversionDirection::TO_METRIC, RangeField::RANGE_FROM);
       }
 
-      if ($rangeTo !== null) {
-        $alert->setRangeTo($rangeTo);
-        //      $alert->convertRangeTo($criteria, $units);
+      if ($updateAlert->rangeTo !== null) {
+        $alert->setRangeTo($updateAlert->rangeTo);
+        $this->alertConverter->convertRangeField($alert, ConversionDirection::TO_METRIC, RangeField::RANGE_TO);
       }
 
-      if ($updateFrequency !== null)
-        $alert->setUpdateFrequency($updateFrequency);
+      if ($updateAlert->updateFrequency !== null)
+        $alert->setUpdateFrequency($updateAlert->updateFrequency);
 
-      if ($message !== null)
-        $alert->setMessage($message);
+      if ($updateAlert->message !== null)
+        $alert->setMessage($updateAlert->message);
 
       $this->entityManager->flush($alert);
 
-      return $alert;
+      return $this->alertConverter->convertRange($alert, ConversionDirection::FROM_METRIC);
     }
 
 
 
     /**
-     * @throws OptimisticLockException
      * @throws EntityNotFound
+     * @throws NonUniqueResultException
      * @throws ORMException
+     * @throws Exception
      */
-    public function deleteAlert(AccountEntity $currentAccount, int $id): AlertEntity {
-      $alert = $this->alert($currentAccount, $id);
+    public function deleteAlert(DeleteAlertInput $deleteAlert): AlertEntity {
+      try {
+        /** @var $alert AlertEntity */
+        $alert = $this->repository->createQueryBuilder('al')
+          ->select('al')
+          ->join('al.location', 'l')
+          ->join('l.account', 'ac')
+          ->where('ac.id = :accountId')
+          ->setParameter('accountId', $this->currentAccount->getId())
+          ->where('al.id = :alertId')
+          ->setParameter('alertId', $deleteAlert->id)
+          ->getQuery()
+          ->getSingleResult();
+      } catch (NoResultException) {
+        throw new EntityNotFound('Alert');
+      }
 
       $this->entityManager->remove($alert);
       $this->entityManager->flush($alert);
 
-      return $alert;
+      return $this->alertConverter->convertRange($alert, ConversionDirection::FROM_METRIC);
     }
   }
 }

@@ -4,8 +4,18 @@
 
 namespace App\Resources\Location {
 
-  use App\Resources\Account\AccountEntity;
+  use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
+  use App\Resources\Auth\Exceptions\BearerTokenMissing;
+  use App\Resources\Auth\Exceptions\InvalidToken;
+  use App\Resources\Auth\Exceptions\TokenExpired;
+  use App\Resources\Common\CommonService;
   use App\Resources\Common\Exceptions\EntityNotFound;
+  use App\Resources\Location\InputTypes\CreateLocationInput;
+  use App\Resources\Location\InputTypes\DeleteLocationInput;
+  use App\Resources\Location\InputTypes\LocationInput;
+  use App\Resources\Location\InputTypes\UpdateLocationInput;
+  use DI\DependencyException;
+  use DI\NotFoundException;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;
   use Doctrine\ORM\Exception\NotSupported;
@@ -13,32 +23,43 @@ namespace App\Resources\Location {
   use Doctrine\ORM\NonUniqueResultException;
   use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
+  use Doctrine\ORM\TransactionRequiredException;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
-  class LocationService {
+  class LocationService extends CommonService {
     protected EntityRepository $repository;
 
 
 
     /**
      * @throws NotSupported
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws AuthorizationHeaderMissing
+     * @throws BearerTokenMissing
+     * @throws InvalidToken
+     * @throws TokenExpired
+     * @throws DependencyException
+     * @throws NotFoundException
+     * @throws TransactionRequiredException
      */
     public function __construct(
       protected EntityManager $entityManager
     ) {
+      parent::__construct();
       $this->repository = $entityManager->getRepository(LocationEntity::class);
     }
 
 
 
     /**
-     * @param AccountEntity $currentAccount
+     * @param
      * @return LocationEntity[]
      */
-    public function locations(AccountEntity $currentAccount): array {
-      return $currentAccount->getLocations();
+    public function locations(): array {
+      return $this->currentAccount->getLocations();
     }
 
 
@@ -47,11 +68,11 @@ namespace App\Resources\Location {
      * @throws NonUniqueResultException
      * @throws NoResultException
      */
-    public function locationsCount(AccountEntity $currentAccount): int {
+    public function locationsCount(): int {
       return $this->repository->createQueryBuilder('l')
         ->select('COUNT(l.id)')
         ->where('l.account = :account')
-        ->setParameter('account', $currentAccount)
+        ->setParameter('account', $this->currentAccount)
         ->getQuery()
         ->getSingleScalarResult();
     }
@@ -60,15 +81,26 @@ namespace App\Resources\Location {
 
     /**
      * @throws EntityNotFound
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    public function location(AccountEntity $currentAccount, int $id): LocationEntity {
-      $location = $this->repository->findOneBy(['account' => $currentAccount, 'id' => $id]);
+    public function location(LocationInput $location): LocationEntity {
+      /** @var $foundLocation LocationEntity */
+      $foundLocation = $this->repository->createQueryBuilder('l')
+        ->select('l')
+        ->join('l.account', 'ac')
+        ->where('ac.id = :accountId')
+        ->andWhere('l.id = :locationId')
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->setParameter('locationId', $location->id)
+        ->getQuery()
+        ->getSingleResult();
 
-      if (!$location) {
-        throw new EntityNotFound("Location");
+      if (!$foundLocation) {
+        throw new EntityNotFound('Location');
       }
 
-      return $location;
+      return $foundLocation;
     }
 
 
@@ -79,10 +111,16 @@ namespace App\Resources\Location {
      * @throws GraphQLException
      */
     // TODO: Avoid user from changing the city and country name
-    public function createLocation(AccountEntity $currentAccount, string $cityName, string $countryName, ?string $label, float $latitude, float $longitude): LocationEntity {
-      $newLocation = new LocationEntity($cityName, $countryName, $label, $latitude, $longitude);
-      $currentAccount->addLocation($newLocation);
+    public function createLocation(CreateLocationInput $createLocation): LocationEntity {
+      $newLocation = new LocationEntity(
+        $createLocation->cityName,
+        $createLocation->countryName,
+        $createLocation->label,
+        $createLocation->latitude,
+        $createLocation->longitude
+      );
 
+      $this->currentAccount->addLocation($newLocation);
       $this->entityManager->persist($newLocation);
       $this->entityManager->flush($newLocation);
 
@@ -98,38 +136,55 @@ namespace App\Resources\Location {
      * @throws ORMException
      */
     // TODO: Avoid user from changing the city and country name
-    public function updateLocation(AccountEntity $currentAccount, int $id, ?string $cityName, ?string $countryName, ?string $label, ?float $latitude, ?float $longitude): LocationEntity {
-      $outdatedLocation = self::location($currentAccount, $id);
+    public function updateLocation(UpdateLocationInput $updateLocation): LocationEntity {
+      /** @var $location LocationEntity */
+      $location = $this->repository->createQueryBuilder('l')
+        ->select('l')
+        ->join('l.account', 'ac')
+        ->where('ac.id = :accountId')
+        ->andWhere('l.id = :locationId')
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->setParameter('locationId', $updateLocation->id)
+        ->getQuery()
+        ->getSingleResult();
 
-      if ($cityName !== null)
-        $outdatedLocation->setCityName($cityName);
+      if ($updateLocation->cityName !== null)
+        $location->setCityName($updateLocation->cityName);
 
-      if ($countryName !== null)
-        $outdatedLocation->setCountryName($countryName);
+      if ($updateLocation->countryName !== null)
+        $location->setCountryName($updateLocation->countryName);
 
-      if ($label !== null)
-        $outdatedLocation->setLabel($label);
+      if ($updateLocation->label !== null)
+        $location->setLabel($updateLocation->label);
 
-      if ($latitude !== null)
-        $outdatedLocation->setLatitude($latitude);
+      if ($updateLocation->latitude !== null)
+        $location->setLatitude($updateLocation->latitude);
 
-      if ($longitude !== null)
-        $outdatedLocation->setLongitude($longitude);
+      if ($updateLocation->longitude !== null)
+        $location->setLongitude($updateLocation->longitude);
 
-      $this->entityManager->flush($outdatedLocation);
+      $this->entityManager->flush($location);
 
-      return $outdatedLocation;
+      return $location;
     }
 
 
 
     /**
-     * @throws EntityNotFound
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function deleteLocation(AccountEntity $currentAccount, int $id): LocationEntity {
-      $location = self::location($currentAccount, $id);
+    public function deleteLocation(DeleteLocationInput $deleteLocation): LocationEntity {
+      /** @var $location LocationEntity */
+      $location = $this->repository->createQueryBuilder('l')
+        ->select('l')
+        ->join('l.account', 'ac')
+        ->where('ac.id = :accountId')
+        ->andWhere('l.id = :locationId')
+        ->setParameter('accountId', $this->currentAccount->getId())
+        ->setParameter('locationId', $deleteLocation->id)
+        ->getQuery()
+        ->getSingleResult();
 
       $this->entityManager->remove($location);
       $this->entityManager->flush($location);
