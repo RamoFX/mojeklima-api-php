@@ -2,7 +2,7 @@
 
 
 
-namespace App\Resources\Weather\Enums {
+namespace App\Resources\Account\Enums {
 
   enum TemperatureUnits: string {
     case CELSIUS = "CELSIUS";

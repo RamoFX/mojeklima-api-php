@@ -2,7 +2,7 @@
 
 
 
-namespace App\Resources\Weather\Enums {
+namespace App\Resources\Account\Enums {
 
   enum SpeedUnits: string {
     case METERS_PER_SECOND = "METERS_PER_SECOND";

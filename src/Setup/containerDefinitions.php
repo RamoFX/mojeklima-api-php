@@ -34,6 +34,9 @@ namespace App\Setup {
     EntityManager::class => function(ConfigManager $config) {
       EnumType::addEnumType(AccountRole::class);
       EnumType::addEnumType(Criteria::class);
+      EnumType::addEnumType(TemperatureUnits::class);
+      EnumType::addEnumType(SpeedUnits::class);
+      EnumType::addEnumType(PressureUnits::class);
 
       $configuration = ORMSetup::createAttributeMetadataConfiguration(
         $config->get('doctrine.entities'),

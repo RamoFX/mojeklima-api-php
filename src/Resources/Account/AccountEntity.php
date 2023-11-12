@@ -5,6 +5,9 @@
 namespace App\Resources\Account {
 
   use App\Resources\Account\Enums\AccountRole;
+  use App\Resources\Account\Enums\PressureUnits;
+  use App\Resources\Account\Enums\SpeedUnits;
+  use App\Resources\Account\Enums\TemperatureUnits;
   use App\Resources\Common\Utilities\Validator;
   use App\Resources\Location\LocationEntity;
   use App\Resources\PushSubscription\PushSubscriptionEntity;
@@ -44,6 +47,19 @@ namespace App\Resources\Account {
     private string $email;
     #[ORM\Column(name: "password_hash", length: 60, options: ["fixed" => true])]
     private string $passwordHash;
+
+    #[ORM\Column(name: "temperature_units", type: TemperatureUnits::class)]
+    private TemperatureUnits $temperatureUnits;
+
+    #[ORM\Column(name: "speed_units", type: SpeedUnits::class)]
+    private SpeedUnits $speedUnits;
+
+    #[ORM\Column(name: "pressure_units", type: PressureUnits::class)]
+    private PressureUnits $pressureUnits;
+
+    #[ORM\Column(name: "is_marked_as_removed", type: "boolean")]
+    private bool $isMarkedAsRemoved;
+
     #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
@@ -62,6 +78,9 @@ namespace App\Resources\Account {
       $this->setName($name);
       $this->setEmail($email);
       $this->setPassword($password);
+      $this->setTemperatureUnits(TemperatureUnits::CELSIUS);
+      $this->setSpeedUnits(SpeedUnits::METERS_PER_SECOND);
+      $this->setPressureUnits(PressureUnits::HECTOPASCAL);
       $this->locations = new ArrayCollection();
       $this->pushSubscriptions = new ArrayCollection();
     }
@@ -149,6 +168,47 @@ namespace App\Resources\Account {
 
       return $this;
     }
+
+
+
+    #[Field]
+    public function getTemperatureUnits(): TemperatureUnits {
+      return $this->temperatureUnits;
+    }
+
+    public function setTemperatureUnits(TemperatureUnits $temperatureUnits): AccountEntity {
+      $this->temperatureUnits = $temperatureUnits;
+
+      return $this;
+    }
+
+
+
+    #[Field]
+    public function getSpeedUnits(): SpeedUnits {
+      return $this->speedUnits;
+    }
+
+    public function setSpeedUnits(SpeedUnits $speedUnits): AccountEntity {
+      $this->speedUnits = $speedUnits;
+
+      return $this;
+    }
+
+
+
+    #[Field]
+    public function getPressureUnits(): PressureUnits {
+      return $this->pressureUnits;
+    }
+
+    public function setPressureUnits(PressureUnits $pressureUnits): AccountEntity {
+      $this->pressureUnits = $pressureUnits;
+
+      return $this;
+    }
+
+
 
     #[Field]
     public function getCreatedAt(): DateTimeImmutable {

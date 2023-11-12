@@ -4,15 +4,17 @@
 
 namespace App\Resources\Common\Utilities {
 
-  use App\Resources\Weather\Enums\PressureUnits;
-  use App\Resources\Weather\Enums\SpeedUnits;
-  use App\Resources\Weather\Enums\TemperatureUnits;
+  use App\Resources\Account\Enums\PressureUnits;
+  use App\Resources\Account\Enums\SpeedUnits;
+  use App\Resources\Account\Enums\TemperatureUnits;
   use Exception;
 
 
 
   class UnitsConverter {
-    const defaultMetric = [TemperatureUnits::CELSIUS, SpeedUnits::METERS_PER_SECOND, PressureUnits::HECTOPASCAL];
+    const defaultMetric = [ TemperatureUnits::CELSIUS, SpeedUnits::METERS_PER_SECOND, PressureUnits::HECTOPASCAL ];
+
+
 
     /**
      * @throws Exception
@@ -59,6 +61,8 @@ namespace App\Resources\Common\Utilities {
 
       throw new Exception($errorMessage);
     }
+
+
 
     /**
      * @throws Exception
