@@ -2,14 +2,14 @@
 
 
 
-namespace App\Resources\Common\Exceptions {
+namespace App\Resources\Limit\Exceptions {
 
   use App\Resources\Common\Utilities\Translation;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
-  class LimitExceeded extends GraphQLException {
+  class EntityLimitExceeded extends GraphQLException {
     /**
      * @param string $entityName
      * @param float|int $limit
