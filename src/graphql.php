@@ -7,18 +7,19 @@ namespace App {
   use App\Resources\Auth\AuthService;
   use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Debug;
-  use App\Resources\Common\Utilities\Translation;
+  use DI\Container;
   use GraphQL\Error\DebugFlag;
   use GraphQL\GraphQL;
   use Psr\SimpleCache\CacheInterface;
   use TheCodingMachine\GraphQLite\Context\Context;
   use TheCodingMachine\GraphQLite\SchemaFactory;
-  use Throwable;
 
 
 
   // helpers
+  /** @var $container Container */
   $container = require SETUP_PATH . '/container.php';
+  /** @var $config ConfigManager */
   $config = $container->get(ConfigManager::class);
   $isDev = $config->get('is.dev');
   $isProd = $config->get('is.prod');
@@ -88,7 +89,7 @@ namespace App {
   $allowOrigin = $config->get('security.origin');
 
   header("Access-Control-Allow-Origin: $allowOrigin");
-  header("Vary: Origin");
+  header('Vary: Origin');
   header('Access-Control-Allow-Methods: POST, OPTIONS');
   header('Access-Control-Allow-Headers: Authorization,Content-Type,Preferred-Language,baggage,sentry-trace');
 

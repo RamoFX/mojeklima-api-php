@@ -9,6 +9,8 @@ namespace App\Resources\Common\Utilities {
       private readonly array $config
     ) {}
 
+
+
     public function get(string $selector, mixed $default = null): mixed {
       $keys = explode('.', $selector);
       $configSlice = $this->config;
