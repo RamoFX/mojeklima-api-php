@@ -1,12 +1,6 @@
 vendor
 .idea
-docker.env
-upload.sh
 .env
-.htaccess
 .rnd
 .vscode
 .run
-playground
-xdebug
-logs
