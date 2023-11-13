@@ -20,6 +20,7 @@ namespace App\Setup {
         'user' => $_ENV['DB_USERNAME'],
         'password' => $_ENV['DB_PASSWORD'],
         'host' => $_ENV['DB_HOSTNAME'],
+        'port' => $_ENV['DB_PORT'],
         'driver' => $_ENV['DB_DRIVER'],
         'charset' => $_ENV['DB_CHARSET']
       ],

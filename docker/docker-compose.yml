@@ -1,0 +1,63 @@
+version: '3.3'
+
+services:
+  api:
+    build:
+      context: ""
+      dockerfile: Dockerfile
+      args:
+        USER_ID: '${WWWUSER:-1000}'
+        GROUP_ID: '${WWWGROUP:-1000}'
+        USER: '${USER:-whoami}'
+    container_name: mojeklima-api
+    restart: always
+    working_dir: /var/www/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "9000:9000"
+    volumes:
+      - ../:/var/www
+      - ./php:/usr/local/etc/php/conf.d/
+
+  nginx:
+    image: nginx:1.25.3-alpine
+    container_name: mojeklima-nginx
+    networks:
+      - network1
+    ports:
+      - "8080:80"
+    restart: always
+    volumes:
+      - ../:/var/www
+      - ./nginx:/etc/nginx/conf.d
+
+  db:
+    image: mysql:8.2
+    container_name: mojeklima-db
+    restart: always
+    networks:
+      - network1
+    environment:
+      MYSQL_ROOT_PASSWORD: OFpt5r1RWWZLKYhJB8b9SpNeQcutQye7sl0cuNXIq3CsIlHpbW
+      MYSQL_DATABASE: mojeklima
+      MYSQL_USER: mojeklima
+      MYSQL_PASSWORD: 4N2bZRBLjeH4ff7
+    volumes:
+      - ../storage/mysql:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  redis:
+    image: redis:7.2.3-alpine
+    container_name: mojeklima-redis
+    restart: always
+    networks:
+      - network1
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass NtTUvQKyPURbD7D3p5A2vqdLKPkDyA2UBAT9qdPA32KxqiMbLD
+
+networks:
+  network1:
+    external: true
