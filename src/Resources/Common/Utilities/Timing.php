@@ -17,7 +17,7 @@ namespace App\Resources\Common\Utilities {
 
     public static function stop(): float {
       return round(
-        microtime(true) - array_pop(self::$timingStack) * 1000,
+        (microtime(true) - array_pop(self::$timingStack)) * 1000,
         1
       );
     }
