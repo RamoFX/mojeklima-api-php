@@ -18,7 +18,7 @@ namespace App\Setup {
   $containerBuilder->addDefinitions($containerDefinitions);
 
   if ($config['is']['prod']) {
-    $containerBuilder->enableCompilation(CONTAINER_COMPILATION_PATH);
+    $containerBuilder->enableCompilation(COMPILATION_PATH);
   }
 
   $container = $containerBuilder->build();
