@@ -24,6 +24,19 @@ namespace App {
   try {
     global $isDev;
 
+    function respond($output): void {
+      global $isDev;
+
+      if ($isDev ?? false) {
+        $output['debug'] = Debug::getAll();
+      }
+
+      header('Content-Type: application/json');
+      echo json_encode($output, JSON_INVALID_UTF8_IGNORE);
+    }
+
+
+
     // helpers
     /** @var $container Container */
     $container = require SETUP_PATH . '/container.php';
@@ -31,17 +44,6 @@ namespace App {
     $config = $container->get(ConfigManager::class);
     $isDev = $config->get('is.dev');
     $isProd = $config->get('is.prod');
-
-    function respond($output): void {
-      global $isDev;
-
-      if ($isDev) {
-        $output['debug'] = Debug::getAll();
-      }
-
-      header('Content-Type: application/json');
-      echo json_encode($output, JSON_INVALID_UTF8_IGNORE);
-    }
 
 
 
