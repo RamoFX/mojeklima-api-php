@@ -133,14 +133,15 @@ namespace App {
         $function = $trace['function'] ?? '';
         $type = $trace['type'] ?? '';
         $class = $trace['class'] ?? '';
-        $args = implode(', ', $trace['args'] ?? []);
+        $args = $trace['args'] ?? null;
 
         $location = implode(':', [ $file, $line ]);
-        $member = "$class$type$function($args)";
+        $member = "$class$type$function";
 
         $customTrace[] = [
           'location' => $location, // "location": "/src/graphql.php:158",
-          'member' => $member      // "member":   "\App\Resources\Common\Utilities\Debug::getAll(...)"
+          'member' => $member,     // "member":   "\App\Resources\Common\Utilities\Debug::getAll",
+          'args' => $args          // "args":     [ ... ]
         ];
       }
 
