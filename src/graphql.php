@@ -145,10 +145,13 @@ namespace App {
         ];
       }
 
+      $file = str_replace(PROJECT_ROOT_PATH, '', $exception->getFile() ?? '');
+      $line = $exception->getLine();
+      $location = implode(':', [ $file, $line ]);
+
       $error['extensions'] = [
         'debugMessage' => $exception->getMessage(),
-        'file' => str_replace(PROJECT_ROOT_PATH, '', $exception->getFile() ?? ''),
-        'line' => $exception->getLine(),
+        'location' => $location,
         'trace' => $customTrace
       ];
     }
