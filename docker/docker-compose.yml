@@ -12,10 +12,8 @@ services:
     container_name: mojeklima-api
     restart: always
     working_dir: /var/www/
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - "9000:9000"
+    networks:
+      - network1
     volumes:
       - ../:/var/www
       - ./php:/usr/local/etc/php/conf.d/
@@ -25,8 +23,6 @@ services:
     container_name: mojeklima-nginx
     networks:
       - network1
-    ports:
-      - "8080:80"
     restart: always
     volumes:
       - ../:/var/www
@@ -45,8 +41,6 @@ services:
       MYSQL_PASSWORD: 4N2bZRBLjeH4ff7
     volumes:
       - ../storage/mysql:/var/lib/mysql
-    ports:
-      - "3307:3306"
 
   redis:
     image: redis:7.2.3-alpine
@@ -54,8 +48,6 @@ services:
     restart: always
     networks:
       - network1
-    ports:
-      - "6379:6379"
     command: redis-server --requirepass NtTUvQKyPURbD7D3p5A2vqdLKPkDyA2UBAT9qdPA32KxqiMbLD
 
 networks:
