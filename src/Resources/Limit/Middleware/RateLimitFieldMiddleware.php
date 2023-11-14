@@ -4,8 +4,11 @@
 
 namespace App\Resources\Limit\Middleware {
 
+  use App\Resources\Common\Utilities\Debug;
+  use App\Resources\Limit\Attributes\GlobalRateLimit;
   use App\Resources\Limit\Attributes\RateLimit;
   use App\Resources\Limit\Exceptions\RateLimitExceeded;
+  use App\Resources\Limit\RateLimitService;
   use GraphQL\Type\Definition\FieldDefinition;
   use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Middlewares\FieldHandlerInterface;
@@ -15,6 +18,12 @@ namespace App\Resources\Limit\Middleware {
 
 
   class RateLimitFieldMiddleware implements FieldMiddlewareInterface {
+    public function __construct(
+      protected RateLimitService $rateLimitService
+    ) {}
+
+
+
     /**
      * @throws InvalidArgumentException
      * @throws RateLimitExceeded
@@ -23,11 +32,15 @@ namespace App\Resources\Limit\Middleware {
       $annotations = $queryFieldDescriptor->getMiddlewareAnnotations();
       /** @var RateLimit $rateLimit */
       $rateLimit = $annotations->getAnnotationByType(RateLimit::class);
+      $rateLimit ??= new GlobalRateLimit();
 
-      if ($rateLimit === null)
-        return $fieldHandler->handle($queryFieldDescriptor);
+      // TODO FIX: Called for every mutation and query!
+      $k = 'DEBUG middleware';
+      $m = Debug::get($k, []);
+      $m[] = $queryFieldDescriptor->getName();
+      Debug::set($k, $m);
 
-      $rateLimit->consume();
+      $this->rateLimitService->apply($rateLimit);
 
       return $fieldHandler->handle($queryFieldDescriptor);
     }

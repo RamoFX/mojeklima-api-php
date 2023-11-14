@@ -67,13 +67,15 @@ namespace App {
     $controllerNamespace = $config->get('namespace.controller');
     $typeNamespace = $config->get('namespace.type');
     $authService = $container->get(AuthService::class);
+    /** @var $rateLimitFieldMiddleware RateLimitFieldMiddleware */
+    $rateLimitFieldMiddleware = $container->get(RateLimitFieldMiddleware::class);
 
     $factory
       ->addControllerNamespace($controllerNamespace)
       ->addTypeNamespace($typeNamespace)
       ->setAuthenticationService($authService)
       ->setAuthorizationService($authService)
-      ->addFieldMiddleware(new RateLimitFieldMiddleware());
+      ->addFieldMiddleware($rateLimitFieldMiddleware);
 
     if ($isProd) {
       $factory->prodMode();
