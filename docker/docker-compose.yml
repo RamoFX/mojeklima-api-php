@@ -1,14 +1,10 @@
-version: '3.3'
+version: '3.7'
 
 services:
   api:
     build:
-      context: ""
+      context: ./
       dockerfile: Dockerfile
-      args:
-        USER_ID: '${WWWUSER:-1000}'
-        GROUP_ID: '${WWWGROUP:-1000}'
-        USER: '${USER:-whoami}'
     container_name: mojeklima-api
     restart: always
     working_dir: /var/www/
@@ -35,10 +31,10 @@ services:
     networks:
       - network1
     environment:
-      MYSQL_ROOT_PASSWORD: OFpt5r1RWWZLKYhJB8b9SpNeQcutQye7sl0cuNXIq3CsIlHpbW
-      MYSQL_DATABASE: mojeklima
-      MYSQL_USER: mojeklima
-      MYSQL_PASSWORD: 4N2bZRBLjeH4ff7
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
       - ../storage/mysql:/var/lib/mysql
 
@@ -48,7 +44,7 @@ services:
     restart: always
     networks:
       - network1
-    command: redis-server --requirepass NtTUvQKyPURbD7D3p5A2vqdLKPkDyA2UBAT9qdPA32KxqiMbLD
+    command: redis-server --requirepass ${REDIS_PASSWORD}
 
 networks:
   network1:
