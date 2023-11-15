@@ -17,3 +17,9 @@ docker-compose \
   up \
   --detach \
   --build
+
+# post
+sleep 5
+
+## try to create db schema if not exists yet
+docker exec mojeklima-api php ./cli/doctrine orm:schema-tool:create
