@@ -7,10 +7,8 @@ namespace App\Resources\System {
   use App\Resources\Common\CommonService;
   use App\Resources\System\DTO\HealthOutput;
   use Doctrine\ORM\EntityManager;
-  use Doctrine\ORM\NonUniqueResultException;
-  use Doctrine\ORM\NoResultException;
   use Redis as RedisClient;
-  use RedisException;
+  use Throwable;
 
 
 
@@ -24,13 +22,13 @@ namespace App\Resources\System {
 
 
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws RedisException
-     * @throws NoResultException
-     */
     public function health(): HealthOutput {
-      $redisHealthy = boolval($this->redis->ping());
+      try {
+        $redisHealthy = boolval($this->redis->ping());
+      } catch (Throwable) {
+        $redisHealthy = false;
+      }
+
       $databaseHealthy = $this->entityManager->getConnection()->isConnected();
 
       return new HealthOutput(
