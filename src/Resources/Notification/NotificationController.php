@@ -87,7 +87,7 @@ namespace App\Resources\Notification {
      */
     #[Mutation]
     #[Logged]
-    #[Right(Permission::PUSH_NOTIFICATIONS->value)]
+    #[Right(Permission::ONLY_TRUSTED)]
     public function notify(NotifyInput $notify): NotificationEntity {
       return $this->notificationService->notify($notify);
     }
@@ -109,7 +109,7 @@ namespace App\Resources\Notification {
      */
     #[Mutation]
     #[Logged]
-    #[Right(Permission::PUSH_NOTIFICATIONS->value)]
+    #[Right(Permission::ONLY_TRUSTED)]
     public function checkForNotifications(): int {
       return $this->notificationService->checkForNotifications();
     }

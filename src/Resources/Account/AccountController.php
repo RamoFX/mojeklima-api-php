@@ -56,7 +56,7 @@ namespace App\Resources\Account {
      */
     #[Query]
     #[Logged]
-    #[Right(Permission::ACCOUNT_MANAGEMENT->value)]
+    #[Right(Permission::ACCOUNT_MANAGEMENT)]
     public function account(AccountInput $account): AccountEntity {
       return $this->accountService->account($account);
     }
@@ -68,7 +68,7 @@ namespace App\Resources\Account {
      */
     #[Query]
     #[Logged]
-    #[Right(Permission::ACCOUNT_MANAGEMENT->value)]
+    #[Right(Permission::ACCOUNT_MANAGEMENT)]
     public function accounts(): array {
       return $this->accountService->accounts();
     }
@@ -80,7 +80,7 @@ namespace App\Resources\Account {
      */
     #[Query]
     #[Logged]
-    #[Right(Permission::ACCOUNT_MANAGEMENT->value)]
+    #[Right(Permission::ACCOUNT_MANAGEMENT)]
     public function userAccounts(): array {
       return $this->accountService->userAccounts();
     }
@@ -93,7 +93,7 @@ namespace App\Resources\Account {
      */
     #[Query]
     #[Logged]
-    #[Right(Permission::ACCOUNT_MANAGEMENT->value)]
+    #[Right(Permission::ACCOUNT_MANAGEMENT)]
     public function accountsCount(): int {
       return $this->accountService->accountsCount();
     }
@@ -108,7 +108,7 @@ namespace App\Resources\Account {
      */
     #[Mutation]
     #[Logged]
-    #[Right(Permission::ACCOUNT_MANAGEMENT->value)]
+    #[Right(Permission::ACCOUNT_MANAGEMENT)]
     public function changeRole(ChangeRoleInput $changeRole): AccountEntity {
       return $this->accountService->changeRole($changeRole);
     }
@@ -181,8 +181,10 @@ namespace App\Resources\Account {
 
 
     /**
-     * @throws InvalidToken
+     * @throws OptimisticLockException
      * @throws EmailNotFound
+     * @throws InvalidToken
+     * @throws ORMException
      * @throws TokenExpired
      */
     #[Mutation]
@@ -220,7 +222,7 @@ namespace App\Resources\Account {
      */
     #[Mutation]
     #[Logged]
-    #[Right(Permission::ACCOUNT_MANAGEMENT->value)]
+    #[Right(Permission::ACCOUNT_MANAGEMENT)]
     public function permanentlyDeleteAccount(): AccountEntity {
       return $this->accountService->permanentlyDeleteAccount();
     }

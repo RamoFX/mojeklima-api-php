@@ -5,8 +5,8 @@
 namespace App\Resources\Permission\Enums {
 
   enum Permission: string {
-    case PUSH_NOTIFICATIONS = 'PUSH_NOTIFICATIONS';
+    const ONLY_TRUSTED = 'ONLY_TRUSTED';
 
-    case ACCOUNT_MANAGEMENT = 'ACCOUNT_MANAGEMENT';
+    const ACCOUNT_MANAGEMENT = 'ACCOUNT_MANAGEMENT';
   }
 }

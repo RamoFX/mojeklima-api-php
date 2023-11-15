@@ -92,7 +92,7 @@ namespace App\Resources\Auth {
     public function isAllowed(string|Permission $right, $subject = null): bool {
       return match ($right) {
         Permission::ACCOUNT_MANAGEMENT => $this->isAdminAccount() || $this->isSystemAccount(),
-        Permission::PUSH_NOTIFICATIONS => $this->isSystemAccount(),
+        Permission::ONLY_TRUSTED => $this->isSystemAccount(),
         default => false
       };
     }
