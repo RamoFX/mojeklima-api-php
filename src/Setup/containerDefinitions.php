@@ -56,7 +56,7 @@ namespace App\Setup {
 
 
 
-    CacheInterface::class => function(ConfigManager $config) {
+    RedisClient::class => function(ConfigManager $config) {
       $client = new RedisClient();
 
       $client->connect(
@@ -69,8 +69,18 @@ namespace App\Setup {
         ]
       );
 
-      $store = new RedisStore($client);
+      return $client;
+    },
 
+
+
+    RedisStore::class => function(RedisClient $client) {
+      return new RedisStore($client);
+    },
+
+
+
+    CacheInterface::class => function(RedisStore $store) {
       return new SimpleCache($store);
     }
 
