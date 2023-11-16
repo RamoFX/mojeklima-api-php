@@ -8,7 +8,7 @@ namespace App {
   use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Debug;
   use App\Resources\Common\Utilities\Translation;
-  use App\Resources\Limit\Middleware\RateLimitFieldMiddleware;
+  use App\Resources\Limit\RateLimitService;
   use DI\Container;
   use GraphQL\Error\DebugFlag;
   use GraphQL\GraphQL;
@@ -61,21 +61,26 @@ namespace App {
 
 
 
+    // rate limit
+    if ($isProd) {
+      $rateLimitService = $container->get(RateLimitService::class);
+      $rateLimitService->apply();
+    }
+
+
+
     // schema
     $cache = $container->get(CacheInterface::class);
     $factory = new SchemaFactory($cache, $container);
     $controllerNamespace = $config->get('namespace.controller');
     $typeNamespace = $config->get('namespace.type');
     $authService = $container->get(AuthService::class);
-    /** @var $rateLimitFieldMiddleware RateLimitFieldMiddleware */
-    $rateLimitFieldMiddleware = $container->get(RateLimitFieldMiddleware::class);
 
     $factory
       ->addControllerNamespace($controllerNamespace)
       ->addTypeNamespace($typeNamespace)
       ->setAuthenticationService($authService)
-      ->setAuthorizationService($authService)
-      ->addFieldMiddleware($rateLimitFieldMiddleware);
+      ->setAuthorizationService($authService);
 
     if ($isProd) {
       $factory->prodMode();

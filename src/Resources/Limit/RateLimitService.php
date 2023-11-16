@@ -4,9 +4,9 @@
 
 namespace App\Resources\Limit {
 
+  use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Debug;
   use App\Resources\Common\Utilities\Headers;
-  use App\Resources\Limit\Attributes\RateLimit;
   use App\Resources\Limit\Exceptions\RateLimitExceeded;
   use Psr\SimpleCache\CacheInterface;
   use Psr\SimpleCache\InvalidArgumentException;
@@ -15,7 +15,8 @@ namespace App\Resources\Limit {
 
   class RateLimitService {
     public function __construct(
-      protected CacheInterface $cache
+      protected CacheInterface $cache,
+      protected ConfigManager $config
     ) {}
 
 
@@ -24,25 +25,27 @@ namespace App\Resources\Limit {
      * @throws InvalidArgumentException
      * @throws RateLimitExceeded
      */
-    public function apply(RateLimit $rateLimit): void {
+    public function apply(): void {
+      $limit = $this->config->get('rateLimit.limit');
+      $interval = $this->config->get('rateLimit.interval');
       $clientIp = Headers::getClientIp();
-      $cacheKey = $this->createCacheKey($rateLimit->limit, $rateLimit->interval, $clientIp);
+      $cacheKey = $this->createCacheKey($clientIp);
       $requestCount = $this->cache->get($cacheKey, 0);
 
-      //if ($requestCount >= $rateLimit->limit)
-      //  throw new RateLimitExceeded();
+      if ($requestCount >= $limit)
+        throw new RateLimitExceeded();
 
-      $this->cache->set($cacheKey, $requestCount + 1, $rateLimit->interval);
+      $this->cache->set($cacheKey, $requestCount + 1, $interval);
 
       Debug::set("REDIS $cacheKey", $requestCount + 1);
     }
 
 
 
-    protected function createCacheKey(int $limit, int $interval, string $clientIp): string {
+    protected function createCacheKey(string $clientIp): string {
       $clientIp = urlencode($clientIp);
 
-      return "rateLimit#$limit#$interval#$clientIp";
+      return "rateLimit#$clientIp";
     }
   }
 }

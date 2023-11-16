@@ -55,6 +55,10 @@ namespace App\Setup {
     'email' => [
       'sender' => $_ENV['EMAIL_SENDER'],
       'replyTo' => $_ENV['EMAIL_REPLY_TO']
+    ],
+    'rateLimit' => [
+      'limit' => 60,
+      'interval' => 60
     ]
   ];
 }
