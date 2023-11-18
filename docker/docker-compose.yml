@@ -5,6 +5,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+      args:
+        APP_MODE: ${APP_MODE}
     container_name: mojeklima-api
     restart: always
     working_dir: /var/www/

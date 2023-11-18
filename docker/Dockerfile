@@ -6,6 +6,7 @@ RUN apk del $PHPIZE_DEPS
 RUN docker-php-ext-install pdo pdo_mysql
 RUN docker-php-ext-enable redis pdo pdo_mysql
 
-EXPOSE 9000
+ARG APP_MODE
+RUN cp "/usr/local/etc/php/php.ini-$APP_MODE" /usr/local/etc/php/php.ini
 
-USER $USER
+EXPOSE 9000
