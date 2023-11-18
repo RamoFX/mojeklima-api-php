@@ -5,10 +5,14 @@
 # exit if error happens
 set -e
 
+
+
 # go to docker
 script_dir="$(dirname "$0")"
 cd "$script_dir"
 cd "../docker"
+
+
 
 # compose
 docker-compose \

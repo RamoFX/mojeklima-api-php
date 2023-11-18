@@ -5,10 +5,15 @@
 # exit if error happens
 set -e
 
+
+
 # go to docker
 script_dir="$(dirname "$0")"
 cd "$script_dir"
 cd "../docker"
+
+
+
 
 # compose
 docker-compose \
@@ -18,8 +23,12 @@ docker-compose \
   --detach \
   --build
 
-# post
+
+
+# wait for containers to be initialized
 sleep 5
 
-## try to create db schema if not exists yet
+
+
+# post-script
 docker exec mojeklima-api php ./cli/doctrine orm:schema-tool:create
