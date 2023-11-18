@@ -18,6 +18,7 @@ namespace App\Setup {
   use MatthiasMullie\Scrapbook\Psr16\SimpleCache;
   use Psr\SimpleCache\CacheInterface;
   use Redis as RedisClient;
+  use Symfony\Component\Cache\Adapter\RedisAdapter;
   use function DI\create;
 
 
@@ -34,7 +35,7 @@ namespace App\Setup {
 
 
 
-    EntityManager::class => function(ConfigManager $config) {
+    EntityManager::class => function(ConfigManager $config, RedisClient $redis) {
       EnumType::addEnumType(AccountRole::class);
       EnumType::addEnumType(Criteria::class);
       EnumType::addEnumType(TemperatureUnits::class);
@@ -43,7 +44,8 @@ namespace App\Setup {
 
       $configuration = ORMSetup::createAttributeMetadataConfiguration(
         $config->get('doctrine.entities'),
-        $config->get('is.dev')
+        $config->get('is.dev'),
+        cache: new RedisAdapter($redis)
       );
 
       $connection = DriverManager::getConnection(
