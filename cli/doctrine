@@ -3,7 +3,6 @@
 
 
 
-use App\Resources\Common\Utilities\ConfigManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
@@ -17,11 +16,6 @@ require SOURCE_PATH . '/bootstrap.php';
 
 $container = require SETUP_PATH . '/container.php';
 $entityManager = $container->get(EntityManager::class);
-$config = $container->get(ConfigManager::class);
-
-// [CAUTION] This operation should not be executed in a production environment!
-if ($config->get('is.prod'))
-  exit(1);
 
 ConsoleRunner::run(
   new SingleManagerProvider($entityManager)
