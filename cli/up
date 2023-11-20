@@ -41,14 +41,3 @@ docker-compose \
   up \
   --detach \
   --build
-
-
-
-# after up
-
-# wait for containers to become operational
-echo "Waiting 5 seconds for the containers to be initialized..."
-sleep 5
-
-# create database schema
-docker exec mojeklima-api php ./cli/doctrine orm:schema-tool:create

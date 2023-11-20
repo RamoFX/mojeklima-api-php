@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+
+
+# exit if error happens
+set -e
+
+
+
+# create database schema
+docker exec mojeklima-api php ./cli/doctrine orm:schema-tool:create
