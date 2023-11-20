@@ -21,6 +21,16 @@ cd "../docker"
 
 # before up
 
+# group, permission
+# 82 corresponds with ID of a www-data group in php fpm alpine container
+chown :82 ../storage
+chown :82 ../storage/compilation
+chmod g+rw ../storage
+chmod g+rw ../storage/compilation
+
+# remove compiled container
+find ../storage/compilation/ -type f -not -name '.gitignore' -exec rm {} \;
+
 # prepare arguments
 arguments=""
 
