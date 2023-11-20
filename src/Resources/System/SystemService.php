@@ -29,7 +29,15 @@ namespace App\Resources\System {
         $redisHealthy = false;
       }
 
-      $databaseHealthy = $this->entityManager->getConnection()->isConnected();
+      try {
+        $this->entityManager->getConnection()
+          ->prepare('select 1')
+          ->executeQuery()
+          ->fetchNumeric();
+        $databaseHealthy = true;
+      } catch (Throwable) {
+        $databaseHealthy = false;
+      }
 
       return new HealthOutput(
         $redisHealthy,
