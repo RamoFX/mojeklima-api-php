@@ -5,7 +5,6 @@
 namespace App\Resources\Limit {
 
   use App\Resources\Common\Utilities\ConfigManager;
-  use App\Resources\Common\Utilities\Debug;
   use App\Resources\Common\Utilities\Headers;
   use App\Resources\Limit\Exceptions\RateLimitExceeded;
   use Psr\SimpleCache\CacheInterface;
@@ -30,14 +29,21 @@ namespace App\Resources\Limit {
       $interval = $this->config->get('rateLimit.interval');
       $clientIp = Headers::getClientIp();
       $cacheKey = $this->createCacheKey($clientIp);
-      $requestCount = $this->cache->get($cacheKey, 0);
+      $timestamp = time();
+      $timestamps = $this->cache->get($cacheKey, []);
 
-      if ($requestCount >= $limit)
+      // remove older than interval
+      $timestamps = array_filter($timestamps, function($time) use ($interval) {
+        return $time >= (time() - $interval);
+      });
+
+      if (count($timestamps) >= $limit) {
         throw new RateLimitExceeded();
+      }
 
-      $this->cache->set($cacheKey, $requestCount + 1, $interval);
-
-      Debug::set("REDIS $cacheKey", $requestCount + 1);
+      // include current request timestamp
+      $timestamps[] = $timestamp;
+      $this->cache->set($cacheKey, $timestamps, $interval);
     }
 
 
