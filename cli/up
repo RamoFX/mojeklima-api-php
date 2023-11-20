@@ -7,6 +7,11 @@ set -e
 
 
 
+# before up
+../cli/up-before
+
+
+
 # go to docker
 script_dir="$( cd "$(dirname "$0")" ; pwd -P )"
 cd "$script_dir"
@@ -16,7 +21,6 @@ cd "../docker"
 
 # load environment
 . ../.env
-
 
 
 
@@ -30,13 +34,5 @@ docker-compose \
 
 
 
-# post-script
-if [ "$APP_MODE" = "production" ]; then
-  echo "Will not try to create a database schema, because it is only allowed in development application mode"
-  exit 0
-fi
-
-echo "Waiting 5 seconds for the containers to be initialized..."
-sleep 5 # wait for containers to be initialized
-
-docker exec mojeklima-api php ./cli/doctrine orm:schema-tool:create
+# after up
+../cli/up-after

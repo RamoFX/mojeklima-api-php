@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+
+
+# exit if error happens
+set -e
+
+
+
+# go to project root
+script_dir="$( cd "$(dirname "$0")" ; pwd -P )"
+cd "$script_dir"
+cd "../"
+
+
+
+# load environment
+. ./.env
+
+
+
+# prepare env arguments
+echo "Waiting 5 seconds for the containers to be initialized..."
+sleep 5
+
+docker exec mojeklima-api php ./cli/doctrine orm:schema-tool:create
