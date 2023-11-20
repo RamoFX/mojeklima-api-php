@@ -7,15 +7,25 @@ set -e
 
 
 
-# before up
-../cli/up-before
-
-
-
 # go to docker
 script_dir="$( cd "$(dirname "$0")" ; pwd -P )"
 cd "$script_dir"
 cd "../docker"
+
+
+
+# before up
+
+# prepare arguments
+arguments=""
+
+if [ "$APP_MODE" = "production" ]
+then
+	arguments="--no-dev --optimize-autoloader"
+fi
+
+# install dependencies
+docker run --rm --interactive --tty --volume "$PWD/../:/app" composer install --no-ansi  --no-interaction --no-plugins --no-progress --no-scripts --ignore-platform-reqs $arguments
 
 
 
@@ -35,4 +45,10 @@ docker-compose \
 
 
 # after up
-../cli/up-after
+
+# wait for containers to become operational
+echo "Waiting 5 seconds for the containers to be initialized..."
+sleep 5
+
+# create database schema
+docker exec mojeklima-api php ./cli/doctrine orm:schema-tool:create

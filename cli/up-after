@@ -2,20 +2,8 @@
 
 
 
-# exit if error happens
-set -e
-
-
-
-# go to project root
-script_dir="$( cd "$(dirname "$0")" ; pwd -P )"
-cd "$script_dir"
-cd "../"
-
-
-
-# load environment
-. ./.env
+# notice
+echo "Notice: This script should be only executed by the /cli/up command in order to work properly"
 
 
 
@@ -23,4 +11,4 @@ cd "../"
 echo "Waiting 5 seconds for the containers to be initialized..."
 sleep 5
 
-docker exec mojeklima-api php ./cli/doctrine orm:schema-tool:create
+docker exec mojeklima-api php ../cli/doctrine orm:schema-tool:create

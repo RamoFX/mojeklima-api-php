@@ -2,25 +2,14 @@
 
 
 
-# exit if error happens
-set -e
-
-
-
-# go to project root
-script_dir="$( cd "$(dirname "$0")" ; pwd -P )"
-cd "$script_dir"
-cd "../"
-
-
-
-# load environment
-. ./.env
+# notice
+echo "Notice: In order to make script /cli/up-before work properly, please make sure it is only executed only executed by the /cli/up command in order to work properly"
 
 
 
 # prepare env arguments
 args=""
+
 if [ "$APP_MODE" = "production" ]
 then
 	args="--no-dev --optimize-autoloader"
@@ -30,4 +19,4 @@ fi
 
 
 # install dependencies
-docker run --rm --interactive --tty --volume "$PWD:/app" composer install --no-ansi  --no-interaction --no-plugins --no-progress --no-scripts --ignore-platform-reqs $args
+docker run --rm --interactive --tty --volume "$PWD/../:/app" composer install --no-ansi  --no-interaction --no-plugins --no-progress --no-scripts --ignore-platform-reqs $args
