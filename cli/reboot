@@ -8,13 +8,11 @@ set -e
 
 
 # go to docker
-script_dir="$(dirname "$0")"
+script_dir="$( cd "$(dirname "$0")" ; pwd -P )"
 cd "$script_dir"
 
 
 
 # reboot stack
-ls
 ./down
 ./up
-
