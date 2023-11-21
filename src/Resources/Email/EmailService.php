@@ -140,15 +140,22 @@ namespace App\Resources\Email {
 
 
 
-    public function sendAccountMarkedAsRemovedNotification(string $email): bool {
+    public function sendAccountRemovalVerification(string $email, string $token): bool {
       $appName = $this->config->get('app.name');
       $replyToEmail = $this->config->get('email.replyTo');
-      // TODO: Finish messages
+      $origin = $this->config->get('app.origin');
+      $confirmRemovalLink = "$origin/verify-email?token=$token";
       $message = Translation::translate([
         'cs' => <<<END
           Vážený uživateli,
           
-          ...
+          Obdrželi jsme žádost o odstranění účtu spojeného s tímto emailem v $appName.
+          
+          Pokud jste tento požadavek nepodali, ignorujte prosím tento email.
+          
+          Chcete-li potvrdit odstranění účtu, klikněte prosím na následující odkaz:
+          
+          $confirmRemovalLink
           
           Pokud máte jakékoli potíže, kontaktujte prosím naši podporu na emailové adrese: $replyToEmail.
           
@@ -156,21 +163,33 @@ namespace App\Resources\Email {
           Tým $appName
           END,
         'en' => <<<END
-          Dear User,
+          Dear user,
           
-          ...
+          We received a request to remove an account associated with this email on $appName.
           
-          If you continue to have issues, please contact our support team at: $replyToEmail.
+          If you did not make this request, please ignore this email.
           
-          Thank you,
+          To confirm the account removal, please follow the link below:
+          
+          $confirmRemovalLink
+          
+          If you have any concerns or questions, feel free to contact us at $replyToEmail.
+          
+          Best regards,
           $appName Team
           END,
         'de' => <<<END
           Sehr geehrter Benutzer,
           
-          ...
+          Wir haben eine Anfrage zum Entfernen eines mit dieser E-Mail verknüpften Kontos auf $appName erhalten.
           
-          Wenn Sie weiterhin Probleme haben, kontaktieren Sie bitte unser Support-Team unter: $replyToEmail.
+          Wenn Sie diese Anfrage nicht gestellt haben, ignorieren Sie diese E-Mail bitte.
+          
+          Um die Kontoentfernung zu bestätigen, folgen Sie bitte dem Link unten:
+          
+          $confirmRemovalLink
+          
+          Wenn Sie Bedenken oder Fragen haben, können Sie uns gerne unter $replyToEmail kontaktieren.
           
           Vielen Dank,
           $appName Team

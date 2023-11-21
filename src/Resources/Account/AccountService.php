@@ -5,9 +5,11 @@
 namespace App\Resources\Account {
 
   use App\Resources\Account\DTO\AccountInput;
+  use App\Resources\Account\DTO\BeginAccountRemovalInput;
   use App\Resources\Account\DTO\BeginEmailVerificationInput;
   use App\Resources\Account\DTO\BeginPasswordResetInput;
   use App\Resources\Account\DTO\ChangeRoleInput;
+  use App\Resources\Account\DTO\CompleteAccountRemovalInput;
   use App\Resources\Account\DTO\CompleteEmailVerificationInput;
   use App\Resources\Account\DTO\CompletePasswordResetInput;
   use App\Resources\Account\DTO\CreateAccountInput;
@@ -40,7 +42,6 @@ namespace App\Resources\Account {
   use Doctrine\ORM\OptimisticLockException;
   use Doctrine\ORM\TransactionRequiredException;
   use Exception;
-  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
@@ -243,7 +244,10 @@ namespace App\Resources\Account {
       if ($account->getEmailVerified())
         throw new EmailAlreadyVerified();
 
-      $token = $this->jwt->create([ 'email' => $beginEmailVerification->email ], '1 hour');
+      $payload = [
+        'email' => $beginEmailVerification->email
+      ];
+      $token = $this->jwt->create($payload, '1 hour');
 
       return $this->emailService->sendEmailVerification($beginEmailVerification->email, $token);
     }
@@ -358,18 +362,62 @@ namespace App\Resources\Account {
 
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws InvalidArgumentException
+     * @throws EmailNotFound
      */
-    public function markAccountRemoved(): AccountEntity {
-      $this->currentAccount->setIsMarkedAsRemoved(true);
-      $this->authService->logout();
-      $this->emailService->sendAccountMarkedAsRemovedNotification($this->currentAccount->getEmail());
+    public function beginAccountRemoval(BeginAccountRemovalInput $beginAccountRemoval): bool {
+      try {
+        // check if account exists
+        $emailsCount = (int) $this->repository->createQueryBuilder('a')
+          ->select('COUNT(a.id)')
+          ->where('a.email = :email')
+          ->setParameter('email', $beginAccountRemoval->email)
+          ->getQuery()
+          ->getSingleScalarResult();
+      } catch (Exception) {
+        throw new EmailNotFound();
+      }
+
+      if ($emailsCount === 0)
+        throw new EmailNotFound();
+
+      $payload = [
+        'email' => $beginAccountRemoval->email
+      ];
+      $token = $this->jwt->create($payload, '1 hour');
+
+      return $this->emailService->sendAccountRemovalVerification($beginAccountRemoval->email, $token);
+    }
+
+
+
+    /**
+     * @throws EmailNotFound
+     * @throws OptimisticLockException
+     * @throws InvalidToken
+     * @throws ORMException
+     * @throws TokenExpired
+     */
+    public function completeAccountRemoval(CompleteAccountRemovalInput $completeAccountRemoval): bool {
+      $payload = $this->jwt->decode($completeAccountRemoval->token);
+      $email = $payload['email'];
+
+      try {
+        /* @var AccountEntity $account */
+        $account = $this->repository->createQueryBuilder('a')
+          ->select('a')
+          ->where('a.email = :email')
+          ->setParameter('email', $email)
+          ->getQuery()
+          ->getSingleResult();
+      } catch (Exception) {
+        throw new EmailNotFound();
+      }
+
+      $account->setIsMarkedAsRemoved(true);
 
       $this->entityManager->flush($this->currentAccount);
 
-      return $this->currentAccount;
+      return true;
     }
 
 

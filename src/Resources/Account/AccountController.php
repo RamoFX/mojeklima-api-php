@@ -5,9 +5,11 @@
 namespace App\Resources\Account {
 
   use App\Resources\Account\DTO\AccountInput;
+  use App\Resources\Account\DTO\BeginAccountRemovalInput;
   use App\Resources\Account\DTO\BeginEmailVerificationInput;
   use App\Resources\Account\DTO\BeginPasswordResetInput;
   use App\Resources\Account\DTO\ChangeRoleInput;
+  use App\Resources\Account\DTO\CompleteAccountRemovalInput;
   use App\Resources\Account\DTO\CompleteEmailVerificationInput;
   use App\Resources\Account\DTO\CompletePasswordResetInput;
   use App\Resources\Account\DTO\CreateAccountInput;
@@ -27,7 +29,6 @@ namespace App\Resources\Account {
   use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
   use Doctrine\ORM\TransactionRequiredException;
-  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -203,14 +204,27 @@ namespace App\Resources\Account {
 
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws InvalidArgumentException
+     * @throws EmailNotFound
      */
     #[Mutation]
     #[Logged]
-    public function markAccountRemoved(): AccountEntity {
-      return $this->accountService->markAccountRemoved();
+    public function beginAccountRemoval(BeginAccountRemovalInput $beginAccountRemoval): bool {
+      return $this->accountService->beginAccountRemoval($beginAccountRemoval);
+    }
+
+
+
+    /**
+     * @throws EmailNotFound
+     * @throws InvalidToken
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws TokenExpired
+     */
+    #[Mutation]
+    #[Logged]
+    public function completeAccountRemoval(CompleteAccountRemovalInput $completeAccountRemoval): bool {
+      return $this->accountService->completeAccountRemoval($completeAccountRemoval);
     }
 
 
