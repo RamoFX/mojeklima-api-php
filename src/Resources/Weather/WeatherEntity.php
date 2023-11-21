@@ -5,9 +5,10 @@
 namespace App\Resources\Weather {
 
   use App\Resources\Cache\Cacheable;
+  use App\Resources\Common\Exceptions\CannotSerialize;
   use App\Resources\Common\JsonDeserializable;
-  use App\Resources\Common\Utilities\Translation;
   use App\Resources\Location\LocationEntity;
+  use ArgumentCountError;
   use JsonSerializable;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Type;
@@ -40,14 +41,7 @@ namespace App\Resources\Weather {
      */
     public static function getKey(string ...$components): string {
       if (count($components) !== 2) {
-        // TODO: Own exception file?
-        $message = Translation::translate([
-          "cs" => "Weather::getKey přijímá právě dva argumenty (zeměpisná šířka, zeměpisná délka)",
-          "en" => "Weather::getKey accepts exactly two arguments (latitude, longitude)",
-          "de" => "Weather::getKey akzeptiert genau zwei Argumente (Breitengrad, Längengrad)",
-        ]);
-
-        throw new GraphQLException($message);
+        throw new ArgumentCountError('', 500);
       }
 
       $latitude = $components[0];
@@ -72,14 +66,7 @@ namespace App\Resources\Weather {
       $encoded = json_encode($fields);
 
       if ($encoded === false) {
-        // TODO: Own exception file?
-        $message = Translation::translate([
-          "cs" => "Nelze serializovat počasí",
-          "en" => "Cannot serialize Weather",
-          "de" => "Weather kann nicht serialisiert werden",
-        ]);
-
-        throw new GraphQLException($message);
+        throw new CannotSerialize('Weather');
       }
 
       return $encoded;

@@ -24,7 +24,6 @@ namespace App\Resources\Location {
   use Doctrine\ORM\NoResultException;
   use Doctrine\ORM\OptimisticLockException;
   use Doctrine\ORM\TransactionRequiredException;
-  use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
 
@@ -105,12 +104,6 @@ namespace App\Resources\Location {
 
 
 
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws GraphQLException
-     */
-    // TODO: Avoid user from changing the city and country name
     public function createLocation(CreateLocationInput $createLocation): LocationEntity {
       $newLocation = new LocationEntity(
         $createLocation->cityName,
@@ -129,13 +122,6 @@ namespace App\Resources\Location {
 
 
 
-    /**
-     * @throws OptimisticLockException
-     * @throws EntityNotFound
-     * @throws GraphQLException
-     * @throws ORMException
-     */
-    // TODO: Avoid user from changing the city and country name
     public function updateLocation(UpdateLocationInput $updateLocation): LocationEntity {
       /** @var $location LocationEntity */
       $location = $this->repository->createQueryBuilder('l')
