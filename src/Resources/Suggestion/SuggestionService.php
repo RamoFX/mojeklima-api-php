@@ -5,7 +5,6 @@
 namespace App\Resources\Suggestion {
 
   use App\Resources\Common\Utilities\ConfigManager;
-  use App\Resources\Common\Utilities\Debug;
   use App\Resources\Common\Utilities\Translation;
   use App\Resources\Suggestion\DTO\SuggestionInput;
   use Exception;
@@ -46,8 +45,6 @@ namespace App\Resources\Suggestion {
         throw new Exception($responseJson->error);
 
       $response = $responseJson->decode_response();
-
-      Debug::set('response', $response);
 
       $suggestions = [];
 
