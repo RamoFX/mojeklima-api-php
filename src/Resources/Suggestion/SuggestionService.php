@@ -5,6 +5,7 @@
 namespace App\Resources\Suggestion {
 
   use App\Resources\Common\Utilities\ConfigManager;
+  use App\Resources\Common\Utilities\Debug;
   use App\Resources\Common\Utilities\Translation;
   use App\Resources\Suggestion\DTO\SuggestionInput;
   use Exception;
@@ -33,7 +34,7 @@ namespace App\Resources\Suggestion {
       $apiKey = $this->config->get('keys.api.openCageGeocoding');
 
       // "https://api.opencagedata.com/geocode/v1/json?key=2e20a10b90b64b8ab26b10257f49ef5f&no_annotations=1&language=$language&limit=5&q=$query";
-      $result = $api->get("json", [
+      $responseJson = $api->get("json", [
         'key' => $apiKey,
         'no_annotations' => 1,
         'limit' => 5,
@@ -41,30 +42,25 @@ namespace App\Resources\Suggestion {
         'q' => $suggestion->query
       ]);
 
-      if ($result->error)
-        throw new Exception($result->error);
+      if ($responseJson->error)
+        throw new Exception($responseJson->error);
 
-      $data = $result->decode_response();
+      $response = $responseJson->decode_response();
+
+      Debug::set('response', $response);
 
       $suggestions = [];
 
-      if (!isset($data['total_results']) || $data['total_results'] === 0)
+      if (!isset($response['total_results']) || $response['total_results'] === 0)
         return $suggestions;
 
-      foreach ($data['results'] as $result) {
-        $latitude = $result['geometry']['lat'];
-        $longitude = $result['geometry']['lng'];
-        $cityName = $result['components']['city'];
-        $countryName = $result['components']['country'];
-
-        $suggestion = new SuggestionEntity(
-          $latitude,
-          $longitude,
-          $cityName,
-          $countryName
+      foreach ($response['results'] as $responseJson) {
+        $suggestions[] = new SuggestionEntity(
+          $responseJson['geometry']['lat'],
+          $responseJson['geometry']['lng'],
+          $responseJson['components']['city'],
+          $responseJson['components']['country']
         );
-
-        $suggestions[] = $suggestion;
       }
 
       return $suggestions;
