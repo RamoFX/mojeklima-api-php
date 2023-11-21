@@ -15,42 +15,29 @@ namespace App\Resources\Weather {
      * @throws Exception
      */
     public function convert(WeatherEntity $weather): WeatherEntity {
-      // temperature
-      $weather->setTemperature(
-        UnitsConverter::fromMetric(
-          $weather->getTemperature(),
-          $this->currentAccount->getTemperatureUnits()
-        )
+      $weather->temperature = UnitsConverter::fromMetric(
+        $weather->temperature,
+        $this->currentAccount->getTemperatureUnits()
       );
 
-      $weather->setFeelsLike(
-        UnitsConverter::fromMetric(
-          $weather->getFeelsLike(),
-          $this->currentAccount->getTemperatureUnits()
-        )
+      $weather->feelsLike = UnitsConverter::fromMetric(
+        $weather->feelsLike,
+        $this->currentAccount->getTemperatureUnits()
       );
 
-      // speed
-      $weather->setWindSpeed(
-        UnitsConverter::fromMetric(
-          $weather->getWindSpeed(),
-          $this->currentAccount->getSpeedUnits()
-        )
+      $weather->windSpeed = UnitsConverter::fromMetric(
+        $weather->windSpeed,
+        $this->currentAccount->getSpeedUnits()
       );
 
-      $weather->setWindGust(
-        UnitsConverter::fromMetric(
-          $weather->getWindGust(),
-          $this->currentAccount->getSpeedUnits()
-        )
+      $weather->windGust = UnitsConverter::fromMetric(
+        $weather->windGust,
+        $this->currentAccount->getSpeedUnits()
       );
 
-      // pressure
-      $weather->setPressure(
-        UnitsConverter::fromMetric(
-          $weather->getPressure(),
-          $this->currentAccount->getPressureUnits()
-        )
+      $weather->pressure = UnitsConverter::fromMetric(
+        $weather->pressure,
+        $this->currentAccount->getPressureUnits()
       );
 
       return $weather;

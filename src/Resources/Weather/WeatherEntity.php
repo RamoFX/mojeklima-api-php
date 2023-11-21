@@ -18,21 +18,38 @@ namespace App\Resources\Weather {
 
   #[Type(name: "Weather")]
   class WeatherEntity extends JsonDeserializable implements JsonSerializable, Cacheable {
-    private float $temperature;
-    private float $feelsLike;
-    private int $humidity;
-    private int $pressure;
-    private float $windSpeed;
-    private ?float $windGust;
-    private int $windDirection;
-    private int $cloudiness;
-    private string $description;
-    private string $iconCode;
-    private int $dateTime;
-    private int $sunrise;
-    private int $sunset;
-    private int $timezone;
-    private LocationEntity $location;
+    public function __construct(
+      #[Field]
+      public float $temperature,
+      #[Field]
+      public float $feelsLike,
+      #[Field]
+      public int $humidity,
+      #[Field]
+      public int $pressure,
+      #[Field]
+      public float $windSpeed,
+      #[Field]
+      public ?float $windGust,
+      #[Field]
+      public int $windDirection,
+      #[Field]
+      public int $cloudiness,
+      #[Field]
+      public string $description,
+      #[Field]
+      public string $iconCode,
+      #[Field]
+      public int $dateTime,
+      #[Field]
+      public int $sunrise,
+      #[Field]
+      public int $sunset,
+      #[Field]
+      public int $timezone,
+      #[Field]
+      public LocationEntity $location
+    ) {}
 
 
 
@@ -70,201 +87,6 @@ namespace App\Resources\Weather {
       }
 
       return $encoded;
-    }
-
-
-
-    #[Field]
-    public function getTemperature(): float {
-      return $this->temperature;
-    }
-
-    public function setTemperature(float $temperature): WeatherEntity {
-      $this->temperature = $temperature;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getFeelsLike(): float {
-      return $this->feelsLike;
-    }
-
-    public function setFeelsLike(float $feelsLike): WeatherEntity {
-      $this->feelsLike = $feelsLike;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getHumidity(): int {
-      return $this->humidity;
-    }
-
-    public function setHumidity(int $humidity): WeatherEntity {
-      $this->humidity = $humidity;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getPressure(): int {
-      return $this->pressure;
-    }
-
-    public function setPressure(int $pressure): WeatherEntity {
-      $this->pressure = $pressure;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getWindSpeed(): float {
-      return $this->windSpeed;
-    }
-
-    public function setWindSpeed(float $windSpeed): WeatherEntity {
-      $this->windSpeed = $windSpeed;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getWindGust(): ?float {
-      return $this->windGust;
-    }
-
-    public function setWindGust(?float $windGust): WeatherEntity {
-      $this->windGust = $windGust;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getWindDirection(): int {
-      return $this->windDirection;
-    }
-
-    public function setWindDirection(int $windDirection): WeatherEntity {
-      $this->windDirection = $windDirection;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getCloudiness(): int {
-      return $this->cloudiness;
-    }
-
-    public function setCloudiness(int $cloudiness): WeatherEntity {
-      $this->cloudiness = $cloudiness;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getDescription(): string {
-      return $this->description;
-    }
-
-    public function setDescription(string $description): WeatherEntity {
-      $this->description = $description;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getIconCode(): string {
-      return $this->iconCode;
-    }
-
-    public function setIconCode(string $iconCode): WeatherEntity {
-      $this->iconCode = $iconCode;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getDateTime(): int {
-      return $this->dateTime;
-    }
-
-    public function setDateTime(int $dateTime): WeatherEntity {
-      $this->dateTime = $dateTime;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getSunrise(): int {
-      return $this->sunrise;
-    }
-
-    public function setSunrise(int $sunrise): WeatherEntity {
-      $this->sunrise = $sunrise;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getSunset(): int {
-      return $this->sunset;
-    }
-
-    public function setSunset(int $sunset): WeatherEntity {
-      $this->sunset = $sunset;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getTimezone(): int {
-      return $this->timezone;
-    }
-
-    public function setTimezone(int $timezone): WeatherEntity {
-      $this->timezone = $timezone;
-
-      return $this;
-    }
-
-
-
-    #[Field]
-    public function getLocation(): LocationEntity {
-      return $this->location;
-    }
-
-    public function setLocation(LocationEntity $location): WeatherEntity {
-      $this->location = $location;
-
-      return $this;
     }
   }
 }

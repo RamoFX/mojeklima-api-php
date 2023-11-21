@@ -5,7 +5,6 @@
 namespace App\Resources\Weather {
 
   use App\Resources\Common\CommonService;
-  use App\Resources\Common\Enums\ConversionDirection;
   use App\Resources\Common\Utilities\ConfigManager;
   use App\Resources\Common\Utilities\Translation;
   use App\Resources\Location\DTO\LocationInput;
@@ -38,7 +37,7 @@ namespace App\Resources\Weather {
      * @throws GraphQLException
      * @throws InvalidArgumentException
      */
-    public function weather(WeatherInput $weather) {
+    public function weather(WeatherInput $weather): WeatherEntity {
       $locationInput = new LocationInput();
       $locationInput->id = $weather->locationId;
       $location = $this->locationService->location($locationInput);
@@ -61,8 +60,8 @@ namespace App\Resources\Weather {
       if ($cachedValue) {
         $weather = WeatherEntity::jsonDeserialize($cachedValue);
 
-        $weather->setLocation($location);
-        $this->weatherConverter->convert($weather, ConversionDirection::FROM_METRIC);
+        $weather->location = $location;
+        $this->weatherConverter->convert($weather);
 
         return $weather;
       }
@@ -83,28 +82,29 @@ namespace App\Resources\Weather {
 
       $data = $result->decode_response();
 
-      $weather = (new WeatherEntity())
-        ->setTemperature($data['main']['temp'])
-        ->setFeelsLike($data['main']['feels_like'])
-        ->setHumidity($data['main']['humidity'])
-        ->setPressure($data['main']['pressure'])
-        ->setWindSpeed($data['wind']['speed'])
-        ->setWindGust($data['wind']['gust'] ?? null)
-        ->setWindDirection($data['wind']['deg'])
-        ->setCloudiness($data['clouds']['all'])
-        ->setDescription($data['weather'][0]['description'])
-        ->setIconCode($data['weather'][0]['icon'])
-        ->setDateTime($data['dt'])
-        ->setSunrise($data['sys']['sunrise'])
-        ->setSunset($data['sys']['sunset'])
-        ->setTimezone($data['timezone'])
-        ->setLocation($location);
+      $weather = new WeatherEntity(
+        $data['main']['temp'],
+        $data['main']['feels_like'],
+        $data['main']['humidity'],
+        $data['main']['pressure'],
+        $data['wind']['speed'],
+        $data['wind']['gust'] ?? null,
+        $data['wind']['deg'],
+        $data['clouds']['all'],
+        $data['weather'][0]['description'],
+        $data['weather'][0]['icon'],
+        $data['dt'],
+        $data['sys']['sunrise'],
+        $data['sys']['sunset'],
+        $data['timezone'],
+        $location
+      );
 
       // with caching
       $cacheValue = $weather->jsonSerialize();
 
       $this->cache->set($cacheKey, $cacheValue, [ 'EX' => $cacheExpiration ]);
-      $this->weatherConverter->convert($weather, ConversionDirection::FROM_METRIC);
+      $this->weatherConverter->convert($weather);
 
       return $weather;
     }
