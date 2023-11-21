@@ -50,7 +50,7 @@ namespace App\Resources\Suggestion {
         $suggestions[] = new SuggestionEntity(
           $responseJson['geometry']['lat'],
           $responseJson['geometry']['lng'],
-          $responseJson['components']['city'],
+          $responseJson['components']['town'],
           $responseJson['components']['country']
         );
       }
