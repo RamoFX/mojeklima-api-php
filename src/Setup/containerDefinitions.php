@@ -4,21 +4,13 @@
 
 namespace App\Setup {
 
-  use App\Resources\Account\Enums\AccountRole;
-  use App\Resources\Account\Enums\PressureUnits;
-  use App\Resources\Account\Enums\SpeedUnits;
-  use App\Resources\Account\Enums\TemperatureUnits;
-  use App\Resources\Alert\Enums\Criteria;
-  use App\Resources\Common\Types\EnumType;
   use App\Resources\Common\Utilities\ConfigManager;
-  use Doctrine\DBAL\DriverManager;
+  use App\Singleton\EntityManagerSingleton;
   use Doctrine\ORM\EntityManager;
-  use Doctrine\ORM\ORMSetup;
   use MatthiasMullie\Scrapbook\Adapters\Redis as RedisStore;
   use MatthiasMullie\Scrapbook\Psr16\SimpleCache;
   use Psr\SimpleCache\CacheInterface;
   use Redis as RedisClient;
-  use Symfony\Component\Cache\Adapter\RedisAdapter;
   use function DI\create;
 
 
@@ -36,24 +28,7 @@ namespace App\Setup {
 
 
     EntityManager::class => function(ConfigManager $config, RedisClient $redis) {
-      EnumType::addEnumType(AccountRole::class);
-      EnumType::addEnumType(Criteria::class);
-      EnumType::addEnumType(TemperatureUnits::class);
-      EnumType::addEnumType(SpeedUnits::class);
-      EnumType::addEnumType(PressureUnits::class);
-
-      $configuration = ORMSetup::createAttributeMetadataConfiguration(
-        $config->get('doctrine.entities'),
-        $config->get('is.dev'),
-        cache: new RedisAdapter($redis)
-      );
-
-      $connection = DriverManager::getConnection(
-        $config->get('doctrine.connection'),
-        $configuration
-      );
-
-      return new EntityManager($connection, $configuration);
+      return EntityManagerSingleton::getInstance($config, $redis);
     },
 
 
