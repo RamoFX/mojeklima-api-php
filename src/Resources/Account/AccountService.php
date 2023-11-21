@@ -5,7 +5,6 @@
 namespace App\Resources\Account {
 
   use App\Resources\Account\DTO\AccountInput;
-  use App\Resources\Account\DTO\BeginAccountRemovalInput;
   use App\Resources\Account\DTO\BeginEmailVerificationInput;
   use App\Resources\Account\DTO\BeginPasswordResetInput;
   use App\Resources\Account\DTO\ChangeRoleInput;
@@ -17,7 +16,6 @@ namespace App\Resources\Account {
   use App\Resources\Account\DTO\UploadAvatarInput;
   use App\Resources\Account\Enums\AccountRole;
   use App\Resources\Account\Exceptions\AccountAlreadyExist;
-  use App\Resources\Account\Exceptions\AccountMarkedAsRemoved;
   use App\Resources\Account\Exceptions\EmailAlreadyInUse;
   use App\Resources\Account\Exceptions\EmailAlreadyVerified;
   use App\Resources\Account\Exceptions\EmailNotFound;
@@ -290,7 +288,6 @@ namespace App\Resources\Account {
 
     /**
      * @throws EmailNotFound
-     * @throws AccountMarkedAsRemoved
      * @throws Exception
      */
     public function beginPasswordReset(BeginPasswordResetInput $resetPassword): bool {
@@ -364,13 +361,13 @@ namespace App\Resources\Account {
     /**
      * @throws EmailNotFound
      */
-    public function beginAccountRemoval(BeginAccountRemovalInput $beginAccountRemoval): bool {
+    public function beginAccountRemoval(): bool {
       try {
         // check if account exists
         $emailsCount = (int) $this->repository->createQueryBuilder('a')
           ->select('COUNT(a.id)')
           ->where('a.email = :email')
-          ->setParameter('email', $beginAccountRemoval->email)
+          ->setParameter('email', $this->currentAccount->getEmail())
           ->getQuery()
           ->getSingleScalarResult();
       } catch (Exception) {
@@ -381,11 +378,11 @@ namespace App\Resources\Account {
         throw new EmailNotFound();
 
       $payload = [
-        'email' => $beginAccountRemoval->email
+        'email' => $this->currentAccount->getEmail()
       ];
       $token = $this->jwt->create($payload, '1 hour');
 
-      return $this->emailService->sendAccountRemovalVerification($beginAccountRemoval->email, $token);
+      return $this->emailService->sendAccountRemovalVerification($this->currentAccount->getEmail(), $token);
     }
 
 

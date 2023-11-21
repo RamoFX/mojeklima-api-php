@@ -208,8 +208,8 @@ namespace App\Resources\Account {
      */
     #[Mutation]
     #[Logged]
-    public function beginAccountRemoval(BeginAccountRemovalInput $beginAccountRemoval): bool {
-      return $this->accountService->beginAccountRemoval($beginAccountRemoval);
+    public function beginAccountRemoval(): bool {
+      return $this->accountService->beginAccountRemoval();
     }
 
 
