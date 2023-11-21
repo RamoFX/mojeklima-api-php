@@ -178,8 +178,6 @@ namespace App\Resources\Account {
         $createAccount->password
       );
 
-      // TODO: start email verification
-
       $this->entityManager->persist($newAccount);
       $this->entityManager->flush($newAccount);
 
