@@ -15,6 +15,7 @@ namespace App\Resources\Auth {
   use App\Resources\Auth\Exceptions\BearerTokenMissing;
   use App\Resources\Auth\Exceptions\IncorrectPassword;
   use App\Resources\Auth\Exceptions\InvalidToken;
+  use App\Resources\Auth\Exceptions\NotAuthenticated;
   use App\Resources\Auth\Exceptions\TokenExpired;
   use App\Resources\Auth\Utilities\JWT;
   use App\Resources\Common\Utilities\Headers;
@@ -56,12 +57,17 @@ namespace App\Resources\Auth {
 
     /**
      * @throws AuthorizationHeaderMissing
+     * @throws AccountMarkedAsRemoved
      * @throws BearerTokenMissing
+     * @throws TokenExpired
      * @throws InvalidArgumentException
      * @throws InvalidToken
-     * @throws TokenExpired
+     * @throws EmailNotVerified
+     * @throws NotAuthenticated
      */
     public function isLogged(): bool {
+      $this->ensureTrustedIdentity();
+
       $token = Headers::getBearerToken();
       $payload = $this->jwt->decode($token);
       $accountId = (int) $payload[self::AUTH_JWT_ACCOUNT_ID_KEY];
@@ -107,6 +113,26 @@ namespace App\Resources\Auth {
 
     protected function isSystemAccount(): bool {
       return $this->getUser()->getRole() === AccountRole::SYSTEM;
+    }
+
+
+
+    /**
+     * @throws EmailNotVerified
+     * @throws AccountMarkedAsRemoved
+     * @throws NotAuthenticated
+     */
+    protected function ensureTrustedIdentity(): void {
+      $account = $this->getUser();
+
+      if ($account === null)
+        throw new NotAuthenticated();
+
+      if ($account->getIsMarkedAsRemoved())
+        throw new EmailNotVerified();
+
+      if (!$account->getEmailVerified())
+        throw new AccountMarkedAsRemoved();
     }
 
 

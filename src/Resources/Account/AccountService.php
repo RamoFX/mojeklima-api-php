@@ -291,20 +291,20 @@ namespace App\Resources\Account {
      */
     public function beginPasswordReset(BeginPasswordResetInput $resetPassword): bool {
       try {
-        /* @var AccountEntity $account */
-        $account = $this->repository->createQueryBuilder('a')
-          ->select('a')
+        // check if account exists
+        /** @var $emailsCount int */
+        $emailsCount = $this->repository->createQueryBuilder('a')
+          ->select('COUNT(a.id)')
           ->where('a.email = :email')
           ->setParameter('email', $resetPassword->email)
           ->getQuery()
-          ->getSingleResult();
+          ->getSingleScalarResult();
       } catch (Exception) {
         throw new EmailNotFound();
       }
 
-      // TODO: Maybe check this more often?
-      if ($account->getIsMarkedAsRemoved())
-        throw new AccountMarkedAsRemoved();
+      if ($emailsCount === 0)
+        throw new EmailNotFound();
 
       $payload = [
         'email' => $resetPassword->email,
