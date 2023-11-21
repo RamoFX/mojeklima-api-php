@@ -43,8 +43,6 @@ namespace App\Resources\Weather {
       $location = $this->locationService->location($locationInput);
       $latitude = $location->getLatitude();
       $longitude = $location->getLongitude();
-
-      // language
       $language = Translation::getPreferredLanguage();
       // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (country code).
       // For that reason additional mapping needs to be done

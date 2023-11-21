@@ -27,12 +27,8 @@ namespace App\Resources\Suggestion {
      */
     public function suggestions(SuggestionInput $suggestion): array {
       $language = Translation::getPreferredLanguage();
-
-      // rest api
       $api = $this->getRestClient();
       $apiKey = $this->config->get('keys.api.openCageGeocoding');
-
-      // "https://api.opencagedata.com/geocode/v1/json?key=2e20a10b90b64b8ab26b10257f49ef5f&no_annotations=1&language=$language&limit=5&q=$query";
       $responseJson = $api->get("json", [
         'key' => $apiKey,
         'no_annotations' => 1,
@@ -45,7 +41,6 @@ namespace App\Resources\Suggestion {
         throw new Exception($responseJson->error);
 
       $response = $responseJson->decode_response();
-
       $suggestions = [];
 
       if (!isset($response['total_results']) || $response['total_results'] === 0)
