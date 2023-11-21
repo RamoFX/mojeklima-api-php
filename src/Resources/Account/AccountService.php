@@ -161,7 +161,7 @@ namespace App\Resources\Account {
      */
     public function createAccount(CreateAccountInput $createAccount): AccountEntity {
       // check if account already exists
-      $emailsCount = $this->repository->createQueryBuilder('a')
+      $emailsCount = (int) $this->repository->createQueryBuilder('a')
         ->select('COUNT(a.id)')
         ->where('a.email = :email')
         ->setParameter('email', $createAccount->email)
@@ -194,7 +194,7 @@ namespace App\Resources\Account {
     public function updateAccount(UpdateAccountInput $updateAccount): AccountEntity {
       // perform checks before making any updates to the account
       // is email already in use?
-      $emailsCount = $this->repository->createQueryBuilder('a')
+      $emailsCount = (int) $this->repository->createQueryBuilder('a')
         ->select('COUNT(a.id)')
         ->from(AccountEntity::class, 'a')
         ->where('a.email = :email')
@@ -292,8 +292,7 @@ namespace App\Resources\Account {
     public function beginPasswordReset(BeginPasswordResetInput $resetPassword): bool {
       try {
         // check if account exists
-        /** @var $emailsCount int */
-        $emailsCount = $this->repository->createQueryBuilder('a')
+        $emailsCount = (int) $this->repository->createQueryBuilder('a')
           ->select('COUNT(a.id)')
           ->where('a.email = :email')
           ->setParameter('email', $resetPassword->email)
