@@ -362,21 +362,6 @@ namespace App\Resources\Account {
      * @throws EmailNotFound
      */
     public function beginAccountRemoval(): bool {
-      try {
-        // check if account exists
-        $emailsCount = (int) $this->repository->createQueryBuilder('a')
-          ->select('COUNT(a.id)')
-          ->where('a.email = :email')
-          ->setParameter('email', $this->currentAccount->getEmail())
-          ->getQuery()
-          ->getSingleScalarResult();
-      } catch (Exception) {
-        throw new EmailNotFound();
-      }
-
-      if ($emailsCount === 0)
-        throw new EmailNotFound();
-
       $payload = [
         'email' => $this->currentAccount->getEmail()
       ];
@@ -395,23 +380,8 @@ namespace App\Resources\Account {
      * @throws TokenExpired
      */
     public function completeAccountRemoval(CompleteAccountRemovalInput $completeAccountRemoval): bool {
-      $payload = $this->jwt->decode($completeAccountRemoval->token);
-      $email = $payload['email'];
-
-      try {
-        /* @var AccountEntity $account */
-        $account = $this->repository->createQueryBuilder('a')
-          ->select('a')
-          ->where('a.email = :email')
-          ->setParameter('email', $email)
-          ->getQuery()
-          ->getSingleResult();
-      } catch (Exception) {
-        throw new EmailNotFound();
-      }
-
-      $account->setIsMarkedAsRemoved(true);
-
+      $this->jwt->decode($completeAccountRemoval->token);
+      $this->currentAccount->setIsMarkedAsRemoved(true);
       $this->entityManager->flush($this->currentAccount);
 
       return true;
