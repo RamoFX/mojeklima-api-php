@@ -195,7 +195,6 @@ namespace App\Resources\Account {
       // is email already in use?
       $emailsCount = (int) $this->repository->createQueryBuilder('a')
         ->select('COUNT(a.id)')
-        ->from(AccountEntity::class, 'a')
         ->where('a.email = :email')
         ->setParameter('email', $updateAccount->email)
         ->getQuery()
@@ -342,7 +341,6 @@ namespace App\Resources\Account {
       }
 
       $account->setPassword($newPassword);
-
       $this->entityManager->flush($this->currentAccount);
 
       return true;
