@@ -101,7 +101,7 @@ namespace App\Resources\Weather {
       // with caching
       $cacheValue = $weather->jsonSerialize();
 
-      $this->cache->set($cacheKey, $cacheValue, [ 'EX' => $cacheExpiration ]);
+      $this->cache->set($cacheKey, $cacheValue, $cacheExpiration);
       $this->weatherConverter->convert($weather);
 
       return $weather;
