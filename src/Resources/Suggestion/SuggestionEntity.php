@@ -17,7 +17,7 @@ namespace App\Resources\Suggestion {
       #[Field]
       public float $longitude,
       #[Field]
-      public string $cityName,
+      public ?string $cityName,
       #[Field]
       public string $countryName
     ) {}
