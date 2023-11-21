@@ -30,7 +30,7 @@ namespace App\Resources\Suggestion {
 
       // rest api
       $api = $this->getRestClient();
-      $apiKey = $this->config->get('key.openCageGeocoding');
+      $apiKey = $this->config->get('keys.api.openCageGeocoding');
 
       // "https://api.opencagedata.com/geocode/v1/json?key=2e20a10b90b64b8ab26b10257f49ef5f&no_annotations=1&language=$language&limit=5&q=$query";
       $result = $api->get("json", [
