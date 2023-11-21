@@ -122,8 +122,8 @@ namespace App\Resources\Auth {
      * @throws AccountMarkedAsRemoved
      * @throws NotAuthenticated
      */
-    protected function ensureTrustedIdentity(): void {
-      $account = $this->getUser();
+    protected function ensureTrustedIdentity(AccountEntity $account = null): void {
+      $account ??= $this->getUser();
 
       if ($account === null)
         throw new NotAuthenticated();
@@ -145,6 +145,7 @@ namespace App\Resources\Auth {
      * @throws TokenExpired
      * @throws EmailNotVerified
      * @throws InvalidArgumentException
+     * @throws NotAuthenticated
      */
     public function login(LoginInput $login): TokenOutput {
       try {
@@ -159,11 +160,7 @@ namespace App\Resources\Auth {
         throw new EmailNotFound();
       }
 
-      if (!$account->getEmailVerified())
-        throw new EmailNotVerified();
-
-      if ($account->getIsMarkedAsRemoved())
-        throw new AccountMarkedAsRemoved();
+      $this->ensureTrustedIdentity($account);
 
       $doPasswordsMatch = password_verify($login->password, $account->getPasswordHash());
 
