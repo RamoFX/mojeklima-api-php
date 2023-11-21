@@ -33,7 +33,7 @@ namespace App\Resources\Email {
           
           Pokud jste nepožádali o obnovení hesla, prosím, ignorujte tento email.
           
-          Pokud budete mít další problémy, prosím, kontaktujte naši podporu na emailové adrese: $replyToEmail.
+          Pokud máte jakékoli potíže, kontaktujte prosím naši podporu na emailové adrese: $replyToEmail.
           
           Děkujeme,
           Tým $appName
@@ -47,7 +47,7 @@ namespace App\Resources\Email {
           
           If you have not requested a password reset, please ignore this email.
           
-          If you have any further problems, please contact our support at $replyToEmail.
+          If you have any concerns or questions, feel free to contact us at $replyToEmail.
           
           Thank you,
           $appName Team
@@ -61,7 +61,7 @@ namespace App\Resources\Email {
           
           Wenn Sie kein Zurücksetzen des Passworts angefordert haben, ignorieren Sie bitte diese E-Mail.
           
-          Sollten Sie weitere Probleme haben, wenden Sie sich bitte an unseren Support unter $replyToEmail.
+          Wenn Sie Bedenken oder Fragen haben, können Sie uns gerne unter $replyToEmail kontaktieren.
           
           Vielen Dank,
           $appName-Team
@@ -108,7 +108,7 @@ namespace App\Resources\Email {
           
           If you did not sign up for an account on $appName, please ignore this email.
           
-          If you continue to have issues, please contact our support team at: $replyToEmail.
+          If you have any concerns or questions, feel free to contact us at $replyToEmail.
           
           Thank you,
           $appName Team
@@ -122,7 +122,7 @@ namespace App\Resources\Email {
           
           Wenn Sie sich nicht auf $appName registriert haben, ignorieren Sie bitte diese E-Mail.
           
-          Wenn Sie weiterhin Probleme haben, kontaktieren Sie bitte unser Support-Team unter: $replyToEmail.
+          Wenn Sie Bedenken oder Fragen haben, können Sie uns gerne unter $replyToEmail kontaktieren.
           
           Vielen Dank,
           $appName Team
