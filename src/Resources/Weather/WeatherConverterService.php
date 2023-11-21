@@ -30,10 +30,11 @@ namespace App\Resources\Weather {
         $this->currentAccount->getSpeedUnits()
       );
 
-      $weather->windGust = UnitsConverter::fromMetric(
-        $weather->windGust,
-        $this->currentAccount->getSpeedUnits()
-      );
+      if ($weather->windGust !== null)
+        $weather->windGust = UnitsConverter::fromMetric(
+          $weather->windGust,
+          $this->currentAccount->getSpeedUnits()
+        );
 
       $weather->pressure = UnitsConverter::fromMetric(
         $weather->pressure,
