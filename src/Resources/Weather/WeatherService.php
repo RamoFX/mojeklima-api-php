@@ -42,8 +42,7 @@ namespace App\Resources\Weather {
      */
     public function weather(WeatherInput $weather): WeatherEntity {
       // prepare information
-      $locationInput = new LocationInput();
-      $locationInput->id = $weather->locationId;
+      $locationInput = new LocationInput($weather->locationId);
       $location = $this->locationService->location($locationInput);
       $language = Translation::getPreferredLanguage();
       // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (country code).
