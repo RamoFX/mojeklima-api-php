@@ -15,7 +15,6 @@ namespace App\Resources\Notification {
   use App\Resources\Notification\DTO\DeleteNotificationInput;
   use App\Resources\Notification\DTO\NotificationInput;
   use App\Resources\Notification\DTO\NotifyInput;
-  use App\Resources\Weather\DTO\WeatherInput;
   use App\Resources\Weather\WeatherService;
   use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;
@@ -252,9 +251,7 @@ namespace App\Resources\Notification {
           if ($locationId === null)
             continue;
 
-          $weatherInput = new WeatherInput();
-          $weatherInput->locationId = $locationId;
-          $weather = $this->weatherService->weather($weatherInput);
+          $weather = $location->getWeather();
           $alerts = $location->getAlerts();
 
           foreach ($alerts as $alert) {

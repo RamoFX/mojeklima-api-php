@@ -7,9 +7,11 @@ namespace App\Resources\Location {
   use App\Resources\Account\AccountEntity;
   use App\Resources\Alert\AlertEntity;
   use App\Resources\Common\Utilities\Validator;
+  use App\Resources\Weather\DTO\WeatherInput;
   use App\Resources\Weather\WeatherEntity;
   use App\Resources\Weather\WeatherService;
   use DateTimeImmutable;
+  use DI\Container;
   use Doctrine\Common\Collections\ArrayCollection;
   use Doctrine\Common\Collections\Collection;
   use Doctrine\ORM\Event\PrePersistEventArgs;
@@ -213,12 +215,14 @@ namespace App\Resources\Location {
     #[Field]
     public function getWeather(): ?WeatherEntity {
       if (!isset($this->weather)) {
+        /** @var Container $container */
         $container = require SETUP_PATH . "/container.php";
+        /** @var WeatherService $weatherService */
         $weatherService = $container->get(WeatherService::class);
-        $id = $this->getId();
-        $account = $this->getAccount();
 
-        return $weatherService->weather($account, $id, null, null, null);
+        return $weatherService->weather(
+          new WeatherInput($this->getId())
+        );
       } else {
         return $this->weather;
       }

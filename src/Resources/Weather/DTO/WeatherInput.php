@@ -11,7 +11,9 @@ namespace App\Resources\Weather\DTO {
 
   #[Input]
   class WeatherInput {
-    #[Field]
-    public int $locationId;
+    public function __construct(
+      #[Field]
+      public int $locationId
+    ) {}
   }
 }
