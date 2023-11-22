@@ -272,14 +272,14 @@ namespace App\Resources\Notification {
 
             // get weather value set in alert
             $currentValue = match ($criteria) {
-              Criteria::TEMPERATURE => $weather->getTemperature(),
-              Criteria::FEELS_LIKE => $weather->getFeelsLike(),
-              Criteria::HUMIDITY => $weather->getHumidity(),
-              Criteria::WIND_SPEED => $weather->getWindSpeed(),
-              Criteria::WIND_GUST => $weather->getWindGust(),
-              Criteria::WIND_DIRECTION => $weather->getWindDirection(),
-              Criteria::PRESSURE => $weather->getPressure(),
-              Criteria::CLOUDINESS => $weather->getCloudiness(),
+              Criteria::TEMPERATURE => $weather->temperature,
+              Criteria::FEELS_LIKE => $weather->feelsLike,
+              Criteria::HUMIDITY => $weather->humidity,
+              Criteria::WIND_SPEED => $weather->windSpeed,
+              Criteria::WIND_GUST => $weather->windGust,
+              Criteria::WIND_DIRECTION => $weather->windDirection,
+              Criteria::PRESSURE => $weather->pressure,
+              Criteria::CLOUDINESS => $weather->cloudiness,
             };
 
             if ($currentValue === null)
