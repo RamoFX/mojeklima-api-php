@@ -20,7 +20,7 @@ namespace App\Resources\Alert {
   use App\Resources\Common\Enums\ConversionDirection;
   use App\Resources\Common\Exceptions\EntityNotFound;
   use App\Resources\Limit\Exceptions\EntityLimitExceeded;
-  use App\Resources\Location\LocationEntity;
+  use App\Resources\Location\DTO\LocationInput;
   use App\Resources\Location\LocationService;
   use DI\DependencyException;
   use DI\NotFoundException;
@@ -149,7 +149,7 @@ namespace App\Resources\Alert {
      */
     public function locationAlertsCount(LocationAlertsCountInput $locationAlertsCount): int {
       return $this->repository->createQueryBuilder('al')
-        ->select('COUNT(a.id)')
+        ->select('COUNT(al.id)')
         ->join('al.location', 'l')
         ->join('l.account', 'ac')
         ->where('l.id = :locationId')
@@ -195,7 +195,7 @@ namespace App\Resources\Alert {
      */
     public function toggleAlert(ToggleAlertInput $toggleAlert): AlertEntity {
       try {
-        /** @var $alert AlertEntity */
+        /** @var AlertEntity $alert */
         $alert = $this->repository->createQueryBuilder('al')
           ->select('al')
           ->join('al.location', 'l')
@@ -230,8 +230,8 @@ namespace App\Resources\Alert {
      * @throws Exception
      */
     public function createAlert(CreateAlertInput $createAlert): AlertEntity {
-      $alertsCount = $this->repository->createQueryBuilder('al')
-        ->select('COUNT(a.id)')
+      $alertsCount = (int) $this->repository->createQueryBuilder('al')
+        ->select('COUNT(al.id)')
         ->join('al.location', 'l')
         ->join('l.account', 'ac')
         ->where('ac.id = :accountId')
@@ -240,19 +240,11 @@ namespace App\Resources\Alert {
         ->getSingleScalarResult();
 
       if ($alertsCount >= self::ALERTS_LIMIT)
-        throw new EntityLimitExceeded("Alert", self::ALERTS_LIMIT);
+        throw new EntityLimitExceeded('Alert', self::ALERTS_LIMIT);
 
-      try {
-        /** @var $location LocationEntity */
-        $location = $this->repository->createQueryBuilder('l')
-          ->select('l')
-          ->where('l.id = :locationId')
-          ->setParameter('locationId', $createAlert->locationId)
-          ->getQuery()
-          ->getSingleResult();
-      } catch (NoResultException) {
-        throw new EntityNotFound('Alert');
-      }
+      $location = $this->locationService->location(
+        new LocationInput($createAlert->locationId)
+      );
 
       $newAlert = new AlertEntity(
         $createAlert->isEnabled,
@@ -284,7 +276,7 @@ namespace App\Resources\Alert {
      */
     public function updateAlert(UpdateAlertInput $updateAlert): AlertEntity {
       try {
-        /** @var $alert AlertEntity */
+        /** @var AlertEntity $alert */
         $alert = $this->repository->createQueryBuilder('al')
           ->select('al')
           ->join('al.location', 'l')
@@ -338,7 +330,7 @@ namespace App\Resources\Alert {
      */
     public function deleteAlert(DeleteAlertInput $deleteAlert): AlertEntity {
       try {
-        /** @var $alert AlertEntity */
+        /** @var AlertEntity $alert */
         $alert = $this->repository->createQueryBuilder('al')
           ->select('al')
           ->join('al.location', 'l')

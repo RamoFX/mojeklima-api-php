@@ -84,7 +84,7 @@ namespace App\Resources\Location {
      * @throws NonUniqueResultException
      */
     public function location(LocationInput $location): LocationEntity {
-      /** @var $foundLocation LocationEntity */
+      /** @var LocationEntity $foundLocation */
       $foundLocation = $this->repository->createQueryBuilder('l')
         ->select('l')
         ->join('l.account', 'ac')
@@ -123,7 +123,7 @@ namespace App\Resources\Location {
 
 
     public function updateLocation(UpdateLocationInput $updateLocation): LocationEntity {
-      /** @var $location LocationEntity */
+      /** @var LocationEntity $location */
       $location = $this->repository->createQueryBuilder('l')
         ->select('l')
         ->join('l.account', 'ac')
@@ -161,7 +161,7 @@ namespace App\Resources\Location {
      * @throws ORMException
      */
     public function deleteLocation(DeleteLocationInput $deleteLocation): LocationEntity {
-      /** @var $location LocationEntity */
+      /** @var LocationEntity $location */
       $location = $this->repository->createQueryBuilder('l')
         ->select('l')
         ->join('l.account', 'ac')
