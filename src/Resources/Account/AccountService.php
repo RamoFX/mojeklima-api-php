@@ -273,7 +273,7 @@ namespace App\Resources\Account {
       $payload = $this->jwt->decode($completeEmailVerification->token);
 
       try {
-        /** @var $account AccountEntity */
+        /** @var AccountEntity $account */
         $account = $this->repository->createQueryBuilder('a')
           ->select('a')
           ->where('a.email = :email')

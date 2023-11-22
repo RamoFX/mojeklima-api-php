@@ -36,7 +36,7 @@ namespace App\Resources\Common {
      * @throws TransactionRequiredException
      */
     public function __construct() {
-      /** @var $container Container */
+      /** @var Container $container */
       $container = require SETUP_PATH . '/container.php';
       $authService = $container->get(AuthService::class);
       $this->currentAccount = $authService->getUser();

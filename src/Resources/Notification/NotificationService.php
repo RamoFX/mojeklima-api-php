@@ -315,7 +315,7 @@ namespace App\Resources\Notification {
      */
     public function deleteNotification(DeleteNotificationInput $deleteNotification): NotificationEntity {
       try {
-        /** @var $notification NotificationEntity */
+        /** @var NotificationEntity $notification */
         $notification = $this->repository->createQueryBuilder('n')
           ->select('n')
           ->join('n.alerts', 'al')

@@ -42,9 +42,9 @@ namespace App {
 
 
     // helpers
-    /** @var $container Container */
+    /** @var Container $container */
     $container = require SETUP_PATH . '/container.php';
-    /** @var $config ConfigManager */
+    /** @var ConfigManager $config */
     $config = $container->get(ConfigManager::class);
     $isDev = $config->get('is.dev');
     $isProd = $config->get('is.prod');

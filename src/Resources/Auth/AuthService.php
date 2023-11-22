@@ -149,7 +149,7 @@ namespace App\Resources\Auth {
      */
     public function login(LoginInput $login): TokenOutput {
       try {
-        /** @var $account AccountEntity */
+        /** @var AccountEntity $account */
         $account = $this->repository->createQueryBuilder('a')
           ->select('a')
           ->where('a.email = :email')
