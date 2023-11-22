@@ -220,9 +220,7 @@ namespace App\Resources\Location {
         /** @var WeatherService $weatherService */
         $weatherService = $container->get(WeatherService::class);
 
-        return $weatherService->weather(
-          new WeatherInput($this->getId())
-        );
+        return $weatherService->weatherFromLocation($this);
       } else {
         return $this->weather;
       }
