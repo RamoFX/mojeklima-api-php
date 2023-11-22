@@ -6,12 +6,15 @@ namespace App\Resources\Weather {
 
   use App\Resources\Common\CommonService;
   use App\Resources\Common\Utilities\ConfigManager;
-  use App\Resources\Common\Utilities\Translation;
+    use App\Resources\Common\Utilities\Debug;
+    use App\Resources\Common\Utilities\Translation;
   use App\Resources\Location\DTO\LocationInput;
-  use App\Resources\Location\LocationService;
+    use App\Resources\Location\LocationEntity;
+    use App\Resources\Location\LocationService;
   use App\Resources\Weather\DTO\WeatherInput;
   use Exception;
-  use Psr\SimpleCache\CacheInterface;
+    use GraphQL\Validator\Rules\LoneSchemaDefinition;
+    use Psr\SimpleCache\CacheInterface;
   use Psr\SimpleCache\InvalidArgumentException;
   use RestClient;
   use RestClientException;
@@ -38,11 +41,10 @@ namespace App\Resources\Weather {
      * @throws InvalidArgumentException
      */
     public function weather(WeatherInput $weather): WeatherEntity {
+      // prepare information
       $locationInput = new LocationInput();
       $locationInput->id = $weather->locationId;
       $location = $this->locationService->location($locationInput);
-      $latitude = $location->getLatitude();
-      $longitude = $location->getLongitude();
       $language = Translation::getPreferredLanguage();
       // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (country code).
       // For that reason additional mapping needs to be done
@@ -51,60 +53,94 @@ namespace App\Resources\Weather {
       ];
 
       // check cache
-      $cacheKey = WeatherEntity::getKey(strval($latitude), strval($longitude));
-      $cacheExpiration = WeatherEntity::getExpiration();
-      $cachedValue = $this->cache->get($cacheKey);
+      $weather = $this->getCachedWeather($location);
 
-      if ($cachedValue) {
-        $weather = WeatherEntity::jsonDeserialize($cachedValue);
-
-        $weather->location = $location;
-        $this->weatherConverter->convert($weather);
-
-        return $weather;
+      if ($weather !== null) {
+        return $this->weatherConverter->convert($weather);
       }
 
-      // api call
-      $api = self::getRestClient();
+      // miss, retrieve from external source
       $apiKey = $this->config->get('keys.api.openWeather');
-      $result = $api->get("weather", [
+      $responseJson = self::getRestClient()->get('weather', [
         'appid' => $apiKey,
-        'lat' => $latitude,
-        'lon' => $longitude,
+        'lat' => $location->getLatitude(),
+        'lon' => $location->getLongitude(),
         'units' => 'metric',
         'lang' => $languageMap[$language] ?? $language
       ]);
 
-      if ($result->error)
-        throw new Exception($result->error);
+      if ($responseJson->error)
+        throw new Exception($responseJson->error);
 
-      $data = $result->decode_response();
+      $response = $responseJson->decode_response();
 
       $weather = new WeatherEntity(
-        $data['main']['temp'],
-        $data['main']['feels_like'],
-        $data['main']['humidity'],
-        $data['main']['pressure'],
-        $data['wind']['speed'],
-        $data['wind']['gust'] ?? null,
-        $data['wind']['deg'],
-        $data['clouds']['all'],
-        $data['weather'][0]['description'],
-        $data['weather'][0]['icon'],
-        $data['dt'],
-        $data['sys']['sunrise'],
-        $data['sys']['sunset'],
-        $data['timezone'],
+        $response['main']['temp'],
+        $response['main']['feels_like'],
+        $response['main']['humidity'],
+        $response['main']['pressure'],
+        $response['wind']['speed'],
+        $response['wind']['gust'] ?? null,
+        $response['wind']['deg'],
+        $response['clouds']['all'],
+        $response['weather'][0]['description'],
+        $response['weather'][0]['icon'],
+        $response['dt'],
+        $response['sys']['sunrise'],
+        $response['sys']['sunset'],
+        $response['timezone'],
         $location
       );
 
-      // with caching
-      $cacheValue = $weather->jsonSerialize();
-
-      $this->cache->set($cacheKey, $cacheValue, $cacheExpiration);
+      // cache it
+      $this->cacheWeather($weather);
       $this->weatherConverter->convert($weather);
 
       return $weather;
+    }
+
+
+
+    private function getCachedWeather(LocationEntity $location): WeatherEntity|null {
+      $key = $this->getCacheKeyFromLocation($location);
+      $weatherJson = $this->cache->get($key);
+
+      if ($weatherJson === null)
+        return null;
+
+      $weather = WeatherFactory::fromJson($weatherJson, $location);
+
+      return $weather;
+    }
+
+
+
+    private function cacheWeather(WeatherEntity $weather): bool {
+      $key = $this->getCacheKeyFromWeather($weather);
+      $weatherJson = WeatherFactory::toJson($weather);
+
+      return $this->cache->set($key, $weatherJson, 60 * 10);
+    }
+
+
+
+    private function getCacheKeyFromWeather(WeatherEntity $weather): string {
+      return $this->getCacheKeyFromLocation($weather->location);
+    }
+
+
+
+    private function getCacheKeyFromLocation(LocationEntity $location): string {
+      return $this->getWeatherCacheKey(
+        $location->getLatitude(),
+        $location->getLongitude()
+      );
+    }
+
+
+
+    private function getWeatherCacheKey(float $latitude, float $longitude): string {
+      return "Weather#$latitude,$longitude";
     }
 
 
