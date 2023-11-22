@@ -6,15 +6,13 @@ namespace App\Resources\Weather {
 
   use App\Resources\Common\CommonService;
   use App\Resources\Common\Utilities\ConfigManager;
-    use App\Resources\Common\Utilities\Debug;
-    use App\Resources\Common\Utilities\Translation;
+  use App\Resources\Common\Utilities\Translation;
   use App\Resources\Location\DTO\LocationInput;
-    use App\Resources\Location\LocationEntity;
-    use App\Resources\Location\LocationService;
+  use App\Resources\Location\LocationEntity;
+  use App\Resources\Location\LocationService;
   use App\Resources\Weather\DTO\WeatherInput;
   use Exception;
-    use GraphQL\Validator\Rules\LoneSchemaDefinition;
-    use Psr\SimpleCache\CacheInterface;
+  use Psr\SimpleCache\CacheInterface;
   use Psr\SimpleCache\InvalidArgumentException;
   use RestClient;
   use RestClientException;

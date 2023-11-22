@@ -4,7 +4,7 @@
 
 namespace App\Resources\Weather {
 
-    use App\Resources\Location\LocationEntity;
+  use App\Resources\Location\LocationEntity;
 
 
 

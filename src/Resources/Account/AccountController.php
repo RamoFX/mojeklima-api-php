@@ -5,7 +5,6 @@
 namespace App\Resources\Account {
 
   use App\Resources\Account\DTO\AccountInput;
-  use App\Resources\Account\DTO\BeginAccountRemovalInput;
   use App\Resources\Account\DTO\BeginEmailVerificationInput;
   use App\Resources\Account\DTO\BeginPasswordResetInput;
   use App\Resources\Account\DTO\ChangeRoleInput;
