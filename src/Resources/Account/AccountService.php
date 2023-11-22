@@ -214,6 +214,16 @@ namespace App\Resources\Account {
       if ($updateAccount->password !== null)
         $this->currentAccount->setPassword($updateAccount->password);
 
+      if ($updateAccount->temperatureUnits !== null)
+        $this->currentAccount->setTemperatureUnits($updateAccount->temperatureUnits);
+
+      if ($updateAccount->speedUnits !== null)
+        $this->currentAccount->setSpeedUnits($updateAccount->speedUnits);
+
+      if ($updateAccount->pressureUnits !== null)
+        $this->currentAccount->setPressureUnits($updateAccount->pressureUnits);
+
+
       $this->entityManager->flush($this->currentAccount);
 
       return $this->currentAccount;
