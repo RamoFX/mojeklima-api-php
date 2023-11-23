@@ -4,8 +4,6 @@
 
 namespace App\Resources\Common\Utilities {
 
-
-
   use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
   use App\Resources\Auth\Exceptions\BearerTokenMissing;
 
