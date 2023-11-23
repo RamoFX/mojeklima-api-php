@@ -84,7 +84,9 @@ namespace App\Resources\Account {
      */
     public function account(AccountInput $account) {
       try {
-        return $this->repository->find(AccountEntity::class, $account->id);
+        return $this->repository->findOneBy([
+          'id' => $account->id
+        ]);
       } catch (Exception) {
         throw new EntityNotFound('Account');
       }
