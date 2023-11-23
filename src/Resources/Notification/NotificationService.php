@@ -6,7 +6,8 @@ namespace App\Resources\Notification {
 
   use App\Resources\Account\AccountService;
   use App\Resources\Account\DTO\AccountInput;
-  use App\Resources\Alert\AlertService;
+    use App\Resources\Alert\AlertEntity;
+    use App\Resources\Alert\AlertService;
   use App\Resources\Alert\DTO\AlertInput;
   use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Common\CommonService;
@@ -138,9 +139,11 @@ namespace App\Resources\Notification {
       $accountInput = new AccountInput();
       $accountInput->id = $notify->accountId;
       $account = $this->accountService->account($accountInput);
+
       $alertInput = new AlertInput();
       $alertInput->id = $notify->alertId;
-      $alert = $this->alertService->alert($alertInput);
+      $alert = $this->alertService->alert($alertInput); // error
+
       $notification = new NotificationEntity();
 
       $alert->addNotification($notification);
@@ -151,7 +154,7 @@ namespace App\Resources\Notification {
       $location = $alert->getLocation();
       $cityName = $location->getCityName();
       $countryName = $location->getCountryName();
-      $alert_message = $alert->getMessage();
+      $alertMessage = $alert->getMessage();
 
       // send push notification
       // initialize
@@ -160,10 +163,10 @@ namespace App\Resources\Notification {
       $privateKey = $this->config->get('keys.push.private');
       $appName = $this->config->get('keys.push.private');
       $auth = [
-        "VAPID" => [
-          "subject" => $subject,
-          "publicKey" => $publicKey,
-          "privateKey" => $privateKey
+        'VAPID' => [
+          'subject' => $subject,
+          'publicKey' => $publicKey,
+          'privateKey' => $privateKey
         ]
       ];
       $options = [
@@ -178,12 +181,12 @@ namespace App\Resources\Notification {
       // prepare sending
       $title = "$cityName, $countryName | $appName";
       $data = [
-        "notificationId" => $notification->getId()
+        'notificationId' => $notification->getId()
       ];
       $body = json_encode([
-        "data" => $data,
-        "body" => $alert_message,
-        "title" => $title,
+        'data' => $data,
+        'body' => $alertMessage,
+        'title' => $title,
       ]);
 
       // send to each user agent associated with user
@@ -192,25 +195,26 @@ namespace App\Resources\Notification {
       foreach ($pushSubscriptions as $pushSubscription) {
         // prepare sending
         $subscription = Subscription::create([
-          "contentEncoding" => "aesgcm",
-          "endpoint" => $pushSubscription->getEndpoint(),
-          "authToken" => $pushSubscription->getAuth(),
-          "keys" => [
-            "auth" => $pushSubscription->getAuth(),
-            "p256dh" => $pushSubscription->getP256dh()
+          'contentEncoding' => "aesgcm",
+          'endpoint' => $pushSubscription->getEndpoint(),
+          'authToken' => $pushSubscription->getAuth(),
+          'keys' => [
+            'auth' => $pushSubscription->getAuth(),
+            'p256dh' => $pushSubscription->getP256dh()
           ]
         ]);
 
         // send
         $webPush->sendOneNotification($subscription, $body);
+
         // TODO: Logger - Unable to send push notification for the following reason: <reason>
         // $result = $webPush->sendOneNotification($subscription, $body);
         //
         // // result
         // if ($result->isSuccess()) {
-        // echo "ok";
+        // echo 'ok';
         // } else {
-        // echo "not ok";
+        // echo 'not ok';
         // echo_json($result->getReason());
         // echo_json($result->getResponse());
         // }
@@ -218,6 +222,13 @@ namespace App\Resources\Notification {
 
       return $notification;
     }
+
+
+
+    #private function notifyFromAlert(AlertEntity $alert): NotificationEntity {
+    #  // TODO: Do the same as with the weather in a service?
+    #  return null;
+    #}
 
 
 
@@ -232,71 +243,49 @@ namespace App\Resources\Notification {
      * @throws InvalidArgumentException
      */
     public function checkForNotifications(): int {
-      $accounts = $this->accountService->userAccounts();
+      $locationWeather = [/*
+        "$latitude$longitude" => $weather,
+        ...
+      */];
+      $alerts = $this->alertService->userEnabledAlerts();
       $notificationsDispatched = 0;
 
-      foreach ($accounts as $account) {
-        // handle account id null
-        $accountId = $account->getId();
+      foreach ($alerts as $alert) {
+        // assure we have location's weather
+        $location = $alert->getLocation();
+        $latitude = $location->getLatitude();
+        $longitude = $location->getLongitude();
+        $key = "$latitude$longitude";
 
-        if ($accountId === null)
-          continue;
+        if (!in_array($key, $locationWeather))
+          $locationWeather[$key] = $location->getWeather();
 
-        $locations = $account->getLocations();
+        $weather = $locationWeather[$key];
 
-        foreach ($locations as $location) {
-          $locationId = $location->getId();
+        // compare current weather and alert's range to determine whether to dispatch a notification
+        $criteria = $alert->getCriteria();
+        $currentValue = match ($criteria) {
+          Criteria::TEMPERATURE => $weather->temperature,
+          Criteria::FEELS_LIKE => $weather->feelsLike,
+          Criteria::HUMIDITY => $weather->humidity,
+          Criteria::PRESSURE => $weather->pressure,
+          Criteria::WIND_SPEED => $weather->windSpeed,
+          Criteria::WIND_GUST => $weather->windGust,
+          Criteria::WIND_DIRECTION => $weather->windDirection,
+          Criteria::CLOUDINESS => $weather->cloudiness
+        };
+        $rangeFrom = $alert->getRangeFrom();
+        $rangeTo = $alert->getRangeTo();
+        $shouldNotify = $rangeFrom <= $currentValue && $currentValue <= $rangeTo;
 
-          // handle location id null
-          if ($locationId === null)
-            continue;
+        // notify
+        if ($shouldNotify) {
+          $notificationsDispatched += 1;
+          $notifyInput = new NotifyInput();
+          $notifyInput->accountId = $location->getAccount()->getId();
+          $notifyInput->alertId = $alert->getId();
 
-          $weather = $location->getWeather();
-          $alerts = $location->getAlerts();
-
-          foreach ($alerts as $alert) {
-            // only enabled alerts are getting notifications
-            if (!$alert->getIsEnabled())
-              continue;
-
-            $alertId = $alert->getId();
-
-            // handle alert id null
-            if ($alertId === null)
-              continue;
-
-            $criteria = $alert->getCriteria();
-
-            // get weather value set in alert
-            $currentValue = match ($criteria) {
-              Criteria::TEMPERATURE => $weather->temperature,
-              Criteria::FEELS_LIKE => $weather->feelsLike,
-              Criteria::HUMIDITY => $weather->humidity,
-              Criteria::WIND_SPEED => $weather->windSpeed,
-              Criteria::WIND_GUST => $weather->windGust,
-              Criteria::WIND_DIRECTION => $weather->windDirection,
-              Criteria::PRESSURE => $weather->pressure,
-              Criteria::CLOUDINESS => $weather->cloudiness,
-            };
-
-            if ($currentValue === null)
-              continue;
-
-            // comparison
-            $rangeFrom = $alert->getRangeFrom();
-            $rangeTo = $alert->getRangeTo();
-
-            $shouldNotify = $rangeFrom <= $currentValue && $currentValue <= $rangeTo;
-
-            if ($shouldNotify) {
-              $notifyInput = new NotifyInput();
-              $notifyInput->accountId = $accountId;
-              $notifyInput->alertId = $alertId;
-
-              $this->notify($notifyInput);
-              $notificationsDispatched += 1;
-            }
-          }
+          $this->notify($notifyInput);
         }
       }
 

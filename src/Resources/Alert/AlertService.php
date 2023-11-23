@@ -4,6 +4,7 @@
 
 namespace App\Resources\Alert {
 
+  use App\Resources\Account\Enums\AccountRole;
   use App\Resources\Alert\DTO\AlertInput;
   use App\Resources\Alert\DTO\CreateAlertInput;
   use App\Resources\Alert\DTO\DeleteAlertInput;
@@ -77,6 +78,26 @@ namespace App\Resources\Alert {
         ->join('l.account', 'ac')
         ->where('ac.id = :accountId')
         ->setParameter('accountId', $this->currentAccount->getId())
+        ->getQuery()
+        ->getResult();
+
+      return $this->alertConverter->convertMultipleRanges($alerts, ConversionDirection::FROM_METRIC);
+    }
+
+
+
+    /**
+     * @return AlertEntity[]
+     */
+    public function userEnabledAlerts(): array {
+      $alerts = $this->repository->createQueryBuilder('al')
+        ->select('al')
+        ->join('al.location', 'l')
+        ->join('l.account', 'ac')
+        ->where('ac.role != :systemRole')
+        ->andWhere('al.isEnabled = :true')
+        ->setParameter('systemRole', AccountRole::SYSTEM)
+        ->setParameter('true', true)
         ->getQuery()
         ->getResult();
 
@@ -167,16 +188,21 @@ namespace App\Resources\Alert {
      */
     public function alert(AlertInput $alert): AlertEntity {
       try {
-        $alert = $this->repository->createQueryBuilder('al')
+        $alertQueryBuilder = $this->repository->createQueryBuilder('al')
           ->select('al')
-          ->join('al.location', 'l')
-          ->join('l.account', 'ac')
-          ->where('ac.id = :accountId')
-          ->andWhere('al.id = :alertId')
-          ->setParameter('accountId', $this->currentAccount->getId())
-          ->setParameter('alertId', $alert->id)
-          ->getQuery()
-          ->getSingleResult();
+          ->where('al.id = :alertId')
+          ->setParameter('alertId', $alert->id);
+
+        // do not check whether alert belongs to the system user
+        if ($this->currentAccount->getRole() !== AccountRole::SYSTEM) {
+          $alertQueryBuilder = $alertQueryBuilder
+            ->join('al.location', 'l')
+            ->join('l.account', 'ac')
+            ->andWhere('ac.id = :accountId')
+            ->setParameter('accountId', $this->currentAccount->getId());
+        }
+
+        $alert = $alertQueryBuilder->getQuery()->getSingleResult();
 
         return $this->alertConverter->convertRange($alert, ConversionDirection::FROM_METRIC);
       } catch (Exception) {
