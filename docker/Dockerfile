@@ -6,7 +6,7 @@ RUN apk del $PHPIZE_DEPS
 RUN docker-php-ext-install pdo pdo_mysql
 RUN docker-php-ext-enable redis pdo pdo_mysql
 
-# PHP-FPM configuration
+# php-fpm config
 # RUN echo 'pm = dynamic' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
 #     echo 'pm.max_children = 12' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
 #     echo 'pm.start_servers = 6' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
@@ -14,6 +14,7 @@ RUN docker-php-ext-enable redis pdo pdo_mysql
 #     echo 'pm.max_spare_servers = 8' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
 #     echo 'pm.max_requests = 0' >> /usr/local/etc/php-fpm.d/zz-docker.conf
 
+# php config
 ARG APP_MODE
 RUN cp "/usr/local/etc/php/php.ini-$APP_MODE" /usr/local/etc/php/php.ini
 
