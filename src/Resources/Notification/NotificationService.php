@@ -304,7 +304,7 @@ namespace App\Resources\Notification {
         /** @var NotificationEntity $notification */
         $notification = $this->repository->createQueryBuilder('n')
           ->select('n')
-          ->join('n.alerts', 'al')
+          ->join('n.alert', 'al')
           ->join('al.location', 'l')
           ->join('l.account', 'ac')
           ->where('n.id = :notificationId')
