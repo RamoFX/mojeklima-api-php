@@ -22,19 +22,28 @@ namespace App\Resources\Notification {
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", options: [ "unsigned" => true ])]
     private ?int $id = null;
+
     #[ORM\Column(type: "boolean", options: [ "default" => false ])]
     private bool $seen = false;
+
     #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
+
     #[ORM\ManyToOne(targetEntity: "\App\Resources\Alert\AlertEntity", cascade: [ "persist" ], inversedBy: "notifications")]
     private AlertEntity $alert;
 
+
+
     public function __construct() {}
+
+
 
     #[Field(outputType: "ID")]
     public function getId(): ?int {
       return $this->id;
     }
+
+
 
     #[Field]
     public function getSeen(): bool {
@@ -47,10 +56,14 @@ namespace App\Resources\Notification {
       return $this;
     }
 
+
+
     #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
+
+
 
     #[Field]
     public function getAlert(): AlertEntity {
@@ -62,6 +75,8 @@ namespace App\Resources\Notification {
 
       return $this;
     }
+
+
 
     #[ORM\PrePersist]
     public function onPrePersist(PrePersistEventArgs $args): void {
