@@ -29,6 +29,7 @@ namespace App\Resources\Account {
   use App\Resources\Common\CommonService;
   use App\Resources\Common\Exceptions\EntityNotFound;
   use App\Resources\Email\EmailService;
+  use DateTimeImmutable;
   use DI\DependencyException;
   use DI\NotFoundException;
   use Doctrine\ORM\EntityManager;
@@ -395,6 +396,36 @@ namespace App\Resources\Account {
       $this->entityManager->flush($this->currentAccount);
 
       return true;
+    }
+
+
+
+    public function deleteMarkedAccounts(): int {
+      // retrieve accounts to be deleted
+      $dateThirtyDaysAgo = new DateTimeImmutable();
+      $dateThirtyDaysAgo->modify('-30 days');
+
+      $accounts = $this->repository->createQueryBuilder('a')
+        ->select('a')
+        ->where('a.role != :systemRole')
+        ->andWhere('a.isMarkedAsRemoved = :true')
+        ->andWhere('a.updatedAt <= :dateThirtyDaysAgo')
+        ->setParameter('systemRole', AccountRole::SYSTEM)
+        ->setParameter('true', true)
+        ->setParameter('dateThirtyDaysAgo', $dateThirtyDaysAgo)
+        ->getQuery()
+        ->getResult();
+
+        // delete one by one
+        $accountsDeleted = 0;
+
+        foreach($accounts as $account) {
+          $accountsDeleted += 1;
+          $this->entityManager->remove($account);
+          $this->entityManager->flush($account);
+        }
+
+        return $accountsDeleted;
     }
 
 

@@ -228,6 +228,15 @@ namespace App\Resources\Account {
 
 
 
+    #[Mutation()]
+    #[Logged]
+    #[Right(Permission::ACCOUNT_MANAGEMENT)]
+    public function deleteMarkedAccounts(): int {
+      return $this->accountService->deleteMarkedAccounts();
+    }
+
+
+
     /**
      * @throws OptimisticLockException
      * @throws ORMException
