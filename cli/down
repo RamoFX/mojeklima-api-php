@@ -17,6 +17,6 @@ cd "../docker"
 # compose
 docker-compose \
   --env-file ../.env \
-  --project-name mojeklima \
+  --project-name mojeklima-api \
   down \
   --remove-orphans

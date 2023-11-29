@@ -50,7 +50,7 @@ docker run --rm --interactive --tty --volume "$PWD/../:/app" composer install --
 # compose
 docker-compose \
   --env-file ../.env \
-  --project-name mojeklima \
+  --project-name mojeklima-api \
   up \
   --detach \
   --build
