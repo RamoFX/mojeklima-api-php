@@ -17,7 +17,8 @@ namespace App\Resources\Notification {
   use App\Resources\Notification\DTO\NotificationInput;
   use App\Resources\Notification\DTO\NotifyInput;
   use App\Resources\Weather\WeatherService;
-  use Doctrine\ORM\EntityManager;
+    use DateTimeImmutable;
+    use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NoResultException;
@@ -243,6 +244,8 @@ namespace App\Resources\Notification {
      * @throws InvalidArgumentException
      */
     public function checkForNotifications(): int {
+      $now = new DateTimeImmutable();
+      $now = $now->getTimestamp();
       $locationWeather = [/*
         "$latitude$longitude" => $weather,
         ...
@@ -277,6 +280,8 @@ namespace App\Resources\Notification {
         $rangeFrom = $alert->getRangeFrom();
         $rangeTo = $alert->getRangeTo();
         $shouldNotify = $rangeFrom <= $currentValue && $currentValue <= $rangeTo;
+        // respect update frequency
+        $shouldNotify = $shouldNotify && round($now / 60 / 60) % $alert->getUpdateFrequency() === 0;
 
         // notify
         if ($shouldNotify) {
