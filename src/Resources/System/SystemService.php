@@ -24,9 +24,9 @@ namespace App\Resources\System {
 
     public function health(): HealthOutput {
       try {
-        $redisHealthy = boolval($this->redis->ping());
+        $redis = boolval($this->redis->ping());
       } catch (Throwable) {
-        $redisHealthy = false;
+        $redis = false;
       }
 
       try {
@@ -34,14 +34,17 @@ namespace App\Resources\System {
           ->prepare('select 1')
           ->executeQuery()
           ->fetchNumeric();
-        $databaseHealthy = true;
+        $database = true;
       } catch (Throwable) {
-        $databaseHealthy = false;
+        $database = false;
       }
 
+      $overall = $redis && $database;
+
       return new HealthOutput(
-        $redisHealthy,
-        $databaseHealthy
+        $redis,
+        $database,
+        $overall
       );
     }
   }

@@ -15,9 +15,11 @@ namespace App\Resources\System\DTO {
   class HealthOutput {
     public function __construct(
       #[Field]
-      public bool $redisHealthy,
+      public bool $redis,
       #[Field]
-      public bool $databaseHealthy
+      public bool $database,
+      #[Field]
+      public bool $overall
     ) {}
   }
 }
