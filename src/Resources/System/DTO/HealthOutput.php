@@ -16,8 +16,10 @@ namespace App\Resources\System\DTO {
     public function __construct(
       #[Field]
       public bool $redis,
+
       #[Field]
       public bool $database,
+
       #[Field]
       public bool $overall
     ) {}

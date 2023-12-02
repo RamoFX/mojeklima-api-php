@@ -12,7 +12,7 @@ namespace App\Resources\Account\DTO {
 
   #[Input]
   class ChangeRoleInput {
-    #[Field]
+    #[Field(outputType: "ID")]
     public int $id;
 
     #[Field]

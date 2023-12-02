@@ -11,7 +11,7 @@ namespace App\Resources\Location\DTO {
 
   #[Input]
   class UpdateLocationInput {
-    #[Field]
+    #[Field(outputType: "ID")]
     public int $id;
 
     #[Field]

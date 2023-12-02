@@ -12,7 +12,7 @@ namespace App\Resources\Weather\DTO {
   #[Input]
   class WeatherInput {
     public function __construct(
-      #[Field]
+      #[Field(outputType: "ID")]
       public int $locationId
     ) {}
   }

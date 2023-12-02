@@ -11,7 +11,7 @@ namespace App\Resources\Account\DTO {
 
   #[Input]
   class AccountInput {
-    #[Field]
+    #[Field(outputType: "ID")]
     public int $id;
   }
 }

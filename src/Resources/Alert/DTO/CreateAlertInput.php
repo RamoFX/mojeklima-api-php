@@ -12,7 +12,7 @@ namespace App\Resources\Alert\DTO {
 
   #[Input]
   class CreateAlertInput {
-    #[Field]
+    #[Field(outputType: "ID")]
     public int $locationId;
 
     #[Field]

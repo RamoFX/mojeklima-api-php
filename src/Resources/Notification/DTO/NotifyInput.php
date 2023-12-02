@@ -11,10 +11,10 @@ namespace App\Resources\Notification\DTO {
 
   #[Input]
   class NotifyInput {
-    #[Field]
+    #[Field(outputType: "ID")]
     public int $accountId;
 
-    #[Field]
+    #[Field(outputType: "ID")]
     public int $alertId;
   }
 }

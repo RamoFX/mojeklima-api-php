@@ -11,7 +11,7 @@ namespace App\Resources\Alert\DTO {
 
   #[Input]
   class ToggleAlertInput {
-    #[Field]
+    #[Field(outputType: "ID")]
     public int $id;
 
     #[Field]

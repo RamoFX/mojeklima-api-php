@@ -11,7 +11,7 @@ namespace App\Resources\Notification\DTO {
 
   #[Input]
   class DeleteNotificationInput {
-    #[Field]
+    #[Field(outputType: "ID")]
     public int $id;
   }
 }

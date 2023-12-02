@@ -12,7 +12,7 @@ namespace App\Resources\Location\DTO {
   #[Input]
   class LocationInput {
     public function __construct(
-      #[Field]
+      #[Field(outputType: "ID")]
       public int $id
     ) {}
   }
