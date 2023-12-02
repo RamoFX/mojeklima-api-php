@@ -5,9 +5,7 @@
 namespace App\Resources\Notification {
 
   use App\Resources\Account\AccountService;
-  use App\Resources\Account\DTO\AccountInput;
-    use App\Resources\Alert\AlertEntity;
-    use App\Resources\Alert\AlertService;
+  use App\Resources\Alert\AlertService;
   use App\Resources\Alert\DTO\AlertInput;
   use App\Resources\Alert\Enums\Criteria;
   use App\Resources\Common\CommonService;
@@ -17,8 +15,8 @@ namespace App\Resources\Notification {
   use App\Resources\Notification\DTO\NotificationInput;
   use App\Resources\Notification\DTO\NotifyInput;
   use App\Resources\Weather\WeatherService;
-    use DateTimeImmutable;
-    use Doctrine\ORM\EntityManager;
+  use DateTimeImmutable;
+  use Doctrine\ORM\EntityManager;
   use Doctrine\ORM\EntityRepository;
   use Doctrine\ORM\Exception\ORMException;
   use Doctrine\ORM\NoResultException;
@@ -137,13 +135,11 @@ namespace App\Resources\Notification {
      * @throws ErrorException
      */
     public function notify(NotifyInput $notify): NotificationEntity {
-      $accountInput = new AccountInput();
-      $accountInput->id = $notify->accountId;
-      $account = $this->accountService->account($accountInput);
-
       $alertInput = new AlertInput();
       $alertInput->id = $notify->alertId;
-      $alert = $this->alertService->alert($alertInput); // error
+      $alert = $this->alertService->alert($alertInput);
+
+      $account = $alert->getLocation()->getAccount();
 
       $notification = new NotificationEntity();
 
@@ -171,7 +167,7 @@ namespace App\Resources\Notification {
         ]
       ];
       $options = [
-        "TTL" => 60 * 60 * 24 // 1 day
+        'TTL' => 60 * 60 * 24 // 1 day
       ];
       $timeout = 120;
       $networkClientOptions = [
@@ -287,7 +283,6 @@ namespace App\Resources\Notification {
         if ($shouldNotify) {
           $notificationsDispatched += 1;
           $notifyInput = new NotifyInput();
-          $notifyInput->accountId = $location->getAccount()->getId();
           $notifyInput->alertId = $alert->getId();
 
           $this->notify($notifyInput);

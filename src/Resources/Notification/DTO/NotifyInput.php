@@ -13,9 +13,6 @@ namespace App\Resources\Notification\DTO {
   #[Input]
   class NotifyInput {
     #[Field]
-    public ID $accountId;
-
-    #[Field]
     public ID $alertId;
   }
 }
