@@ -22,7 +22,7 @@ namespace App\Resources\Email {
       $appName = $this->config->get('app.name');
       $replyToEmail = $this->config->get('email.replyTo');
       $origin = $this->config->get('app.origin');
-      $verificationLink = "$origin/reset-password?token=$token";
+      $verificationLink = "$origin/confirm/password-reset?token=$token";
       $message = Translation::translate([
         'cs' => <<<END
           Vážený uživateli,
@@ -83,7 +83,7 @@ namespace App\Resources\Email {
       $appName = $this->config->get('app.name');
       $replyToEmail = $this->config->get('email.replyTo');
       $origin = $this->config->get('app.origin');
-      $verificationLink = "$origin/verify-email?token=$token";
+      $verificationLink = "$origin/confirm/email-verification?token=$token";
       $message = Translation::translate([
         'cs' => <<<END
           Vážený uživateli,
@@ -144,7 +144,7 @@ namespace App\Resources\Email {
       $appName = $this->config->get('app.name');
       $replyToEmail = $this->config->get('email.replyTo');
       $origin = $this->config->get('app.origin');
-      $confirmRemovalLink = "$origin/verify-email?token=$token";
+      $confirmRemovalLink = "$origin/confirm/account-removal?token=$token";
       $message = Translation::translate([
         'cs' => <<<END
           Vážený uživateli,
