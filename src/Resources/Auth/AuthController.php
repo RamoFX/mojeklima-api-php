@@ -46,7 +46,7 @@ namespace App\Resources\Auth {
      */
     #[Mutation]
     #[Logged]
-    public function logout(): string {
+    public function logout(): bool {
       return $this->authService->logout();
     }
 
