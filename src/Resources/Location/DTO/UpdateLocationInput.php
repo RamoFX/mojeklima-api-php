@@ -6,13 +6,14 @@ namespace App\Resources\Location\DTO {
 
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Input;
+  use TheCodingMachine\GraphQLite\Types\ID;
 
 
 
   #[Input]
   class UpdateLocationInput {
-    #[Field(outputType: "ID")]
-    public int $id;
+    #[Field]
+    public ID $id;
 
     #[Field]
     public ?string $cityName;

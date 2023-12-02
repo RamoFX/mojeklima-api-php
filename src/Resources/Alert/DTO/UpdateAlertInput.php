@@ -7,13 +7,14 @@ namespace App\Resources\Alert\DTO {
   use App\Resources\Alert\Enums\Criteria;
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Input;
+  use TheCodingMachine\GraphQLite\Types\ID;
 
 
 
   #[Input]
   class UpdateAlertInput {
-    #[Field(outputType: "ID")]
-    public int $id;
+    #[Field]
+    public ID $id;
 
     #[Field]
     public ?bool $isEnabled;

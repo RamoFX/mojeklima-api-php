@@ -6,12 +6,13 @@ namespace App\Resources\Alert\DTO {
 
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Input;
+  use TheCodingMachine\GraphQLite\Types\ID;
 
 
 
   #[Input]
   class LocationAlertsCountInput {
-    #[Field(outputType: "ID")]
-    public int $locationId;
+    #[Field]
+    public ID $locationId;
   }
 }

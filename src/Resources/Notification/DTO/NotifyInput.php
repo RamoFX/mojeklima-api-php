@@ -6,15 +6,16 @@ namespace App\Resources\Notification\DTO {
 
   use TheCodingMachine\GraphQLite\Annotations\Field;
   use TheCodingMachine\GraphQLite\Annotations\Input;
+  use TheCodingMachine\GraphQLite\Types\ID;
 
 
 
   #[Input]
   class NotifyInput {
-    #[Field(outputType: "ID")]
-    public int $accountId;
+    #[Field]
+    public ID $accountId;
 
-    #[Field(outputType: "ID")]
-    public int $alertId;
+    #[Field]
+    public ID $alertId;
   }
 }
