@@ -68,5 +68,29 @@ namespace App\Resources\Auth\Utilities {
         throw new InvalidToken();
       }
     }
+
+
+
+    /**
+     * @throws InvalidToken
+     * @throws TokenExpired
+     */
+    public function getExpiration(string $token): int {
+      $decodedAuthToken = $this->decode($token);
+
+      return (int) $decodedAuthToken['exp'];
+    }
+
+
+
+    public function validate(string $token): bool {
+      try {
+        $this->decode($token);
+
+        return true;
+      } catch (Exception) {
+        return false;
+      }
+    }
   }
 }
