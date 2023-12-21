@@ -25,6 +25,7 @@ namespace App\Resources\Account {
   use App\Resources\Auth\Exceptions\BearerTokenMissing;
   use App\Resources\Auth\Exceptions\InvalidToken;
   use App\Resources\Auth\Exceptions\TokenExpired;
+  use App\Resources\Auth\Utilities\AuthJWT;
   use App\Resources\Auth\Utilities\JWT;
   use App\Resources\Common\CommonService;
   use App\Resources\Common\Exceptions\EntityNotFound;
@@ -66,7 +67,8 @@ namespace App\Resources\Account {
       protected EntityManager $entityManager,
       protected EmailService $emailService,
       protected JWT $jwt,
-      protected AuthService $authService
+      protected AuthService $authService,
+      protected AuthJWT $authJwt
     ) {
       parent::__construct();
       $this->repository = $entityManager->getRepository(AccountEntity::class);
@@ -356,6 +358,8 @@ namespace App\Resources\Account {
       $account->setPassword($newPassword);
       $this->entityManager->flush($this->currentAccount);
 
+      $this->authJwt->wipeAllowedAuthTokens($account->getId());
+
       return true;
     }
 
@@ -369,9 +373,6 @@ namespace App\Resources\Account {
 
 
 
-    /**
-     * @throws EmailNotFound
-     */
     public function beginAccountRemoval(): bool {
       $payload = [
         'email' => $this->currentAccount->getEmail()
@@ -394,6 +395,8 @@ namespace App\Resources\Account {
 
       $this->currentAccount->setIsMarkedAsRemoved(true);
       $this->entityManager->flush($this->currentAccount);
+
+      $this->authJwt->wipeAllowedAuthTokens($this->currentAccount->getId());
 
       return true;
     }
