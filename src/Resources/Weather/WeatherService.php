@@ -33,10 +33,8 @@ namespace App\Resources\Weather {
 
 
     /**
-     * @throws RestClientException
      * @throws Exception
      * @throws GraphQLException
-     * @throws InvalidArgumentException
      */
     public function weather(WeatherInput $weather): WeatherEntity {
       $locationInput = new LocationInput($weather->locationId);
@@ -47,6 +45,10 @@ namespace App\Resources\Weather {
 
 
 
+    /**
+     * @throws RestClientException
+     * @throws Exception
+     */
     public function weatherFromLocation(LocationEntity $location): WeatherEntity {
       $language = Translation::getPreferredLanguage();
       // Open Weather API inconsistency: API supports both "en" (language code) and "cz" (country code).

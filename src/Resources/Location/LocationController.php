@@ -80,9 +80,10 @@ namespace App\Resources\Location {
 
     /**
      * @throws OptimisticLockException
-     * @throws GraphQLException
      * @throws ORMException
-     * @throws EntityNotFound
+     * @throws GraphQLException
+     * @throws NonUniqueResultException
+     * @throws NoResultException
      */
     #[Mutation]
     #[Logged]

@@ -15,7 +15,6 @@ namespace App\Resources\Account {
   use App\Resources\Account\DTO\UpdateAccountInput;
   use App\Resources\Account\DTO\UploadAvatarInput;
   use App\Resources\Account\Exceptions\AccountAlreadyExist;
-  use App\Resources\Account\Exceptions\AccountMarkedAsRemoved;
   use App\Resources\Account\Exceptions\EmailAlreadyVerified;
   use App\Resources\Account\Exceptions\EmailNotFound;
   use App\Resources\Account\Exceptions\MustBeMarkedAsRemovedFirst;
@@ -171,7 +170,6 @@ namespace App\Resources\Account {
 
     /**
      * @throws EmailNotFound
-     * @throws AccountMarkedAsRemoved
      */
     #[Mutation]
     public function beginPasswordReset(BeginPasswordResetInput $beginPasswordReset): bool {
@@ -202,9 +200,6 @@ namespace App\Resources\Account {
 
 
 
-    /**
-     * @throws EmailNotFound
-     */
     #[Mutation]
     #[Logged]
     public function beginAccountRemoval(): bool {
@@ -214,7 +209,6 @@ namespace App\Resources\Account {
 
 
     /**
-     * @throws EmailNotFound
      * @throws InvalidToken
      * @throws OptimisticLockException
      * @throws ORMException
@@ -228,7 +222,11 @@ namespace App\Resources\Account {
 
 
 
-    #[Mutation()]
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    #[Mutation]
     #[Logged]
     #[Right(Permission::ACCOUNT_MANAGEMENT)]
     public function deleteMarkedAccounts(): int {

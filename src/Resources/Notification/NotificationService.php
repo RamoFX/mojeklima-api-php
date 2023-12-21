@@ -26,8 +26,6 @@ namespace App\Resources\Notification {
   use GuzzleHttp\RequestOptions;
   use Minishlink\WebPush\Subscription;
   use Minishlink\WebPush\WebPush;
-  use Psr\SimpleCache\InvalidArgumentException;
-  use RestClientException;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
 
 
@@ -236,8 +234,7 @@ namespace App\Resources\Notification {
      * @throws GraphQLException
      * @throws ORMException
      * @throws OptimisticLockException
-     * @throws RestClientException
-     * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function checkForNotifications(): int {
       $now = new DateTimeImmutable();

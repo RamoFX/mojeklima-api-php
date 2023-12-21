@@ -14,8 +14,6 @@ namespace App\Resources\Notification {
   use Doctrine\ORM\OptimisticLockException;
   use ErrorException;
   use Exception;
-  use Psr\SimpleCache\InvalidArgumentException;
-  use RestClientException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
   use TheCodingMachine\GraphQLite\Annotations\Query;
@@ -103,9 +101,7 @@ namespace App\Resources\Notification {
      * @throws ORMException
      * @throws EntityNotFound
      * @throws NotSupported
-     * @throws RestClientException
      * @throws ErrorException
-     * @throws InvalidArgumentException
      */
     #[Mutation]
     #[Logged]

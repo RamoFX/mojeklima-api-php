@@ -88,6 +88,7 @@ namespace App\Resources\Alert {
 
     /**
      * @return AlertEntity[]
+     * @throws Exception
      */
     public function userEnabledAlerts(): array {
       $alerts = $this->repository->createQueryBuilder('al')

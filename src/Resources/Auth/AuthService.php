@@ -27,7 +27,6 @@ namespace App\Resources\Auth {
   use Doctrine\ORM\Exception\ORMException;
   use Exception;
   use Psr\SimpleCache\CacheInterface;
-  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Security\AuthenticationServiceInterface;
   use TheCodingMachine\GraphQLite\Security\AuthorizationServiceInterface;
   use Throwable;
@@ -138,14 +137,11 @@ namespace App\Resources\Auth {
 
 
     /**
-     * @throws AccountMarkedAsRemoved
      * @throws EmailNotFound
      * @throws IncorrectPassword
-     * @throws InvalidToken
-     * @throws TokenExpired
-     * @throws EmailNotVerified
-     * @throws InvalidArgumentException
+     * @throws AccountMarkedAsRemoved
      * @throws NotAuthenticated
+     * @throws EmailNotVerified
      */
     public function login(LoginInput $login): TokenOutput {
       try {

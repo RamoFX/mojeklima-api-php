@@ -9,10 +9,12 @@ namespace App\Resources\Auth {
   use App\Resources\Account\Exceptions\EmailNotVerified;
   use App\Resources\Auth\DTO\LoginInput;
   use App\Resources\Auth\DTO\TokenOutput;
+  use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
+  use App\Resources\Auth\Exceptions\BearerTokenMissing;
   use App\Resources\Auth\Exceptions\IncorrectPassword;
   use App\Resources\Auth\Exceptions\InvalidToken;
+  use App\Resources\Auth\Exceptions\NotAuthenticated;
   use App\Resources\Auth\Exceptions\TokenExpired;
-  use Psr\SimpleCache\InvalidArgumentException;
   use TheCodingMachine\GraphQLite\Annotations\Logged;
   use TheCodingMachine\GraphQLite\Annotations\Mutation;
 
@@ -26,13 +28,11 @@ namespace App\Resources\Auth {
 
 
     /**
-     * @throws AccountMarkedAsRemoved
      * @throws EmailNotFound
      * @throws IncorrectPassword
-     * @throws InvalidToken
-     * @throws TokenExpired
+     * @throws NotAuthenticated
+     * @throws AccountMarkedAsRemoved
      * @throws EmailNotVerified
-     * @throws InvalidArgumentException
      */
     #[Mutation]
     public function login(LoginInput $login): TokenOutput {
@@ -41,9 +41,6 @@ namespace App\Resources\Auth {
 
 
 
-    /**
-     * @throws InvalidArgumentException
-     */
     #[Mutation]
     #[Logged]
     public function logout(): bool {
@@ -54,8 +51,9 @@ namespace App\Resources\Auth {
 
     /**
      * @throws InvalidToken
+     * @throws AuthorizationHeaderMissing
+     * @throws BearerTokenMissing
      * @throws TokenExpired
-     * @throws InvalidArgumentException
      */
     #[Mutation]
     #[Logged]

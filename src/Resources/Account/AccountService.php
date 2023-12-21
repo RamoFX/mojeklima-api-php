@@ -384,7 +384,6 @@ namespace App\Resources\Account {
 
 
     /**
-     * @throws EmailNotFound
      * @throws OptimisticLockException
      * @throws InvalidToken
      * @throws ORMException
@@ -400,6 +399,10 @@ namespace App\Resources\Account {
 
 
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function deleteMarkedAccounts(): int {
       // retrieve accounts to be deleted
       $dateThirtyDaysAgo = new DateTimeImmutable();
