@@ -36,6 +36,7 @@ namespace App\Resources\Auth\Utilities {
       $payload = [
         'iat' => $now->getTimestamp(),
         'exp' => $expireAt->getTimestamp(),
+        'ttl' => $expireAt->getTimestamp() - $now->getTimestamp(),
         ...$payload
       ];
 
