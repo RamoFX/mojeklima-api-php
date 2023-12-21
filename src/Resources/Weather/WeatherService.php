@@ -105,24 +105,29 @@ namespace App\Resources\Weather {
 
 
     private function getCachedWeather(LocationEntity $location): WeatherEntity|null {
-      $key = $this->getCacheKeyFromLocation($location);
-      $weatherJson = $this->cache->get($key);
+      try {
+        $key = $this->getCacheKeyFromLocation($location);
+        $weatherJson = $this->cache->get($key);
 
-      if ($weatherJson === null)
+        if ($weatherJson === null)
+          return null;
+
+        return WeatherFactory::fromJson($weatherJson, $location);
+      } catch (InvalidArgumentException) {
         return null;
-
-      $weather = WeatherFactory::fromJson($weatherJson, $location);
-
-      return $weather;
+      }
     }
 
 
 
-    private function cacheWeather(WeatherEntity $weather): bool {
-      $key = $this->getCacheKeyFromWeather($weather);
-      $weatherJson = WeatherFactory::toJson($weather);
+    private function cacheWeather(WeatherEntity $weather): void {
+      try {
+        $key = $this->getCacheKeyFromWeather($weather);
+        $weatherJson = WeatherFactory::toJson($weather);
 
-      return $this->cache->set($key, $weatherJson, 60 * 10);
+        $this->cache->set($key, $weatherJson, 60 * 10);
+      } catch (InvalidArgumentException) {
+      }
     }
 
 
