@@ -27,6 +27,7 @@ namespace App\Resources\Notification {
   use Minishlink\WebPush\Subscription;
   use Minishlink\WebPush\WebPush;
   use TheCodingMachine\GraphQLite\Exceptions\GraphQLException;
+  use TheCodingMachine\GraphQLite\Types\ID;
 
 
 
@@ -282,7 +283,7 @@ namespace App\Resources\Notification {
         if ($shouldNotify) {
           $notificationsDispatched += 1;
           $notifyInput = new NotifyInput();
-          $notifyInput->alertId = $alert->getId();
+          $notifyInput->alertId = new ID($alert->getId());
 
           $this->notify($notifyInput);
         }
