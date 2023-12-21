@@ -409,17 +409,17 @@ namespace App\Resources\Account {
      */
     public function deleteMarkedAccounts(): int {
       // retrieve accounts to be deleted
-      $dateThirtyDaysAgo = new DateTimeImmutable();
-      $dateThirtyDaysAgo->modify('-30 days');
+      $now = new DateTimeImmutable();
+      $gracePeriod = $now->modify('-30 days');
 
       $accounts = $this->repository->createQueryBuilder('a')
         ->select('a')
         ->where('a.role != :systemRole')
         ->andWhere('a.isMarkedAsRemoved = :true')
-        ->andWhere('a.updatedAt <= :dateThirtyDaysAgo')
+        ->andWhere('a.updatedAt <= :gracePeriod')
         ->setParameter('systemRole', AccountRole::SYSTEM)
         ->setParameter('true', true)
-        ->setParameter('dateThirtyDaysAgo', $dateThirtyDaysAgo)
+        ->setParameter('gracePeriod', $gracePeriod)
         ->getQuery()
         ->getResult();
 
