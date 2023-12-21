@@ -38,6 +38,8 @@ namespace App\Resources\PushSubscription {
     #[ORM\ManyToOne(targetEntity: "\App\Resources\Account\AccountEntity", cascade: [ "persist" ], inversedBy: "pushSubscriptions")]
     private AccountEntity $account;
 
+
+
     public function __construct(string $endpoint, string $p256dh, string $auth, string $userAgent) {
       $this->endpoint = $endpoint;
       $this->p256dh = $p256dh;
@@ -45,10 +47,14 @@ namespace App\Resources\PushSubscription {
       $this->userAgent = $userAgent;
     }
 
+
+
     #[Field(outputType: "ID")]
     public function getId(): ?int {
       return $this->id;
     }
+
+
 
     #[Field]
     public function getEndpoint(): string {
@@ -61,6 +67,8 @@ namespace App\Resources\PushSubscription {
       return $this;
     }
 
+
+
     #[Field]
     public function getP256dh(): string {
       return $this->p256dh;
@@ -71,6 +79,8 @@ namespace App\Resources\PushSubscription {
 
       return $this;
     }
+
+
 
     #[Field]
     public function getAuth(): string {
@@ -83,6 +93,8 @@ namespace App\Resources\PushSubscription {
       return $this;
     }
 
+
+
     #[Field]
     public function getUserAgent(): string {
       return $this->userAgent;
@@ -94,6 +106,8 @@ namespace App\Resources\PushSubscription {
       return $this;
     }
 
+
+
     #[Field]
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
@@ -103,6 +117,8 @@ namespace App\Resources\PushSubscription {
     public function getUpdatedAt(): DateTimeImmutable {
       return $this->updatedAt;
     }
+
+
 
     #[Field]
     public function getAccount(): AccountEntity {
@@ -114,6 +130,8 @@ namespace App\Resources\PushSubscription {
 
       return $this;
     }
+
+
 
     #[ORM\PrePersist]
     public function onPrePersist(PrePersistEventArgs $args): void {

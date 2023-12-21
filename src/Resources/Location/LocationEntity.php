@@ -32,24 +32,34 @@ namespace App\Resources\Location {
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", options: [ "unsigned" => true ])]
     private ?int $id = null;
+
     #[ORM\Column(name: "city_name", length: 127)]
     private string $cityName;
+
     #[ORM\Column(name: "country_name", length: 127)]
     private string $countryName;
+
     #[ORM\Column(length: 511, nullable: true)]
     private ?string $label;
+
     #[ORM\Column(type: "decimal", precision: 8, scale: 4)]
     private float $latitude;
+
     #[ORM\Column(type: "decimal", precision: 9, scale: 4)]
     private float $longitude;
+
     #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
+
     #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
+
     #[ORM\ManyToOne(targetEntity: "\App\Resources\Account\AccountEntity", cascade: [ "persist" ], inversedBy: "locations")]
     private AccountEntity $account;
+
     #[ORM\OneToMany(mappedBy: "location", targetEntity: "\App\Resources\Alert\AlertEntity", cascade: [ "persist" ], orphanRemoval: true)]
     private Collection $alerts;
+
     private ?WeatherEntity $weather;
 
 
@@ -168,8 +178,6 @@ namespace App\Resources\Location {
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
-
-
 
     #[Field]
     public function getUpdatedAt(): DateTimeImmutable {

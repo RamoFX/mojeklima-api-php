@@ -29,24 +29,34 @@ namespace App\Resources\Alert {
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer", options: [ "unsigned" => true ])]
     private ?int $id = null;
+
     #[ORM\Column(name: "is_enabled", type: "boolean")]
     private bool $isEnabled;
+
     #[ORM\Column(type: Criteria::class)]
     private Criteria $criteria;
+
     #[ORM\Column(name: "range_from", type: "decimal", precision: 8, scale: 2)]
     private float $rangeFrom;
+
     #[ORM\Column(name: "range_to", type: "decimal", precision: 8, scale: 2)]
     private float $rangeTo;
+
     #[ORM\Column(name: "update_frequency", type: "integer", options: [ "unsigned" => true ])]
     private int $updateFrequency;
+
     #[ORM\Column(length: 511)]
     private string $message;
+
     #[ORM\Column(name: "created_at", type: "datetime_immutable")]
     private DateTimeImmutable $createdAt;
+
     #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
+
     #[ORM\ManyToOne(targetEntity: "\App\Resources\Location\LocationEntity", cascade: [ "persist" ], inversedBy: "alerts")]
     private LocationEntity $location;
+
     #[ORM\OneToMany(mappedBy: "alert", targetEntity: "\App\Resources\Notification\NotificationEntity", cascade: [ "persist" ], orphanRemoval: true)]
     private Collection $notifications;
 
@@ -165,8 +175,6 @@ namespace App\Resources\Alert {
     public function getCreatedAt(): DateTimeImmutable {
       return $this->createdAt;
     }
-
-
 
     #[Field]
     public function getUpdatedAt(): DateTimeImmutable {
