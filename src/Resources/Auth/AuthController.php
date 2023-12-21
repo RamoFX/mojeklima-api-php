@@ -8,7 +8,6 @@ namespace App\Resources\Auth {
   use App\Resources\Account\Exceptions\EmailNotFound;
   use App\Resources\Account\Exceptions\EmailNotVerified;
   use App\Resources\Auth\DTO\LoginInput;
-  use App\Resources\Auth\DTO\TokenOutput;
   use App\Resources\Auth\Exceptions\AuthorizationHeaderMissing;
   use App\Resources\Auth\Exceptions\BearerTokenMissing;
   use App\Resources\Auth\Exceptions\IncorrectPassword;
@@ -35,7 +34,7 @@ namespace App\Resources\Auth {
      * @throws EmailNotVerified
      */
     #[Mutation]
-    public function login(LoginInput $login): TokenOutput {
+    public function login(LoginInput $login): string {
       return $this->authService->login($login);
     }
 
@@ -57,7 +56,7 @@ namespace App\Resources\Auth {
      */
     #[Mutation]
     #[Logged]
-    public function renewToken(): TokenOutput {
+    public function renewToken(): string {
       return $this->authService->renewToken();
     }
   }
