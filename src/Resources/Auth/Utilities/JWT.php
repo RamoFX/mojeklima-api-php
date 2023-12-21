@@ -16,7 +16,7 @@ namespace App\Resources\Auth\Utilities {
 
 
   class JWT {
-    private const ALG = "HS512";
+    private const ALG = 'HS512';
 
 
 
@@ -26,12 +26,15 @@ namespace App\Resources\Auth\Utilities {
 
 
 
-    public function create(mixed $payload, string $humanReadableDuration = '15 minutes'): string {
-      $date = new DateTimeImmutable();
-      $expireAt = $date->modify("+$humanReadableDuration");
+    /**
+     * @param string $humanReadableDuration eg. '15 minutes'
+     */
+    public function create(array $payload, string $humanReadableDuration): string {
+      $now = new DateTimeImmutable();
+      $expireAt = $now->modify("+$humanReadableDuration");
 
       $payload = [
-        'iat' => $date->getTimestamp(),
+        'iat' => $now->getTimestamp(),
         'exp' => $expireAt->getTimestamp(),
         ...$payload
       ];
@@ -60,7 +63,7 @@ namespace App\Resources\Auth\Utilities {
         return json_decode(json_encode($stdClass), true);
       } catch (ExpiredException) {
         throw new TokenExpired();
-      } catch (Exception $e) {
+      } catch (Exception) {
         throw new InvalidToken();
       }
     }
