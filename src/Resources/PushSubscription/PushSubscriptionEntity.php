@@ -15,13 +15,13 @@ namespace App\Resources\PushSubscription {
 
 
   #[ORM\Entity]
-  #[ORM\Table(name: "push_subscriptions", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[ORM\Table(name: "push_subscriptions", options: [ "collate" => "utf8_czech_ci", "charset" => "utf8" ])]
   #[ORM\HasLifecycleCallbacks]
   #[Type(name: "PushSubscription")]
   class PushSubscriptionEntity {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
+    #[ORM\Column(type: "integer", options: [ "unsigned" => true ])]
     private ?int $id = null;
     #[ORM\Column(length: 511)]
     private string $endpoint;
@@ -35,7 +35,7 @@ namespace App\Resources\PushSubscription {
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
-    #[ORM\ManyToOne(targetEntity: "\App\Resources\Account\AccountEntity", cascade: ["persist"], inversedBy: "pushSubscriptions")]
+    #[ORM\ManyToOne(targetEntity: "\App\Resources\Account\AccountEntity", cascade: [ "persist" ], inversedBy: "pushSubscriptions")]
     private AccountEntity $account;
 
     public function __construct(string $endpoint, string $p256dh, string $auth, string $userAgent) {

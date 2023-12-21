@@ -391,6 +391,7 @@ namespace App\Resources\Account {
      */
     public function completeAccountRemoval(CompleteAccountRemovalInput $completeAccountRemoval): bool {
       $this->jwt->decode($completeAccountRemoval->token);
+
       $this->currentAccount->setIsMarkedAsRemoved(true);
       $this->entityManager->flush($this->currentAccount);
 
@@ -419,16 +420,16 @@ namespace App\Resources\Account {
         ->getQuery()
         ->getResult();
 
-        // delete one by one
-        $accountsDeleted = 0;
+      // delete one by one
+      $accountsDeleted = 0;
 
-        foreach($accounts as $account) {
-          $accountsDeleted += 1;
-          $this->entityManager->remove($account);
-          $this->entityManager->flush($account);
-        }
+      foreach ($accounts as $account) {
+        $accountsDeleted += 1;
+        $this->entityManager->remove($account);
+        $this->entityManager->flush($account);
+      }
 
-        return $accountsDeleted;
+      return $accountsDeleted;
     }
 
 

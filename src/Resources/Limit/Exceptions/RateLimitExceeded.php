@@ -10,10 +10,6 @@ namespace App\Resources\Limit\Exceptions {
 
 
   class RateLimitExceeded extends GraphQLException {
-    /**
-     * @param string $entityName
-     * @param float|int $limit
-     */
     public function __construct() {
       $message = Translation::translate([
         'cs' => 'Byl překročen limit počtu požadavků',

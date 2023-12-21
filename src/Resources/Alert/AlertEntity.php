@@ -21,13 +21,13 @@ namespace App\Resources\Alert {
 
 
   #[ORM\Entity]
-  #[ORM\Table(name: "alerts", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[ORM\Table(name: "alerts", options: [ "collate" => "utf8_czech_ci", "charset" => "utf8" ])]
   #[ORM\HasLifecycleCallbacks]
   #[Type(name: "Alert")]
   class AlertEntity {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
+    #[ORM\Column(type: "integer", options: [ "unsigned" => true ])]
     private ?int $id = null;
     #[ORM\Column(name: "is_enabled", type: "boolean")]
     private bool $isEnabled;
@@ -37,7 +37,7 @@ namespace App\Resources\Alert {
     private float $rangeFrom;
     #[ORM\Column(name: "range_to", type: "decimal", precision: 8, scale: 2)]
     private float $rangeTo;
-    #[ORM\Column(name: "update_frequency", type: "integer", options: ["unsigned" => true])]
+    #[ORM\Column(name: "update_frequency", type: "integer", options: [ "unsigned" => true ])]
     private int $updateFrequency;
     #[ORM\Column(length: 511)]
     private string $message;
@@ -45,9 +45,9 @@ namespace App\Resources\Alert {
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
-    #[ORM\ManyToOne(targetEntity: "\App\Resources\Location\LocationEntity", cascade: ["persist"], inversedBy: "alerts")]
+    #[ORM\ManyToOne(targetEntity: "\App\Resources\Location\LocationEntity", cascade: [ "persist" ], inversedBy: "alerts")]
     private LocationEntity $location;
-    #[ORM\OneToMany(mappedBy: "alert", targetEntity: "\App\Resources\Notification\NotificationEntity", cascade: ["persist"], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: "alert", targetEntity: "\App\Resources\Notification\NotificationEntity", cascade: [ "persist" ], orphanRemoval: true)]
     private Collection $notifications;
 
 

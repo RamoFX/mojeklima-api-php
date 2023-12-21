@@ -7,7 +7,6 @@ namespace App\Resources\Location {
   use App\Resources\Account\AccountEntity;
   use App\Resources\Alert\AlertEntity;
   use App\Resources\Common\Utilities\Validator;
-  use App\Resources\Weather\DTO\WeatherInput;
   use App\Resources\Weather\WeatherEntity;
   use App\Resources\Weather\WeatherService;
   use DateTimeImmutable;
@@ -25,13 +24,13 @@ namespace App\Resources\Location {
 
 
   #[ORM\Entity]
-  #[ORM\Table(name: "locations", options: ["collate" => "utf8_czech_ci", "charset" => "utf8"])]
+  #[ORM\Table(name: "locations", options: [ "collate" => "utf8_czech_ci", "charset" => "utf8" ])]
   #[ORM\HasLifecycleCallbacks]
   #[Type(name: "Location")]
   class LocationEntity {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: "integer", options: ["unsigned" => true])]
+    #[ORM\Column(type: "integer", options: [ "unsigned" => true ])]
     private ?int $id = null;
     #[ORM\Column(name: "city_name", length: 127)]
     private string $cityName;
@@ -47,9 +46,9 @@ namespace App\Resources\Location {
     private DateTimeImmutable $createdAt;
     #[ORM\Column(name: "updated_at", type: "datetime_immutable")]
     private DateTimeImmutable $updatedAt;
-    #[ORM\ManyToOne(targetEntity: "\App\Resources\Account\AccountEntity", cascade: ["persist"], inversedBy: "locations")]
+    #[ORM\ManyToOne(targetEntity: "\App\Resources\Account\AccountEntity", cascade: [ "persist" ], inversedBy: "locations")]
     private AccountEntity $account;
-    #[ORM\OneToMany(mappedBy: "location", targetEntity: "\App\Resources\Alert\AlertEntity", cascade: ["persist"], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: "location", targetEntity: "\App\Resources\Alert\AlertEntity", cascade: [ "persist" ], orphanRemoval: true)]
     private Collection $alerts;
     private ?WeatherEntity $weather;
 

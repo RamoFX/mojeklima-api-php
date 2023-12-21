@@ -239,10 +239,12 @@ namespace App\Resources\Notification {
     public function checkForNotifications(): int {
       $now = new DateTimeImmutable();
       $now = $now->getTimestamp();
-      $locationWeather = [/*
+      $locationWeather = [
+        /*
         "$latitude$longitude" => $weather,
         ...
-      */];
+        */
+      ];
       $alerts = $this->alertService->userEnabledAlerts();
       $notificationsDispatched = 0;
 
