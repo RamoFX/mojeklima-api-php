@@ -74,7 +74,7 @@ namespace App\Resources\Auth {
         $payload = $this->jwt->decode($token);
 
         return $this->repository->findOneBy([
-          'accountId' => $payload[AuthJWT::JWT_PAYLOAD_IDENTITY_KEY]
+          'id' => $payload[AuthJWT::JWT_PAYLOAD_IDENTITY_KEY]
         ]);
       } catch (Throwable) {
         return null;
