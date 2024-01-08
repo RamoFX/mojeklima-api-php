@@ -13,7 +13,7 @@ namespace App\Resources\Auth\Utilities {
 
   class AuthJWT {
     public const JWT_PAYLOAD_IDENTITY_KEY = 'accountId';
-    protected const CACHE_SUBJECT = 'allowedAuthenticationToken';
+    protected const CACHE_SUBJECT = 'allowedAuthenticationTokens';
 
 
 
@@ -92,14 +92,19 @@ namespace App\Resources\Auth\Utilities {
     protected function setAllowedAuthTokens(int $accountId, array $tokens): bool {
       try {
         $cacheKey = $this->createAuthTokenCacheKey($accountId);
-        $tokens = array_filter($tokens, fn(string $token) => $this->jwt->validate($token));
-        $tokensExpire = array_map(fn(string $token) => $this->jwt->getExpiration($token), $tokens);
+
+        if (count($tokens) === 0) {
+          $this->cache->delete($cacheKey);
+
+          return true;
+        }
+
+        $validTokens = array_filter($tokens, fn(string $token) => $this->jwt->validate($token));
+        $tokensExpire = array_map(fn(string $token) => $this->jwt->getExpiration($token), $validTokens);
         $now = new DateTimeImmutable();
         $expiresIn = max($tokensExpire) - $now->getTimestamp();
 
-        $this->cache->set($cacheKey, json_encode($tokens), $expiresIn);
-
-        return true;
+        return $this->cache->set($cacheKey, json_encode($validTokens), $expiresIn);
       } catch (Exception|InvalidArgumentException) {
         return false;
       }

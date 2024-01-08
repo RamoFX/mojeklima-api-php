@@ -181,8 +181,6 @@ namespace App\Resources\Auth {
     public function renewToken(): string {
       $token = Headers::getBearerToken();
 
-      // TODO: check if not too young for renewal
-
       $accountId = (int) $this->jwt->decode($token)[AuthJWT::JWT_PAYLOAD_IDENTITY_KEY];
       $this->authTokenManager->disallowAuthToken($accountId, $token);
 
